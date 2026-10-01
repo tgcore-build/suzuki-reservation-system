@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang xml:lang>
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>kosuzu_reservation_requirements</title>
+  <style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">* { box-sizing: border-box; }
+body {
+font-family: -apple-system, "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", sans-serif;
+max-width: 780px;
+margin: 0 auto;
+padding: 32px 24px 120px;
+line-height: 1.75;
+color: #1a1a1a;
+background: #fdfdfb;
+font-size: 16px;
+}
+h1 {
+font-size: 1.6em;
+border-bottom: 3px solid #2d5aa0;
+padding-bottom: 10px;
+margin-top: 2.2em;
+}
+h1:first-of-type { margin-top: 0; }
+h2 {
+font-size: 1.25em;
+margin-top: 2em;
+padding: 8px 12px;
+background: #eef3fb;
+border-left: 5px solid #2d5aa0;
+border-radius: 4px;
+}
+h3 {
+font-size: 1.05em;
+margin-top: 1.6em;
+color: #2d5aa0;
+}
+p { margin: 0.9em 0; }
+strong { color: #b3541e; }
+code {
+font-family: "SF Mono", Menlo, Consolas, monospace;
+background: #eee;
+padding: 0.15em 0.4em;
+border-radius: 4px;
+font-size: 0.9em;
+}
+pre {
+background: #1e1e2a;
+color: #e6e6e6;
+padding: 14px 16px;
+border-radius: 8px;
+overflow-x: auto;
+font-size: 0.88em;
+line-height: 1.5;
+}
+pre code {
+background: none;
+color: inherit;
+padding: 0;
+}
+table {
+border-collapse: collapse;
+width: 100%;
+margin: 1.2em 0;
+font-size: 0.92em;
+}
+th, td {
+border: 1px solid #d8d8d8;
+padding: 8px 10px;
+text-align: left;
+}
+th { background: #f0f0f0; }
+tr:nth-child(even) { background: #fafafa; }
+hr {
+border: none;
+border-top: 1px dashed #ccc;
+margin: 2.5em 0;
+}
+ul, ol { padding-left: 1.4em; }
+li { margin: 0.35em 0; }
+a { color: #2d5aa0; }
+blockquote {
+border-left: 4px solid #ccc;
+margin: 1em 0;
+padding: 0.3em 1em;
+color: #555;
+background: #f7f7f5;
+}
+#toc {
+background: #fff8e8;
+border: 1px solid #f0dca0;
+border-radius: 8px;
+padding: 16px 24px;
+margin-bottom: 2em;
+}
+#toc h2 { background: none; border: none; padding: 0; margin-top: 0; }
+#toc ul { column-count: 2; }
+@media (max-width: 600px) {
+#toc ul { column-count: 1; }
+}
+details {
+background: #f4f7fb;
+border: 1px solid #cfd9e8;
+border-radius: 8px;
+padding: 12px 16px;
+margin: 1.1em 0;
+}
+details summary {
+cursor: pointer;
+font-weight: 600;
+color: #16324f;
+}
+details summary::marker { color: #2d5aa0; }
+details[open] summary { margin-bottom: 10px; }
+details > p, details strong { margin-top: 0.4em; }
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">kosuzu_reservation_requirements</h1>
+</header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#予約顧客管理システム-要件定義書" id="toc-予約顧客管理システム-要件定義書">予約・顧客管理システム
+要件定義書</a>
+<ul>
+<li><a href="#プロジェクト概要" id="toc-プロジェクト概要">1.
+プロジェクト概要</a></li>
+<li><a href="#現状分析" id="toc-現状分析">2. 現状分析</a></li>
+<li><a href="#システム概要" id="toc-システム概要">3.
+システム概要</a></li>
+<li><a href="#ユーザーストーリー" id="toc-ユーザーストーリー">4.
+ユーザーストーリー</a></li>
+<li><a href="#機能要件moscow分析" id="toc-機能要件moscow分析">5.
+機能要件（MoSCoW分析）</a></li>
+<li><a href="#非機能要件" id="toc-非機能要件">6. 非機能要件</a></li>
+<li><a href="#画面遷移図簡易版" id="toc-画面遷移図簡易版">7.
+画面遷移図（簡易版）</a></li>
+<li><a href="#制約条件" id="toc-制約条件">8. 制約条件</a></li>
+<li><a href="#前提条件リスク" id="toc-前提条件リスク">9.
+前提条件・リスク</a></li>
+<li><a href="#承認" id="toc-承認">10. 承認</a></li>
+</ul></li>
+</ul>
+</nav>
+<h1 id="予約顧客管理システム-要件定義書">予約・顧客管理システム
+要件定義書</h1>
+<p>作成日：2026年9月22日　作成者：開発者本人（techmeets Week22〜24
+総合演習）</p>
+<hr />
+<h2 id="プロジェクト概要">1. プロジェクト概要</h2>
+<h3 id="プロジェクト名">1.1 プロジェクト名</h3>
+<p>予約制サービス業向け
+予約・顧客管理システム（対応記録・リマインドつき）</p>
+<h3 id="背景目的">1.2 背景・目的</h3>
+<p>本プロジェクトの対象は、予約制でサービスを提供する店舗である。予約管理や顧客ごとの対応記録（過去の利用内容・使用した資材・対応時間・メモ）は既存の予約管理ソフトで一部管理しているが、リマインド送信や利用履歴の顧客への公開など、既存ソフトだけではカバーしきれない部分がある。</p>
+<p>本プロジェクトは、techmeetsカリキュラムWeek22〜24（3週間の総合演習）の集大成として、実際の店舗業務で使う予約・顧客管理の基幹システムを自分の手で開発することを目的とする。</p>
+<h3 id="対象ユーザー">1.3 対象ユーザー</h3>
+<ul>
+<li><strong>管理者</strong>：唯一の管理者ユーザー。顧客管理・対応記録・予約管理を行う。</li>
+<li><strong>来店客</strong>：リマインドを受け取る。メニューと空き日時を選んでオンラインで予約する。将来的には自分の利用履歴の閲覧も想定。</li>
+</ul>
+<hr />
+<h2 id="現状分析">2. 現状分析</h2>
+<h3 id="現状の業務フロー">2.1 現状の業務フロー</h3>
+<ul>
+<li>予約・顧客情報の一部は既存の予約管理ソフトで管理している。</li>
+<li>対応前後の写真や細かい対応メモは、既存ソフト側で十分に管理しきれていない（今回のシステムで補う想定）。</li>
+<li>来店リマインドは現状、手動または未実施。自動リマインドがない。</li>
+<li>顧客が自分の利用履歴を見る手段がない。</li>
+</ul>
+<h3 id="課題">2.2 課題</h3>
+<ul>
+<li>次回来店を忘れるお客様がいる →
+リマインドがないため機会損失につながっている。</li>
+<li>対応記録（内容・使用資材・対応時間・メモ・写真）を一元管理できていない。</li>
+</ul>
+<h3 id="現状使用しているツール">2.3 現状使用しているツール</h3>
+<ul>
+<li>既存の予約管理ソフト：API提供状況・データエクスポート可否は現時点で未確認。<strong>Week22序盤の最優先調査事項とする。</strong></li>
+</ul>
+<hr />
+<h2 id="システム概要">3. システム概要</h2>
+<h3 id="全体像">3.1 全体像</h3>
+<p>Laravel（PHP）+ MySQL +
+Dockerで構築するWebアプリケーション。管理者が管理画面から顧客・対応記録・予約を管理し、来店予定の一定日数前になると自動でリマインドが送信される。将来的にはお客様自身が利用履歴を見られるページを公開する。</p>
+<h3 id="主要機能一覧">3.2 主要機能一覧</h3>
+<ol type="1">
+<li>顧客管理（顧客マスタ）</li>
+<li>対応記録（提供内容・使用資材・対応時間・メモ・前後の写真添付）</li>
+<li>予約管理（一覧・作成・編集）</li>
+<li>管理画面ログイン</li>
+<li>自動リマインド送信（来店予定の一定日数前に送信）</li>
+<li>既存予約管理ソフトとのデータ連携（自動取り込み）</li>
+<li>顧客向け利用履歴ページ（簡易ログイン）</li>
+<li>顧客向けオンライン予約（メニュー選択・空き日時カレンダー・お客様情報入力による自己予約）</li>
+</ol>
+<hr />
+<h2 id="ユーザーストーリー">4. ユーザーストーリー</h2>
+<p>「【誰が】として、【何を】したい。なぜなら【なぜ】だから。」の形で、主要機能をユーザーストーリーに落とし込む。</p>
+<ol type="1">
+<li>管理者として、顧客情報を登録・編集したい。なぜなら、来店するお客様の情報を一元管理し、対応履歴を紐づけて管理したいから。</li>
+<li>管理者として、顧客を名前や電話番号で検索したい。なぜなら、多くの顧客の中から目的の顧客をすぐに見つけたいから。</li>
+<li>管理者として、顧客ごとの対応記録（メニュー・使用資材・対応時間・メモ・写真）を残したい。なぜなら、次回の対応時に過去の内容を正確に振り返りたいから。</li>
+<li>管理者として、予約を登録・編集・キャンセルしたい。なぜなら、日々の予約状況を正確に把握し、ダブルブッキングを防ぎたいから。</li>
+<li>管理者として、ダッシュボードで本日の予約を一目で確認したい。なぜなら、当日の準備をスムーズに行いたいから。</li>
+<li>管理者として、管理画面にログインしたい。なぜなら、顧客の個人情報を第三者に見られないようにしたいから。</li>
+<li>管理者として、来店予定の一定日数前にお客様へ自動でリマインドを送信したい。なぜなら、来店忘れによる機会損失を減らしたいから。</li>
+<li>管理者として、リマインドの送信状況（送信済み・送信予定・失敗）を確認したい。なぜなら、送信漏れやエラーにすぐ気づきたいから。</li>
+<li>管理者として、既存の予約管理ソフトのデータを自動で取り込みたい。なぜなら、同じ顧客情報を二重に入力する手間をなくしたいから。</li>
+<li>顧客として、来店前にリマインドを受け取りたい。なぜなら、予約を忘れずに来店したいから。</li>
+<li>顧客として、簡単な方法でログインして自分専用のページを見たい。なぜなら、複雑な会員登録なしで気軽に使いたいから。</li>
+<li>顧客として、自分の過去の利用履歴を確認したい。なぜなら、前回どんな内容だったかを来店前に思い出したいから。</li>
+<li>顧客として、メニューと空いている日時を自分で選んで予約したい。なぜなら、電話や来店を待たずに好きなタイミングで予約を完結させたいから。</li>
+<li>顧客として、予約する前に空き状況を確認したい。なぜなら、埋まっている時間帯を何度も問い合わせずに済ませたいから。</li>
+</ol>
+<hr />
+<h2 id="機能要件moscow分析">5. 機能要件（MoSCoW分析）</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>優先度</th>
+<th>機能</th>
+<th>詳細</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Must have</strong></td>
+<td>顧客管理</td>
+<td>顧客マスタ（氏名・連絡先等）のCRUD</td>
+</tr>
+<tr class="even">
+<td><strong>Must have</strong></td>
+<td>対応記録</td>
+<td>提供内容・使用資材・対応時間・メモ・前後の写真添付を記録・閲覧</td>
+</tr>
+<tr class="odd">
+<td><strong>Must have</strong></td>
+<td>予約管理</td>
+<td>予約の一覧表示・新規作成・編集</td>
+</tr>
+<tr class="even">
+<td><strong>Must have</strong></td>
+<td>管理画面ログイン</td>
+<td>管理者専用の認証つき管理画面</td>
+</tr>
+<tr class="odd">
+<td><strong>Must have</strong></td>
+<td>自動リマインド</td>
+<td>メッセージ配信APIを用いて、来店予定の一定日数前に自動でリマインドメッセージを送信</td>
+</tr>
+<tr class="even">
+<td><strong>Must have</strong></td>
+<td>既存ソフト連携</td>
+<td>既存の予約管理ソフトのデータを自動で取り込む（API連携 or
+CSV取り込み。方式はWeek22序盤の調査結果次第）</td>
+</tr>
+<tr class="odd">
+<td><strong>Should have</strong></td>
+<td>顧客向けオンライン予約</td>
+<td>お客様がメニューと空き日時を自分で選び、情報を入力してその場で予約を確定できる機能</td>
+</tr>
+<tr class="even">
+<td><strong>Should〜Could have</strong></td>
+<td>顧客向け利用履歴ページ</td>
+<td>簡易ログインで自分の利用履歴を閲覧できるページ</td>
+</tr>
+<tr class="odd">
+<td><strong>Won’t have</strong></td>
+<td>オンライン決済</td>
+<td>今回のスコープ外</td>
+</tr>
+<tr class="even">
+<td><strong>Won’t have</strong></td>
+<td>複数店舗・複数スタッフ対応</td>
+<td>今回のスコープ外</td>
+</tr>
+<tr class="odd">
+<td><strong>Won’t have</strong></td>
+<td>予約時アンケートのカスタム設定・メールマガジン配信</td>
+<td>店舗ごとに質問内容を設定する仕組みは開発規模を超えるため、自由記述の「ご要望」欄1つで代用する</td>
+</tr>
+<tr class="even">
+<td><strong>Won’t have</strong></td>
+<td>AI提案機能</td>
+<td>別紙「AI提案機能 要件定義書」を参照</td>
+</tr>
+</tbody>
+</table>
+<p><strong>注記：</strong>
+自動リマインドと既存ソフト連携は、当初技術的難易度の高さ（API調査未了・Webhook設定の複雑さ）を理由に「今回は見送り」を提案したが、最終的に両方ともMust
+haveとして正式に採用。既存ソフト連携は、そのAPI・エクスポート対応状況が未確認のため、<strong>Week22序盤に必ず仕様確認を行う</strong>ことをリスク対応として明記する。</p>
+<p>顧客向けオンライン予約は、外部の予約サイト（既存ソフト側）の画面を参考に追加した機能。Must
+have（顧客管理・対応記録・予約管理・管理画面ログイン・自動リマインド・既存ソフト連携）を優先して完成させたうえで着手する。その中でも空き状況カレンダー（自動計算）は顧客体験に直結するため優先的に実装し、時間が不足する場合は顧客向け利用履歴ページ・顧客ログインなど他のShould〜Could
+have機能を先に後回しにする。</p>
+<hr />
+<h2 id="非機能要件">6. 非機能要件</h2>
+<p>■ パフォーマンス ・ページ読み込み時間：3秒以内
+・同時接続数：10ユーザー程度（個人店舗規模の運用を想定）
+・画像アップロード：対応記録の前後写真は1枚あたり5MB以内</p>
+<p>■ セキュリティ ・通信はHTTPS化 ・パスワードはハッシュ化して保存
+・管理画面はログイン必須とし、顧客の個人情報へのアクセスを制限する
+・XSS、CSRF対策を実施</p>
+<p>■ 可用性 ・稼働率：目標99%以上（個人運用のため完全な保証はしない）
+・定期メンテナンス：月1回程度、深夜帯に実施
+・自宅サーバーではなく、Render・Railwayなど外部ホスティングへのデプロイを想定（Week24で対応）</p>
+<p>■ 互換性 ・対応ブラウザ：Chrome、Safari、Edge最新版
+・レスポンシブ対応（顧客はスマホ中心、管理者はPC・タブレットも想定）</p>
+<p>■ 保守性 ・開発者本人が今後も保守する前提で、ドキュメントを整備する
+・Laravelの標準的なコーディング規約・MVC構成に準拠する
+・主要機能（予約登録・リマインド送信等）にはテストコードを作成する</p>
+<hr />
+<h2 id="画面遷移図簡易版">7. 画面遷移図（簡易版）</h2>
+<p>Figmaを使った正式な画面遷移図はWeek19で清書する。ここでは箱と矢印の簡単なスケッチを示す。</p>
+<pre><code>ログイン
+  │
+  ▼
+ダッシュボード ──────────────┐
+  │                        │
+  ▼                        ▼
+顧客一覧                  予約一覧
+  │                        │
+  ▼                        ▼
+顧客詳細 ──┐            予約登録・編集
+  │        │
+  ▼        ▼
+対応記録   顧客登録・編集
+登録・編集
+
+ダッシュボード → リマインド送信ログ
+ダッシュボード → 既存ソフト連携設定
+
+［顧客向け・別入口］
+顧客ログイン → 利用履歴
+
+［顧客向けオンライン予約・別入口／ログイン不要］
+メニュー選択 → 空き日時選択 → お客様情報入力・確定 → 予約完了</code></pre>
+<hr />
+<h2 id="制約条件">8. 制約条件</h2>
+<ul>
+<li>開発期間：Week22〜24の3週間</li>
+<li>開発体制：開発者本人による開発（techmeets総合演習）</li>
+<li>技術スタック：PHP / Laravel / MySQL / Docker（バックエンド）、Blade
+/ Tailwind CSS /
+Alpine.js（フロントエンド）、Render・Railway（デプロイ先候補）</li>
+<li>学習中の技術（Tailwind
+CSS・Alpine.jsなど）を含むため、実装に慣れが必要な期間を見込む</li>
+</ul>
+<hr />
+<h2 id="前提条件リスク">9. 前提条件・リスク</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>リスク</th>
+<th>内容</th>
+<th>対応方針</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>既存ソフト連携の実現可否</td>
+<td>既存ソフト側がAPIやCSVエクスポートに対応しているか未確認</td>
+<td><strong>Week22序盤に最優先で仕様確認。対応していない場合は手動CSV取り込み等の代替案を検討</strong></td>
+</tr>
+<tr class="even">
+<td>メッセージ配信APIの設定</td>
+<td>公式アカウント開設・Webhook設定など、Week5のAPI学習より一段階複雑</td>
+<td>Week22中に先行して公式アカウントを開設し、最小構成（1通送るだけ）から動作確認する</td>
+</tr>
+<tr class="odd">
+<td>3週間という期間の妥当性</td>
+<td>Must
+have機能だけでも「既存ソフト連携」「自動リマインド」という技術的難易度の高い機能が含まれ、スケジュールがタイトになる可能性がある</td>
+<td>スケジュールが遅れそうな場合は、Should〜Could
+have（顧客向けオンライン予約・利用履歴ページ）から先に調整する</td>
+</tr>
+<tr class="even">
+<td>顧客向けオンライン予約の複雑さ</td>
+<td>空き状況をリアルタイムに計算する仕組みは、単純なCRUDより一段階複雑</td>
+<td>空き状況カレンダーを優先実装のうえで着手する。時間が不足する場合は、顧客向け利用履歴ページ・顧客ログインなど他のShould〜Could
+have機能を先に調整する</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="承認">10. 承認</h2>
+<table>
+<thead>
+<tr class="header">
+<th>役割</th>
+<th>氏名</th>
+<th>日付</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>作成者（開発者）</td>
+<td>開発者本人</td>
+<td>2026年9月22日</td>
+</tr>
+<tr class="even">
+<td>承認者</td>
+<td>開発者本人</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

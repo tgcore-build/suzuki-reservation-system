@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang xml:lang>
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>kosuzu_ai_requirements</title>
+  <style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">* { box-sizing: border-box; }
+body {
+font-family: -apple-system, "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", sans-serif;
+max-width: 780px;
+margin: 0 auto;
+padding: 32px 24px 120px;
+line-height: 1.75;
+color: #1a1a1a;
+background: #fdfdfb;
+font-size: 16px;
+}
+h1 {
+font-size: 1.6em;
+border-bottom: 3px solid #2d5aa0;
+padding-bottom: 10px;
+margin-top: 2.2em;
+}
+h1:first-of-type { margin-top: 0; }
+h2 {
+font-size: 1.25em;
+margin-top: 2em;
+padding: 8px 12px;
+background: #eef3fb;
+border-left: 5px solid #2d5aa0;
+border-radius: 4px;
+}
+h3 {
+font-size: 1.05em;
+margin-top: 1.6em;
+color: #2d5aa0;
+}
+p { margin: 0.9em 0; }
+strong { color: #b3541e; }
+code {
+font-family: "SF Mono", Menlo, Consolas, monospace;
+background: #eee;
+padding: 0.15em 0.4em;
+border-radius: 4px;
+font-size: 0.9em;
+}
+pre {
+background: #1e1e2a;
+color: #e6e6e6;
+padding: 14px 16px;
+border-radius: 8px;
+overflow-x: auto;
+font-size: 0.88em;
+line-height: 1.5;
+}
+pre code {
+background: none;
+color: inherit;
+padding: 0;
+}
+table {
+border-collapse: collapse;
+width: 100%;
+margin: 1.2em 0;
+font-size: 0.92em;
+}
+th, td {
+border: 1px solid #d8d8d8;
+padding: 8px 10px;
+text-align: left;
+}
+th { background: #f0f0f0; }
+tr:nth-child(even) { background: #fafafa; }
+hr {
+border: none;
+border-top: 1px dashed #ccc;
+margin: 2.5em 0;
+}
+ul, ol { padding-left: 1.4em; }
+li { margin: 0.35em 0; }
+a { color: #2d5aa0; }
+blockquote {
+border-left: 4px solid #ccc;
+margin: 1em 0;
+padding: 0.3em 1em;
+color: #555;
+background: #f7f7f5;
+}
+#toc {
+background: #fff8e8;
+border: 1px solid #f0dca0;
+border-radius: 8px;
+padding: 16px 24px;
+margin-bottom: 2em;
+}
+#toc h2 { background: none; border: none; padding: 0; margin-top: 0; }
+#toc ul { column-count: 2; }
+@media (max-width: 600px) {
+#toc ul { column-count: 1; }
+}
+details {
+background: #f4f7fb;
+border: 1px solid #cfd9e8;
+border-radius: 8px;
+padding: 12px 16px;
+margin: 1.1em 0;
+}
+details summary {
+cursor: pointer;
+font-weight: 600;
+color: #16324f;
+}
+details summary::marker { color: #2d5aa0; }
+details[open] summary { margin-bottom: 10px; }
+details > p, details strong { margin-top: 0.4em; }
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">kosuzu_ai_requirements</h1>
+</header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#ai提案機能-要件定義書" id="toc-ai提案機能-要件定義書">AI提案機能 要件定義書</a>
+<ul>
+<li><a href="#プロジェクト概要" id="toc-プロジェクト概要">1.
+プロジェクト概要</a></li>
+<li><a href="#現状分析" id="toc-現状分析">2. 現状分析</a></li>
+<li><a href="#システム概要" id="toc-システム概要">3.
+システム概要</a></li>
+<li><a href="#ユーザーストーリー" id="toc-ユーザーストーリー">4.
+ユーザーストーリー</a></li>
+<li><a href="#機能要件moscow分析" id="toc-機能要件moscow分析">5.
+機能要件（MoSCoW分析）</a></li>
+<li><a href="#非機能要件" id="toc-非機能要件">6. 非機能要件</a></li>
+<li><a href="#画面遷移図簡易版" id="toc-画面遷移図簡易版">7.
+画面遷移図（簡易版）</a></li>
+<li><a href="#制約条件" id="toc-制約条件">8. 制約条件</a></li>
+<li><a href="#前提条件リスク" id="toc-前提条件リスク">9.
+前提条件・リスク</a></li>
+<li><a href="#承認" id="toc-承認">10. 承認</a></li>
+</ul></li>
+</ul>
+</nav>
+<h1 id="ai提案機能-要件定義書">AI提案機能 要件定義書</h1>
+<p>作成日：2026年9月22日　作成者：開発者本人（techmeets Week22〜24
+総合演習）</p>
+<hr />
+<h2 id="プロジェクト概要">1. プロジェクト概要</h2>
+<h3 id="機能名">1.1 機能名</h3>
+<p>AI提案機能（予約・顧客管理システムの追加機能）</p>
+<h3 id="背景目的">1.2 背景・目的</h3>
+<p>「自分にどのサービス・メニューが合うか分からない」というお客様の声に、来店前の時点で応えられていない。お客様が悩みや要望をAIに伝えると、AIがそれに合ったサービスメニューを提案してくれる機能を作ることで、来店前の不安を減らし、メニュー選びをスムーズにする。</p>
+<p>本機能は「予約・顧客管理システム
+要件定義書」の本体システムとは別に、独立した機能として要件を定義する。</p>
+<h3 id="対象ユーザー">1.3 対象ユーザー</h3>
+<ul>
+<li><strong>来店客・見込み客</strong>：予約前後に自分の悩みや要望を入力し、おすすめメニューの提案を受け取る。</li>
+<li><strong>管理者</strong>：提案結果の傾向を把握し、接客やメニュー改善の参考にする（将来的な拡張）。</li>
+</ul>
+<hr />
+<h2 id="現状分析">2. 現状分析</h2>
+<h3 id="課題">2.1 課題</h3>
+<ul>
+<li>お客様は専門知識がないと選べない悩みを抱えたまま来店・予約している。</li>
+<li>対応中に毎回ヒアリングして提案しているが、来店前にある程度絞り込めれば、当日の確認時間を短縮でき、お客様も安心して来店できる。</li>
+</ul>
+<h3 id="現状使用しているツール">2.2 現状使用しているツール</h3>
+<ul>
+<li>現状、メニュー提案を支援するツールは存在しない（すべて対面でのヒアリングに依存）。</li>
+</ul>
+<hr />
+<h2 id="システム概要">3. システム概要</h2>
+<h3 id="全体像">3.1 全体像</h3>
+<p>お客様がWeb上のチャット画面で悩みや要望を入力すると、AIが質問を重ねながら内容を絞り込み、最終的におすすめのサービスメニューを提案する。バックエンドからAI（LLM）にAPIリクエストを送り、応答を受け取ってチャット画面に表示する、という一往復＋会話履歴の管理で構成する。</p>
+<h3 id="主要機能一覧">3.2 主要機能一覧</h3>
+<ol type="1">
+<li>チャット形式の悩み・要望入力画面</li>
+<li>AIとの会話（複数ターンでのやり取り、絞り込み）</li>
+<li>会話履歴に基づくおすすめメニューの提案</li>
+<li>提案結果の表示（メニュー名・簡単な理由）</li>
+</ol>
+<hr />
+<h2 id="ユーザーストーリー">4. ユーザーストーリー</h2>
+<p>「【誰が】として、【何を】したい。なぜなら【なぜ】だから。」の形で、主要機能をユーザーストーリーに落とし込む。</p>
+<ol type="1">
+<li>見込み客として、チャットで自分の悩みや要望を入力したい。なぜなら、来店前にどのメニューが合うか知りたいから。</li>
+<li>見込み客として、AIに質問を重ねてもらいながら悩みを絞り込みたい。なぜなら、専門知識がなくても的確な提案を受けたいから。</li>
+<li>見込み客として、AIからおすすめメニューとその理由を提示してもらいたい。なぜなら、納得したうえでメニューを選びたいから。</li>
+<li>見込み客として、AIの提案結果をそのまま予約に進めたい。なぜなら、提案から予約までをスムーズに完了したいから（顧客向けオンライン予約のメニュー選択画面に、提案されたメニューを選択済みの状態で引き継ぐ）。</li>
+<li>管理者として、AI提案の結果傾向を確認したい（Could
+have）。なぜなら、接客やメニュー改善の参考にしたいから。</li>
+</ol>
+<p><strong>注記：</strong>
+本機能単体でのユーザーストーリーは5個。プロジェクト全体（本体システムと合わせて）では最低10個の基準を満たしている（本体システム側で12個）。</p>
+<hr />
+<h2 id="機能要件moscow分析">5. 機能要件（MoSCoW分析）</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>優先度</th>
+<th>機能</th>
+<th>詳細</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Must have</strong></td>
+<td>チャットUI</td>
+<td>お客様がテキストを入力し、AIとやり取りできる画面</td>
+</tr>
+<tr class="even">
+<td><strong>Must have</strong></td>
+<td>AI API連携</td>
+<td>入力内容をAI（LLM API）に送信し、応答を受け取る</td>
+</tr>
+<tr class="odd">
+<td><strong>Must have</strong></td>
+<td>メニュー提案</td>
+<td>会話の内容をもとに、登録済みのサービスメニューの中からおすすめを提示する</td>
+</tr>
+<tr class="even">
+<td><strong>Should have</strong></td>
+<td>会話履歴の保持</td>
+<td>1回のセッション内で、それまでのやり取りを踏まえて質問・提案する（状態管理）</td>
+</tr>
+<tr class="odd">
+<td><strong>Could have</strong></td>
+<td>提案結果の保存</td>
+<td>提案結果を顧客情報と紐づけて保存し、来店時に管理者が確認できるようにする</td>
+</tr>
+<tr class="even">
+<td><strong>Won’t have</strong></td>
+<td>提案結果からの自動予約</td>
+<td>今回のスコープ外（提案後は手動で予約フォームへ誘導する）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>注記：</strong>
+チャット形式（複数ターンで会話しながら絞り込む形）は、1回の入力で完結するフォーム形式に比べて、会話履歴の管理が必要な分、実装がやや複雑になる。予約・顧客管理システム本体（顧客管理・対応記録・予約・リマインド・既存ソフト連携）を優先して完成させたうえで着手する。</p>
+<hr />
+<h2 id="非機能要件">6. 非機能要件</h2>
+<p>■ パフォーマンス ・AI応答時間：5秒以内を目安とする
+・同時接続数：数ユーザー程度（個人店舗規模の運用を想定）
+・入力文字数：1メッセージあたり500文字以内を目安とする</p>
+<p>■ セキュリティ ・通信はHTTPS化
+・入力内容に個人情報が含まれる可能性があるため、AI
+APIへの送信内容・保存内容は必要最小限にとどめる</p>
+<p>■ 可用性 ・稼働率：予約・顧客管理システム本体に準ずる ・AI
+API側で障害が発生した場合はエラーメッセージを表示し、通常のヒアリング（対面）に切り替えられるようにする</p>
+<p>■ 互換性 ・対応ブラウザ：Chrome、Safari、Edge最新版
+・レスポンシブ対応（スマホ中心）</p>
+<p>■ 保守性 ・利用するAI
+APIの仕様変更に対応できるよう、連携部分を疎結合に保つ
+・利用量に応じた従量課金となるため、コスト状況を定期的に確認できるようにする
+・専門知識がないお客様でも直感的に使えるよう、質問文はシンプルな言葉で用意する</p>
+<hr />
+<h2 id="画面遷移図簡易版">7. 画面遷移図（簡易版）</h2>
+<p>Figmaを使った正式な画面遷移図はWeek19で清書する。ここでは箱と矢印の簡単なスケッチを示す。</p>
+<pre><code>（利用者がアクセス）
+      │
+      ▼
+AI提案チャット ──（会話を繰り返す）
+      │
+      ▼（提案が完了）
+提案結果表示
+      │
+      └──[この内容で予約に進む] → 予約・顧客管理システムの顧客向けメニュー選択画面へ（提案メニューを選択済みの状態で遷移）</code></pre>
+<hr />
+<h2 id="制約条件">8. 制約条件</h2>
+<ul>
+<li>開発期間：予約・顧客管理システム本体（Must
+have）の完成後に着手。ただし後述の通り、Week22〜24（3週間）では実装を見送り、フェーズ2（Week24以降）で着手する</li>
+<li>開発体制：開発者本人による開発（techmeets総合演習）</li>
+<li>技術スタック：PHP / Laravel（バックエンド）、外部AI
+API（LLM）との連携</li>
+<li>3週間全体のスケジュールの中で、時間が不足する場合はCould
+have（提案結果の保存）から先に調整する</li>
+</ul>
+<p><strong>スコープの再確認（講師フィードバックを受けて）：</strong>
+予約・顧客管理システムとAI提案機能を合わせた当初の見積もり工数が3週間に対して過大との指摘を受けた。そのため、Week22〜24ではMust
+have機能＋顧客向けオンライン予約（空き状況カレンダー優先）を優先して「動くところまで」完成させることとし、AI提案機能はこの3週間では実装せず、設計（本ドキュメント・Week19設計書）を確定させた状態でフェーズ2（Week24以降）に先送りする。</p>
+<hr />
+<h2 id="前提条件リスク">9. 前提条件・リスク</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>リスク</th>
+<th>内容</th>
+<th>対応方針</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>実装難易度</td>
+<td>チャット形式は会話履歴の管理（状態管理）が必要で、Week5レベルの単純なAPI呼び出しより一段階複雑</td>
+<td>フェーズ2着手時に、まずシンプルな1往復のやり取りで最小実装し、動作確認できてから複数ターンの会話に拡張する2段階アプローチを取る</td>
+</tr>
+<tr class="even">
+<td>AI APIの選定・費用</td>
+<td>利用するAI APIとその費用体系が未確定</td>
+<td>フェーズ2着手前に候補を調査し、最小構成で試験導入する</td>
+</tr>
+<tr class="odd">
+<td>スケジュールへの影響</td>
+<td>本体システム（Must
+have）＋顧客向けオンライン予約を優先するため、3週間（Week22〜24）ではAI提案機能に着手できない可能性が高い</td>
+<td>Week22〜24では実装を見送り、フェーズ2（Week24以降）に先送りする方針を確定済み</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="承認">10. 承認</h2>
+<table>
+<thead>
+<tr class="header">
+<th>役割</th>
+<th>氏名</th>
+<th>日付</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>作成者（開発者）</td>
+<td>開発者本人</td>
+<td>2026年9月22日</td>
+</tr>
+<tr class="even">
+<td>承認者</td>
+<td>開発者本人</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

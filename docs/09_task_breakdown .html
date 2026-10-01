@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang xml:lang>
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>week21_task_breakdown</title>
+  <style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">* { box-sizing: border-box; }
+body {
+font-family: -apple-system, "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", sans-serif;
+max-width: 780px;
+margin: 0 auto;
+padding: 32px 24px 120px;
+line-height: 1.75;
+color: #1a1a1a;
+background: #fdfdfb;
+font-size: 16px;
+}
+h1 {
+font-size: 1.6em;
+border-bottom: 3px solid #2d5aa0;
+padding-bottom: 10px;
+margin-top: 2.2em;
+}
+h1:first-of-type { margin-top: 0; }
+h2 {
+font-size: 1.25em;
+margin-top: 2em;
+padding: 8px 12px;
+background: #eef3fb;
+border-left: 5px solid #2d5aa0;
+border-radius: 4px;
+}
+h3 {
+font-size: 1.05em;
+margin-top: 1.6em;
+color: #2d5aa0;
+}
+p { margin: 0.9em 0; }
+strong { color: #b3541e; }
+code {
+font-family: "SF Mono", Menlo, Consolas, monospace;
+background: #eee;
+padding: 0.15em 0.4em;
+border-radius: 4px;
+font-size: 0.9em;
+}
+pre {
+background: #1e1e2a;
+color: #e6e6e6;
+padding: 14px 16px;
+border-radius: 8px;
+overflow-x: auto;
+font-size: 0.88em;
+line-height: 1.5;
+}
+pre code {
+background: none;
+color: inherit;
+padding: 0;
+}
+table {
+border-collapse: collapse;
+width: 100%;
+margin: 1.2em 0;
+font-size: 0.92em;
+}
+th, td {
+border: 1px solid #d8d8d8;
+padding: 8px 10px;
+text-align: left;
+}
+th { background: #f0f0f0; }
+tr:nth-child(even) { background: #fafafa; }
+hr {
+border: none;
+border-top: 1px dashed #ccc;
+margin: 2.5em 0;
+}
+ul, ol { padding-left: 1.4em; }
+li { margin: 0.35em 0; }
+a { color: #2d5aa0; }
+blockquote {
+border-left: 4px solid #ccc;
+margin: 1em 0;
+padding: 0.3em 1em;
+color: #555;
+background: #f7f7f5;
+}
+#toc {
+background: #fff8e8;
+border: 1px solid #f0dca0;
+border-radius: 8px;
+padding: 16px 24px;
+margin-bottom: 2em;
+}
+#toc h2 { background: none; border: none; padding: 0; margin-top: 0; }
+#toc ul { column-count: 2; }
+@media (max-width: 600px) {
+#toc ul { column-count: 1; }
+}
+details {
+background: #f4f7fb;
+border: 1px solid #cfd9e8;
+border-radius: 8px;
+padding: 12px 16px;
+margin: 1.1em 0;
+}
+details summary {
+cursor: pointer;
+font-weight: 600;
+color: #16324f;
+}
+details summary::marker { color: #2d5aa0; }
+details[open] summary { margin-bottom: 10px; }
+details > p, details strong { margin-top: 0.4em; }
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">week21_task_breakdown</h1>
+</header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#week21タスク分解github-issues用" id="toc-week21タスク分解github-issues用">Week21：タスク分解（GitHub
+Issues用）</a>
+<ul>
+<li><a href="#week22基盤" id="toc-week22基盤">Week22（基盤）</a></li>
+<li><a href="#week23肉付け" id="toc-week23肉付け">Week23（肉付け）</a></li>
+<li><a href="#week24仕上げ顧客向けオンライン予約ai提案機能" id="toc-week24仕上げ顧客向けオンライン予約ai提案機能">Week24（仕上げ・顧客向けオンライン予約・AI提案機能）</a></li>
+<li><a href="#工数の合計確認" id="toc-工数の合計確認">工数の合計確認</a></li>
+</ul></li>
+</ul>
+</nav>
+<h1 id="week21タスク分解github-issues用">Week21：タスク分解（GitHub
+Issues用）</h1>
+<p>作成日：2026年9月29日（2026年9月30日
+スコープ見直し）　対象：予約・顧客管理システム＋AI提案機能（総合プロジェクト）</p>
+<p>この文書は、Week19設計書「4.1
+機能別工数表」とWeek20のスプリント計画をもとに、各機能をGitHub
+Issuesにそのまま登録できる形に分解したもの。下の各ブロックをコピーして、GitHubリポジトリのIssueとして1つずつ登録する。</p>
+<p><strong>スコープの再確認（講師フィードバックを受けて）：</strong>
+予約・顧客管理システムとAI提案機能を合わせた当初の見積もり工数が3週間に対して過大との指摘を受けた。Week22〜24ではMust
+have機能＋顧客向けオンライン予約（空き状況カレンダー優先）を「動くところまで」完成させることを優先し、顧客向け利用履歴ページ（Issue
+11）とAI提案機能一式（Issue
+12〜15）はフェーズ2バックログとして切り出した。Issue
+1〜10・16がWeek22〜24で実際に着手するタスク、Issue
+11〜15はフェーズ2（Week24以降）のバックログとして登録しておく。</p>
+<p>【ラベルの使い方】<code>enhancement</code>は新機能、<code>setup</code>は環境構築等の準備作業、<code>phase2-backlog</code>はWeek22〜24では着手しないフェーズ2の作業に付ける。Week22〜24のラベルで、どの週に着手する想定かを示す。</p>
+<hr />
+<h2 id="week22基盤">Week22（基盤）</h2>
+<h3 id="issue-1環境構築">Issue 1：環境構築</h3>
+<pre><code>タイトル: [環境構築] Docker／Laravel／MySQL環境の構築
+
+## 概要
+開発環境をDocker上に構築し、Laravel・MySQLが動作する状態にする。
+
+## タスク
+- [ ] Docker Compose設定（PHP／MySQL／Nginx等）
+- [ ] Laravelプロジェクト作成
+- [ ] .env設定（DB接続情報等）
+- [ ] マイグレーション実行確認
+- [ ] Git/GitHubリポジトリ作成・初回push
+
+## 見積もり
+2時間
+
+## 優先度
+High
+
+ラベル: setup, Week22</code></pre>
+<h3 id="issue-2管理者ログイン機能">Issue 2：管理者ログイン機能</h3>
+<pre><code>タイトル: [機能] 管理者ログイン機能の実装
+
+## 概要
+管理者が認証つきの管理画面にログインできるようにする。顧客の個人情報を第三者に見られないようにするため。
+
+## タスク
+- [ ] adminsテーブルのマイグレーション作成（1h）
+- [ ] Adminモデル作成（1h）
+- [ ] ログイン処理・セッション管理（コントローラー）（2h）
+- [ ] ログイン画面のビュー作成（2h）
+
+## 見積もり
+6時間
+
+## 優先度
+Must have
+
+ラベル: enhancement, Week22</code></pre>
+<h3 id="issue-3顧客管理crud">Issue 3：顧客管理CRUD</h3>
+<pre><code>タイトル: [機能] 顧客管理機能（CRUD）の実装
+
+## 概要
+管理者が顧客情報を登録・編集・検索・削除できるようにする。
+
+## タスク
+- [ ] customersテーブルのマイグレーション作成（1h）
+- [ ] Customerモデル作成（1h）
+- [ ] コントローラー：一覧・検索（ページング）・登録・編集・削除（5h）
+- [ ] ビュー：一覧・詳細・登録編集フォーム（6h）
+
+## 見積もり
+13時間
+
+## 優先度
+Must have
+
+ラベル: enhancement, Week22</code></pre>
+<h3 id="issue-4予約管理crud管理者向け">Issue
+4：予約管理CRUD（管理者向け）</h3>
+<pre><code>タイトル: [機能] 予約管理機能（管理者向けCRUD）の実装
+
+## 概要
+管理者が予約の一覧表示・新規作成・編集・キャンセルを行えるようにする。
+
+## タスク
+- [ ] reservationsテーブルのマイグレーション作成（1h）
+- [ ] Reservationモデル作成（1h）
+- [ ] コントローラー：一覧・登録・編集・キャンセル（6h）
+- [ ] ビュー：予約一覧・登録編集フォーム（6h）
+
+## 見積もり
+14時間
+
+## 優先度
+Must have
+
+ラベル: enhancement, Week22</code></pre>
+<h3 id="issue-5ダッシュボード">Issue 5：ダッシュボード</h3>
+<pre><code>タイトル: [機能] 管理者ダッシュボードの実装
+
+## 概要
+管理者がログイン後、本日の予約・直近のリマインド送信状況を一目で確認できる画面を作る。
+
+## タスク
+- [ ] コントローラー：本日の予約・リマインド状況の集計（2h）
+- [ ] ビュー：ダッシュボード画面（2h）
+
+## 見積もり
+4時間
+
+## 優先度
+Must have
+
+ラベル: enhancement, Week22</code></pre>
+<hr />
+<h2 id="week23肉付け">Week23（肉付け）</h2>
+<h3 id="issue-6対応記録写真添付含む">Issue
+6：対応記録（写真添付含む）</h3>
+<pre><code>タイトル: [機能] 対応記録機能（写真添付含む）の実装
+
+## 概要
+管理者が顧客ごとの対応記録（提供内容・使用資材・対応時間・メモ・前後の写真）を残せるようにする。次回対応時に過去の内容を正確に振り返るため。
+
+## タスク
+- [ ] recordsテーブルのマイグレーション作成（2h）
+- [ ] Recordモデル作成（1h）
+- [ ] コントローラー：登録・更新・画像アップロード処理（6h）
+- [ ] ビュー：登録編集フォーム・写真プレビュー（6h）
+
+## 見積もり
+15時間
+
+## 優先度
+Must have
+
+ラベル: enhancement, Week23</code></pre>
+<h3 id="issue-7自動リマインド送信">Issue 7：自動リマインド送信</h3>
+<pre><code>タイトル: [機能] 自動リマインド送信機能の実装
+
+## 概要
+来店予定の一定日数前に、メッセージ配信APIを使って自動でリマインドを送信する。来店忘れによる機会損失を減らすため。
+
+## タスク
+- [ ] reminder_logsテーブルのマイグレーション作成（1h）
+- [ ] ReminderLogモデル作成（1h）
+- [ ] バッチ処理（スケジューラ）・配信API連携（8h）
+- [ ] 送信ログ確認画面（2h）
+
+## 見積もり
+12時間
+
+## 優先度
+Must have
+
+ラベル: enhancement, Week23
+
+## 備考
+Week22序盤に配信APIの公式アカウント開設・最小構成（1通送るだけ）の疎通確認を先に済ませておく。</code></pre>
+<h3 id="issue-8既存ソフト連携">Issue 8：既存ソフト連携</h3>
+<pre><code>タイトル: [機能] 既存予約管理ソフトとのデータ連携
+
+## 概要
+既存の予約管理ソフトのデータを自動で取り込み、同じ顧客情報を二重入力する手間をなくす。
+
+## タスク
+- [ ] 既存ソフトのAPI・CSVエクスポート対応状況の調査（別途・Week22序盤に実施）
+- [ ] Customerモデルへの external_id 追加・マイグレーション
+- [ ] コントローラー：連携実行・結果ログ記録（8h）
+- [ ] 連携設定・実行結果確認画面（2h）
+
+## 見積もり
+11時間＋調査時間別途
+
+## 優先度
+Must have
+
+ラベル: enhancement, Week23
+
+## 備考
+本プロジェクトの中で最もリスクが高いタスク。Week22序盤に必ず仕様確認を行い、対応していない場合は手動CSV取り込み等の代替案に切り替える。</code></pre>
+<hr />
+<h2 id="week24仕上げ顧客向けオンライン予約ai提案機能">Week24（仕上げ・顧客向けオンライン予約・AI提案機能）</h2>
+<h3 id="issue-9空き状況カレンダー優先実装">Issue
+9：空き状況カレンダー（優先実装）</h3>
+<pre><code>タイトル: [機能] 顧客向けオンライン予約：空き状況カレンダーの実装
+
+## 概要
+お客様がメニューを選んだ後、空いている日時を自動計算されたカレンダーから選べるようにする。顧客向けオンライン予約の中でも顧客体験に直結するため、他のShould〜Could have機能より優先して実装する。
+
+## タスク
+- [ ] business_hoursテーブルのマイグレーション作成（1h）
+- [ ] BusinessHourモデル作成（1h）
+- [ ] コントローラー：空き状況計算（reservationsとbusiness_hoursの突き合わせ・二重予約防止）（6h）
+- [ ] カレンダーUI（◎/×/−表示、Alpine.jsで日付選択）（5h）
+
+## 見積もり
+13時間
+
+## 優先度
+Should have（優先）
+
+ラベル: enhancement, Week24</code></pre>
+<h3 id="issue-10メニュー選択お客様情報入力">Issue
+10：メニュー選択・お客様情報入力</h3>
+<pre><code>タイトル: [機能] 顧客向けオンライン予約：メニュー選択・お客様情報入力の実装
+
+## 概要
+お客様が予約するメニューを選び、氏名・電話番号等を入力して予約を確定できるようにする。
+
+## タスク
+- [ ] menusテーブルのマイグレーション作成（1h）
+- [ ] Menuモデル作成（1h）
+- [ ] コントローラー：メニュー一覧取得・予約確定処理（バリデーション含む）（3h）
+- [ ] ビュー：メニュー選択画面・お客様情報入力画面（4h）
+
+## 見積もり
+9時間
+
+## 優先度
+Should have（優先）
+
+ラベル: enhancement, Week24</code></pre>
+<h3 id="issue-11顧客向け利用履歴ページ簡易ログインフェーズ2バックログ">Issue
+11：顧客向け利用履歴ページ・簡易ログイン（フェーズ2バックログ）</h3>
+<pre><code>タイトル: [フェーズ2] 顧客向け利用履歴ページ・簡易ログインの実装
+
+## 概要
+お客様が簡易ログインで自分専用のページに入り、過去の利用履歴を確認できるようにする。
+
+## タスク
+- [ ] コントローラー：簡易ログイン処理（1h）
+- [ ] コントローラー：利用履歴取得（4h）
+- [ ] ビュー：ログイン画面・利用履歴画面（4h）
+
+## 見積もり
+9時間
+
+## 優先度
+Should〜Could have（フェーズ2バックログ）
+
+ラベル: enhancement, phase2-backlog
+
+## 備考
+講師フィードバックを受けてWeek22〜24のスコープをMust have＋顧客向けオンライン予約（空き状況カレンダー優先）に絞ったため、この機能はWeek22〜24では着手せず、フェーズ2（Week24以降）に回す。</code></pre>
+<h3 id="issue-12ai-api候補調査選定任意フェーズ2バックログ">Issue 12：AI
+API候補調査・選定（任意・フェーズ2バックログ）</h3>
+<pre><code>タイトル: [調査/フェーズ2] AI提案機能：利用するAI API（LLM）の候補調査・選定
+
+## 概要
+AI提案機能で利用する外部AI APIの候補を調査し、費用体系・レスポンス速度を確認したうえで選定する。Week22〜24では実装しないため、この調査自体も任意（余裕があれば）とする。
+
+## タスク
+- [ ] 候補APIの洗い出し・費用体系の比較
+- [ ] 最小構成でのリクエスト・レスポンス疎通確認
+- [ ] 選定結果の記録
+
+## 見積もり
+調査タスクのため時間見積もりなし（任意・余裕があれば）
+
+## 優先度
+任意（フェーズ2の準備タスク）
+
+ラベル: setup, phase2-backlog</code></pre>
+<h3 id="issue-13チャットuiai-api連携第1段階フェーズ2バックログ">Issue
+13：チャットUI・AI API連携（第1段階・フェーズ2バックログ）</h3>
+<pre><code>タイトル: [フェーズ2] AI提案機能：チャットUI・AI API連携（1往復・フォーム形式）の実装
+
+## 概要
+お客様が悩みや要望を入力すると、AIが1往復でおすすめメニューを提案する最小構成を実装する。Week22〜24では実装せず、フェーズ2（Week24以降）で着手する。
+
+## タスク
+- [ ] ai_sessionsテーブルのマイグレーション作成（会話履歴の保持Issueと共通化）
+- [ ] コントローラー：チャット開始画面表示（1h）
+- [ ] コントローラー：AI APIへのリクエスト送信・応答受け取り（3h）
+- [ ] ビュー：チャット開始画面・提案結果画面（5h）
+
+## 見積もり
+9時間
+
+## 優先度
+Must have（AI機能内・第1段階・フェーズ2バックログ）
+
+ラベル: enhancement, phase2-backlog</code></pre>
+<h3 id="issue-14会話履歴の保持複数ターン化第2段階フェーズ2バックログ">Issue
+14：会話履歴の保持（複数ターン化・第2段階・フェーズ2バックログ）</h3>
+<pre><code>タイトル: [フェーズ2] AI提案機能：会話履歴の保持（複数ターン化）の実装
+
+## 概要
+第1段階（1往復）が動作確認できた後、余裕があれば会話履歴を持たせ、複数ターンで質問を重ねながら絞り込めるようにする。フェーズ2（Week24以降）で着手する。
+
+## タスク
+- [ ] ai_sessions／ai_messagesテーブルのマイグレーション作成（1h）
+- [ ] AiSession／AiMessageモデル作成（1h）
+- [ ] コントローラー：会話履歴を踏まえた応答生成（4h）
+- [ ] ビュー：会話中画面（吹き出し形式）（2h）
+
+## 見積もり
+8時間
+
+## 優先度
+Should have（第2段階・フェーズ2バックログ）
+
+ラベル: enhancement, phase2-backlog</code></pre>
+<h3 id="issue-15提案結果の保存could-haveフェーズ2バックログ">Issue
+15：提案結果の保存（Could have・フェーズ2バックログ）</h3>
+<pre><code>タイトル: [フェーズ2] AI提案機能：提案結果の保存・提案結果一覧の実装
+
+## 概要
+提案結果を顧客情報と紐づけて保存し、管理者が来店時や後から確認できるようにする。フェーズ2（Week24以降）で着手する。
+
+## タスク
+- [ ] ai_sessionsへのresult_menu・customer_id保存処理（1h）
+- [ ] モデル調整（1h）
+- [ ] コントローラー：提案結果一覧取得（2h）
+- [ ] ビュー：提案結果一覧画面（管理者向け）（1h）
+
+## 見積もり
+5時間
+
+## 優先度
+Could have（フェーズ2バックログ）
+
+ラベル: enhancement, phase2-backlog</code></pre>
+<h3 id="issue-16バグ修正デプロイreadme作成">Issue
+16：バグ修正・デプロイ・README作成</h3>
+<pre><code>タイトル: [仕上げ] バグ修正・デプロイ・README作成
+
+## 概要
+本番環境（Render／Railway）にデプロイし、README.mdを整備して成果物として共有できる状態にする。
+
+## タスク
+- [ ] 主要機能のテストコード作成（PHPUnit）
+- [ ] バグ修正・最終確認
+- [ ] Render／Railwayへのデプロイ
+- [ ] README.md作成（プロジェクト概要・技術選定・セットアップ手順）
+- [ ] docs/フォルダへの設計書格納・Figmaリンク記載
+
+## 見積もり
+別途（Week24後半の仕上げタスクとして確保）
+
+## 優先度
+Must have
+
+ラベル: setup, Week24</code></pre>
+<hr />
+<h2 id="工数の合計確認">工数の合計確認</h2>
+<p><strong>スコープの再確認（講師フィードバックを受けて）：</strong>
+予約・顧客管理システムとAI提案機能を合わせた当初の見積もり（約156〜169h）は3週間に対して過大との指摘を受けた。そのため、Week22〜24のスコープをMust
+have機能＋顧客向けオンライン予約（空き状況カレンダー優先）に絞り込み、AI提案機能（Issue
+12〜15）と顧客向け利用履歴ページ・簡易ログイン（Issue
+11）はフェーズ2バックログとして切り出した。</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>区分</th>
+<th>開発工数</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Must
+have機能（顧客管理・対応記録・予約管理・ログイン・自動リマインド・既存ソフト連携）</td>
+<td>約71h</td>
+</tr>
+<tr class="even">
+<td>環境構築・ダッシュボード（付随タスク）</td>
+<td>約6h</td>
+</tr>
+<tr class="odd">
+<td>顧客向けオンライン予約（空き状況カレンダー・メニュー選択、Issue
+9・10）</td>
+<td>約22h</td>
+</tr>
+<tr class="even">
+<td><strong>Week22〜24スコープ 開発工数合計</strong></td>
+<td><strong>約99h</strong></td>
+</tr>
+<tr class="odd">
+<td>バッファ（20〜30%）</td>
+<td>約20〜30h</td>
+</tr>
+<tr class="even">
+<td><strong>Week22〜24 見積もり合計</strong></td>
+<td><strong>約119〜129h（週あたり約40〜43h）</strong></td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr class="header">
+<th>フェーズ2バックログ（Week24以降）</th>
+<th>開発工数</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>顧客向け利用履歴ページ・簡易ログイン（Issue 11）</td>
+<td>約9h</td>
+</tr>
+<tr class="even">
+<td>AI提案機能一式（Issue 12〜15）</td>
+<td>約22h</td>
+</tr>
+<tr class="odd">
+<td><strong>フェーズ2バックログ合計</strong></td>
+<td><strong>約31h</strong></td>
+</tr>
+</tbody>
+</table>
+<p>環境構築・ダッシュボードは「機能別工数表」には含まれない準備・付随タスクのため、ここで別枠として加算している。</p>
+</body>
+</html>
