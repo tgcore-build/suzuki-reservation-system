@@ -1,6 +1,6 @@
 services:
   app:
-    image: php:8.3-cli
+    build: .
     working_dir: /var/www/html
     volumes:
       - .:/var/www/html
