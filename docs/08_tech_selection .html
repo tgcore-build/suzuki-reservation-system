@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang xml:lang>
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>week21_tech_selection</title>
+  <style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">* { box-sizing: border-box; }
+body {
+font-family: -apple-system, "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", sans-serif;
+max-width: 780px;
+margin: 0 auto;
+padding: 32px 24px 120px;
+line-height: 1.75;
+color: #1a1a1a;
+background: #fdfdfb;
+font-size: 16px;
+}
+h1 {
+font-size: 1.6em;
+border-bottom: 3px solid #2d5aa0;
+padding-bottom: 10px;
+margin-top: 2.2em;
+}
+h1:first-of-type { margin-top: 0; }
+h2 {
+font-size: 1.25em;
+margin-top: 2em;
+padding: 8px 12px;
+background: #eef3fb;
+border-left: 5px solid #2d5aa0;
+border-radius: 4px;
+}
+h3 {
+font-size: 1.05em;
+margin-top: 1.6em;
+color: #2d5aa0;
+}
+p { margin: 0.9em 0; }
+strong { color: #b3541e; }
+code {
+font-family: "SF Mono", Menlo, Consolas, monospace;
+background: #eee;
+padding: 0.15em 0.4em;
+border-radius: 4px;
+font-size: 0.9em;
+}
+pre {
+background: #1e1e2a;
+color: #e6e6e6;
+padding: 14px 16px;
+border-radius: 8px;
+overflow-x: auto;
+font-size: 0.88em;
+line-height: 1.5;
+}
+pre code {
+background: none;
+color: inherit;
+padding: 0;
+}
+table {
+border-collapse: collapse;
+width: 100%;
+margin: 1.2em 0;
+font-size: 0.92em;
+}
+th, td {
+border: 1px solid #d8d8d8;
+padding: 8px 10px;
+text-align: left;
+}
+th { background: #f0f0f0; }
+tr:nth-child(even) { background: #fafafa; }
+hr {
+border: none;
+border-top: 1px dashed #ccc;
+margin: 2.5em 0;
+}
+ul, ol { padding-left: 1.4em; }
+li { margin: 0.35em 0; }
+a { color: #2d5aa0; }
+blockquote {
+border-left: 4px solid #ccc;
+margin: 1em 0;
+padding: 0.3em 1em;
+color: #555;
+background: #f7f7f5;
+}
+#toc {
+background: #fff8e8;
+border: 1px solid #f0dca0;
+border-radius: 8px;
+padding: 16px 24px;
+margin-bottom: 2em;
+}
+#toc h2 { background: none; border: none; padding: 0; margin-top: 0; }
+#toc ul { column-count: 2; }
+@media (max-width: 600px) {
+#toc ul { column-count: 1; }
+}
+details {
+background: #f4f7fb;
+border: 1px solid #cfd9e8;
+border-radius: 8px;
+padding: 12px 16px;
+margin: 1.1em 0;
+}
+details summary {
+cursor: pointer;
+font-weight: 600;
+color: #16324f;
+}
+details summary::marker { color: #2d5aa0; }
+details[open] summary { margin-bottom: 10px; }
+details > p, details strong { margin-top: 0.4em; }
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">week21_tech_selection</h1>
+</header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#week21技術選定資料" id="toc-week21技術選定資料">Week21：技術選定資料</a>
+<ul>
+<li><a href="#使用技術一覧" id="toc-使用技術一覧">1.
+使用技術一覧</a></li>
+<li><a href="#選定理由" id="toc-選定理由">2. 選定理由</a></li>
+<li><a href="#まだ学んでいない技術の扱い" id="toc-まだ学んでいない技術の扱い">3.
+まだ学んでいない技術の扱い</a></li>
+</ul></li>
+</ul>
+</nav>
+<h1 id="week21技術選定資料">Week21：技術選定資料</h1>
+<p>作成日：2026年9月29日　対象：予約・顧客管理システム＋AI提案機能（総合プロジェクト）</p>
+<p>この文書は、Week18〜20で作成した要件定義書・設計書をもとに、開発に使用する技術とその選定理由をまとめたもの。</p>
+<hr />
+<h2 id="使用技術一覧">1. 使用技術一覧</h2>
+<h3 id="バックエンド">バックエンド</h3>
+<table>
+<thead>
+<tr class="header">
+<th>技術</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>PHP 8.x</td>
+<td>サーバーサイド言語</td>
+</tr>
+<tr class="even">
+<td>Laravel</td>
+<td>Webアプリケーションフレームワーク</td>
+</tr>
+<tr class="odd">
+<td>MySQL</td>
+<td>データベース</td>
+</tr>
+<tr class="even">
+<td>Docker</td>
+<td>開発環境の構築・統一</td>
+</tr>
+</tbody>
+</table>
+<h3 id="フロントエンド">フロントエンド</h3>
+<table>
+<thead>
+<tr class="header">
+<th>技術</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Blade</td>
+<td>Laravel標準のテンプレートエンジン</td>
+</tr>
+<tr class="even">
+<td>Tailwind CSS</td>
+<td>UIのスタイリング</td>
+</tr>
+<tr class="odd">
+<td>Alpine.js</td>
+<td>予約カレンダーの表示切り替えなど軽量な動的UI</td>
+</tr>
+</tbody>
+</table>
+<h3 id="ai提案機能">AI提案機能</h3>
+<table>
+<thead>
+<tr class="header">
+<th>技術</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>外部AI API（LLM）</td>
+<td>チャットでの悩み入力・メニュー提案の生成</td>
+</tr>
+</tbody>
+</table>
+<h3 id="インフラ運用">インフラ・運用</h3>
+<table>
+<thead>
+<tr class="header">
+<th>技術</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Render または Railway</td>
+<td>本番環境へのデプロイ先</td>
+</tr>
+<tr class="even">
+<td>Git / GitHub</td>
+<td>バージョン管理・タスク管理（Issues）・成果物提出</td>
+</tr>
+</tbody>
+</table>
+<h3 id="テスト開発支援">テスト・開発支援</h3>
+<table>
+<thead>
+<tr class="header">
+<th>技術</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>PHPUnit</td>
+<td>主要機能（予約登録・リマインド送信等）のテストコード</td>
+</tr>
+<tr class="even">
+<td>Laravel Debugbar</td>
+<td>開発中のデバッグ</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="選定理由">2. 選定理由</h2>
+<h3 id="php-laravel">PHP / Laravel</h3>
+<p>techmeetsカリキュラムで学習してきた言語・フレームワークであり、Week22時点で最も使い慣れている。認証・CRUD・バリデーションといった本プロジェクトの中心機能が標準機能として揃っており、MVC構成に沿って開発できるため、3週間という短い期間で個人開発するのに適している。</p>
+<p><strong>比較検討：</strong>
+Node.js（Express）やPython（Django）も選択肢としてはあり得るが、いずれも新たに学習し直すコストが発生し、今回の期間には見合わないため不採用とした。</p>
+<h3 id="mysql">MySQL</h3>
+<p>Laravelとの親和性が高く、顧客・予約・対応記録・メニューのようにリレーション（紐付け）を持つデータを扱うのに適している。個人店舗規模（同時接続10ユーザー程度）の運用であれば性能面でも十分。</p>
+<h3 id="docker">Docker</h3>
+<p>開発環境をコードとして再現できるため、環境構築の手間や「自分のPCでは動くが本番では動かない」という事態を避けられる。本番環境（Render・Railway）へのデプロイ時も、環境差異を最小限にできる。</p>
+<h3 id="blade">Blade</h3>
+<p>Laravel標準のテンプレートエンジンであり、追加の学習コストなしに利用できる。</p>
+<p><strong>比較検討：</strong>
+Vue.jsやReactを使ったSPA構成も検討したが、学習コストと開発工数（状態管理・ビルド環境の構築など）が本プロジェクトの規模に対して過大であり、個人開発かつ3週間という制約に合わないため不採用とした。</p>
+<h3 id="tailwind-css">Tailwind CSS</h3>
+<p>ユーティリティクラスを組み合わせるだけで、レスポンシブなUIを手早く組める。CSSを1から設計するデザイン専任者がいない個人開発において、実装スピードを優先できる。</p>
+<h3 id="alpine.js">Alpine.js</h3>
+<p>顧客向けオンライン予約の空き状況カレンダーや、AI提案チャットの会話ログ表示など、ページ遷移を伴わない軽量な動的UIが必要な箇所がある。フル機能のSPAフレームワークを導入するほどの複雑さはなく、Bladeとの組み合わせで必要十分な対話性を実現できるため採用した。</p>
+<h3 id="外部ai-apillm">外部AI API（LLM）</h3>
+<p>自前でAIモデルを学習・運用するのは今回の期間・規模では非現実的。既存のLLM提供APIを組み合わせることで、チャット形式のメニュー提案を3週間の後半（Sprint3）という限られた時間内でも実装できる。利用料は従量課金となるため、コスト状況を定期的に確認する運用とする（要件定義書
+6. 非機能要件を参照）。</p>
+<h3 id="render-railway">Render / Railway</h3>
+<p>個人開発・小規模運用に見合った料金体系と、デプロイの手軽さを重視して選定した。自宅サーバーやVPSを自分で運用・保守する場合と比べて、セキュリティパッチ適用やサーバーダウン対応などの保守負担を減らせる。</p>
+<h3 id="git-github">Git / GitHub</h3>
+<p>バージョン管理はもちろん、Week21課題の提出方法（リポジトリ・README・docsフォルダ・Issues）そのものがGitHubの利用を前提としているため。</p>
+<hr />
+<h2 id="まだ学んでいない技術の扱い">3. まだ学んでいない技術の扱い</h2>
+<p>Tailwind
+CSSとAlpine.jsは、要件定義・設計の時点では使用技術として決定しているが、実装方法の詳細はWeek23で本格的に学ぶ。Week22の時点では「このプロジェクトではこの技術を使う」という前提で設計を進めている。Render・Railwayへのデプロイも同様に、実践としてはWeek24で扱う。</p>
+</body>
+</html>

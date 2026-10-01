@@ -1,0 +1,1348 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang xml:lang>
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>week19_reservation_design</title>
+  <style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">* { box-sizing: border-box; }
+body {
+font-family: -apple-system, "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", sans-serif;
+max-width: 780px;
+margin: 0 auto;
+padding: 32px 24px 120px;
+line-height: 1.75;
+color: #1a1a1a;
+background: #fdfdfb;
+font-size: 16px;
+}
+h1 {
+font-size: 1.6em;
+border-bottom: 3px solid #2d5aa0;
+padding-bottom: 10px;
+margin-top: 2.2em;
+}
+h1:first-of-type { margin-top: 0; }
+h2 {
+font-size: 1.25em;
+margin-top: 2em;
+padding: 8px 12px;
+background: #eef3fb;
+border-left: 5px solid #2d5aa0;
+border-radius: 4px;
+}
+h3 {
+font-size: 1.05em;
+margin-top: 1.6em;
+color: #2d5aa0;
+}
+p { margin: 0.9em 0; }
+strong { color: #b3541e; }
+code {
+font-family: "SF Mono", Menlo, Consolas, monospace;
+background: #eee;
+padding: 0.15em 0.4em;
+border-radius: 4px;
+font-size: 0.9em;
+}
+pre {
+background: #1e1e2a;
+color: #e6e6e6;
+padding: 14px 16px;
+border-radius: 8px;
+overflow-x: auto;
+font-size: 0.88em;
+line-height: 1.5;
+}
+pre code {
+background: none;
+color: inherit;
+padding: 0;
+}
+table {
+border-collapse: collapse;
+width: 100%;
+margin: 1.2em 0;
+font-size: 0.92em;
+}
+th, td {
+border: 1px solid #d8d8d8;
+padding: 8px 10px;
+text-align: left;
+}
+th { background: #f0f0f0; }
+tr:nth-child(even) { background: #fafafa; }
+hr {
+border: none;
+border-top: 1px dashed #ccc;
+margin: 2.5em 0;
+}
+ul, ol { padding-left: 1.4em; }
+li { margin: 0.35em 0; }
+a { color: #2d5aa0; }
+blockquote {
+border-left: 4px solid #ccc;
+margin: 1em 0;
+padding: 0.3em 1em;
+color: #555;
+background: #f7f7f5;
+}
+#toc {
+background: #fff8e8;
+border: 1px solid #f0dca0;
+border-radius: 8px;
+padding: 16px 24px;
+margin-bottom: 2em;
+}
+#toc h2 { background: none; border: none; padding: 0; margin-top: 0; }
+#toc ul { column-count: 2; }
+@media (max-width: 600px) {
+#toc ul { column-count: 1; }
+}
+details {
+background: #f4f7fb;
+border: 1px solid #cfd9e8;
+border-radius: 8px;
+padding: 12px 16px;
+margin: 1.1em 0;
+}
+details summary {
+cursor: pointer;
+font-weight: 600;
+color: #16324f;
+}
+details summary::marker { color: #2d5aa0; }
+details[open] summary { margin-bottom: 10px; }
+details > p, details strong { margin-top: 0.4em; }
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">week19_reservation_design</h1>
+</header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#week19-設計書予約顧客管理システム画面設計db設計api設計" id="toc-week19-設計書予約顧客管理システム画面設計db設計api設計">Week19
+設計書：予約・顧客管理システム（画面設計・DB設計・API設計）</a>
+<ul>
+<li><a href="#画面設計" id="toc-画面設計">1. 画面設計</a></li>
+<li><a href="#db設計" id="toc-db設計">2. DB設計</a></li>
+<li><a href="#api設計" id="toc-api設計">3. API設計</a></li>
+<li><a href="#工数見積もり" id="toc-工数見積もり">4.
+工数見積もり</a></li>
+<li><a href="#インフラ構成図参考" id="toc-インフラ構成図参考">5.
+インフラ構成図（参考）</a></li>
+</ul></li>
+</ul>
+</nav>
+<h1 id="week19-設計書予約顧客管理システム画面設計db設計api設計">Week19
+設計書：予約・顧客管理システム（画面設計・DB設計・API設計）</h1>
+<p>作成日：2026年9月23日　対象：予約・顧客管理システム</p>
+<p>この設計書は「予約・顧客管理システム
+要件定義書」をもとに、画面設計・DB設計・API設計をまとめたもの。AI提案機能は別紙「Week19
+設計書：AI提案機能」で扱う。</p>
+<p><strong>Figmaワイヤーフレーム：</strong> <a href="https://www.figma.com/design/2JolEvuYmxQiFynxv2JfTo/%E7%84%A1%E9%A1%8C?node-id=0-1&amp;t=sqtwBgtZyZ9xfN6Q-1">こちらのリンクから確認できます</a>（左側のページ一覧の「予約システム」ページに本システムの8画面、「AI提案機能」ページにAI提案機能の5画面があります）</p>
+<p><strong>連携方針：</strong>
+本システムはAI提案機能を一切参照しない、単独で完結する設計にする。AI提案機能側からのみ<code>customer_id</code>で緩く参照される（詳細は別紙参照）。</p>
+<hr />
+<h2 id="画面設計">1. 画面設計</h2>
+<h3 id="画面一覧">1.1 画面一覧</h3>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>No</th>
+<th>画面名</th>
+<th>対象</th>
+<th>概要</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>ログイン画面</td>
+<td>管理者</td>
+<td>ID・パスワード入力</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>ダッシュボード</td>
+<td>管理者</td>
+<td>本日の予約・直近のリマインド送信状況</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>顧客一覧</td>
+<td>管理者</td>
+<td>顧客の検索・一覧表示</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>顧客詳細</td>
+<td>管理者</td>
+<td>基本情報＋対応記録の履歴＋予約履歴</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td>顧客登録・編集</td>
+<td>管理者</td>
+<td>顧客情報の新規登録・編集フォーム</td>
+</tr>
+<tr class="even">
+<td>6</td>
+<td>対応記録登録・編集</td>
+<td>管理者</td>
+<td>提供内容・使用資材・対応時間・メモ・写真添付</td>
+</tr>
+<tr class="odd">
+<td>7</td>
+<td>予約一覧</td>
+<td>管理者</td>
+<td>カレンダー表示 or リスト表示</td>
+</tr>
+<tr class="even">
+<td>8</td>
+<td>予約登録・編集</td>
+<td>管理者</td>
+<td>日時・顧客・メニューの入力フォーム</td>
+</tr>
+<tr class="odd">
+<td>9</td>
+<td>リマインド送信ログ</td>
+<td>管理者</td>
+<td>送信済み・送信予定のリマインド一覧</td>
+</tr>
+<tr class="even">
+<td>10</td>
+<td>既存ソフト連携設定</td>
+<td>管理者</td>
+<td>連携方式の設定・手動取込の実行</td>
+</tr>
+<tr class="odd">
+<td>11</td>
+<td>顧客ログイン</td>
+<td>利用者</td>
+<td>簡易ログイン（電話番号等＋認証コード想定）</td>
+</tr>
+<tr class="even">
+<td>12</td>
+<td>利用履歴（顧客向け）</td>
+<td>利用者</td>
+<td>自分の過去の利用履歴を閲覧</td>
+</tr>
+<tr class="odd">
+<td>13</td>
+<td>予約：メニュー選択（顧客向け）</td>
+<td>利用者</td>
+<td>予約するメニューを選ぶ（ログイン不要）</td>
+</tr>
+<tr class="even">
+<td>14</td>
+<td>予約：日時選択（顧客向け）</td>
+<td>利用者</td>
+<td>空き状況カレンダーから日時を選ぶ</td>
+</tr>
+<tr class="odd">
+<td>15</td>
+<td>予約：お客様情報入力・確定（顧客向け）</td>
+<td>利用者</td>
+<td>氏名・電話番号等を入力し予約を確定する</td>
+</tr>
+<tr class="even">
+<td>16</td>
+<td>エラーページ</td>
+<td>共通</td>
+<td>404 / 500</td>
+</tr>
+</tbody>
+</table>
+<h3 id="主要画面のワイヤーフレーム構成最低5画面">1.2
+主要画面のワイヤーフレーム構成（最低5画面）</h3>
+<p>上記16画面のうち、代表的な8画面についてワイヤーフレームを作成した（カリキュラムの最低基準5画面を上回る）。残る8画面（顧客登録・編集(5)／対応記録登録・編集(6)／予約一覧(7)／リマインド送信ログ(9)／既存ソフト連携設定(10)／顧客ログイン(11)／利用履歴(12)／エラーページ(16)）は、下記でワイヤーフレーム化した「一覧表＋検索」「詳細＋タブ」「フォーム＋登録ボタン」「ログイン」のいずれかのパターンを組み合わせて構成できるため、今回は代表画面のみを作成し、実装時に同じパターンを展開する方針とした。</p>
+<p><strong>①ログイン画面（No.1）</strong></p>
+<pre><code>┌─────────────────────────────┐
+│         （システム名ロゴ）        │
+│                               │
+│  ID    [                  ]  │
+│  パスワード[               ]  │
+│                               │
+│         [ログイン]             │
+└─────────────────────────────┘</code></pre>
+<p><strong>②ダッシュボード（No.2）</strong></p>
+<pre><code>┌─────────────────────────────┐
+│ ヘッダー：メニュー／ログアウト     │
+├─────────────────────────────┤
+│ 本日の予約（3件）               │
+│  ・10:00 顧客A                │
+│  ・13:00 顧客B                │
+├─────────────────────────────┤
+│ 直近のリマインド送信状況         │
+│  ・送信済み 2件／送信予定 1件     │
+└─────────────────────────────┘</code></pre>
+<p><strong>③顧客一覧（No.3）</strong></p>
+<pre><code>┌─────────────────────────────┐
+│ 検索：[            ] [検索]    │
+├─────────────────────────────┤
+│ 氏名      │ 電話番号   │ 最終来店 │
+│ 顧客A     │ 090-xxxx  │ 09/01  │
+│ 顧客B     │ 090-yyyy  │ 08/20  │
+├─────────────────────────────┤
+│ [＋新規顧客登録]               │
+└─────────────────────────────┘</code></pre>
+<p><strong>④顧客詳細画面（No.4）</strong></p>
+<pre><code>┌─────────────────────────────┐
+│ ヘッダー：顧客名／基本情報      │
+├─────────────────────────────┤
+│ タブ：[基本情報] [対応記録] [予約履歴] │
+├─────────────────────────────┤
+│ 一覧（日付順）：              │
+│  ・2026/09/01 対応内容A [詳細] │
+│  ・2026/08/01 対応内容B [詳細] │
+├─────────────────────────────┤
+│ [＋新規対応記録を追加]         │
+└─────────────────────────────┘</code></pre>
+<p><strong>⑤予約登録・編集画面（No.8）</strong></p>
+<pre><code>┌─────────────────────────────┐
+│ 顧客選択（検索付きセレクト）      │
+│ 日付／時間                    │
+│ メニュー選択（複数可）          │
+│ メモ                         │
+├─────────────────────────────┤
+│ [キャンセル]         [保存]    │
+└─────────────────────────────┘</code></pre>
+<p><strong>⑥予約：メニュー選択画面（No.13・顧客向け）</strong></p>
+<pre><code>┌─────────────────────────────┐
+│ メニューを選んでください         │
+├─────────────────────────────┤
+│ メニューA　　¥○○○　[選ぶ]      │
+│ メニューB　　¥○○○　[選ぶ]      │
+│ メニューC　　¥○○○　[選ぶ]      │
+└─────────────────────────────┘</code></pre>
+<p><strong>⑦予約：日時選択画面（No.14・顧客向け）</strong>
+外部の予約サイト例（Hot Pepper
+Beautyなど）の空き状況カレンダーを参考にした構成。</p>
+<pre><code>┌─────────────────────────────┐
+│ 選択中のメニュー：メニューA　¥○○○  │
+├─────────────────────────────┤
+│ ＜ 前の一週間　　　　次の一週間 ＞  │
+│      25(金) 26(土) 27(日) 28(月) …│
+├─────────────────────────────┤
+│ 10:00  −    −    ◎    −   … │
+│ 10:30  −    −    ◎    −   … │
+│ 11:00  ×    ◎    ◎    ×   … │
+├─────────────────────────────┤
+│ ◎：予約可　×：満席　−：営業時間外  │
+└─────────────────────────────┘</code></pre>
+<p>◎の枠を選ぶと次の画面へ進む。空き状況は「予約管理（reservations）」の登録済み予約と、営業時間・定休日の設定（business_hours）から自動で計算する。</p>
+<p><strong>⑧予約：お客様情報入力・確定画面（No.15・顧客向け）</strong></p>
+<pre><code>┌─────────────────────────────┐
+│ 選択内容確認：メニュー／日時／金額   │
+├─────────────────────────────┤
+│ お名前　　　[               ]  │
+│ 電話番号　　[               ]  │
+│ 来店は初めてですか？ ○はい ○いいえ │
+│ ご要望（任意）                  │
+│ [                          ] │
+├─────────────────────────────┤
+│ ご来店にあたっての注意事項…       │
+│ ［ ］確認しました（必須）         │
+├─────────────────────────────┤
+│         [この内容で予約する]     │
+└─────────────────────────────┘</code></pre>
+<p>「この内容で予約する」を押すと予約が確定し、管理者側の予約一覧（No.7）・ダッシュボード（No.2）にも反映される。</p>
+<p>外部の予約サイト例では、他にも「サロンからの質問（選択式のアンケート）」「メールマガジン受信設定」があったが、これらは店舗ごとに質問内容を設定できる仕組みが必要になり、3週間の開発規模を超える。今回は「ご要望（自由記述、任意）」欄1つで代用し、質問のカスタム設定機能とメルマガ配信はWon’t
+have（今回のスコープ外）とする。</p>
+<h3 id="画面遷移図">1.3 画面遷移図</h3>
+<pre><code>ログイン(1)
+  │
+  ▼
+ダッシュボード(2) ──────────────┐
+  │                          │
+  ▼                          ▼
+顧客一覧(3)                 予約一覧(7)
+  │                          │
+  ▼                          ▼
+顧客詳細(4) ──┐            予約登録・編集(8)
+  │          │
+  ▼          ▼
+対応記録    顧客登録・編集(5)
+登録・編集(6)
+
+ダッシュボード(2) → リマインド送信ログ(9)
+ダッシュボード(2) → 既存ソフト連携設定(10)
+
+［顧客向け・別入口］
+顧客ログイン(11) → 利用履歴(12)
+
+［顧客向けオンライン予約・別入口／ログイン不要］
+メニュー選択(13) → 日時選択(14) → お客様情報入力・確定(15) → 予約完了
+  └─ 確定するとreservationsに直接登録され、予約一覧(7)・ダッシュボード(2)にも反映される
+
+どの画面でもエラー時は共通エラーページ(16)へ</code></pre>
+<hr />
+<h2 id="db設計">2. DB設計</h2>
+<h3 id="エンティティ一覧">2.1 エンティティ一覧</h3>
+<ul>
+<li>admins（管理者）</li>
+<li>customers（顧客）</li>
+<li>records（対応記録）</li>
+<li>menus（メニュー）</li>
+<li>reservations（予約）</li>
+<li>reminder_logs（リマインド送信ログ）</li>
+<li>external_sync_logs（既存ソフト連携ログ）</li>
+<li>business_hours（営業時間・定休日設定）</li>
+</ul>
+<h3 id="テーブル定義全テーブル">2.2 テーブル定義（全テーブル）</h3>
+<p><strong>テーブル: admins（管理者）</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th>カラム名</th>
+<th>型</th>
+<th>NULL</th>
+<th>デフォルト</th>
+<th>説明</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>id</td>
+<td>BIGINT</td>
+<td>NO</td>
+<td>AUTO</td>
+<td>管理者ID（PK）</td>
+</tr>
+<tr class="even">
+<td>email</td>
+<td>VARCHAR(100)</td>
+<td>NO</td>
+<td>-</td>
+<td>ログイン用メールアドレス</td>
+</tr>
+<tr class="odd">
+<td>password</td>
+<td>VARCHAR(255)</td>
+<td>NO</td>
+<td>-</td>
+<td>パスワード（ハッシュ）</td>
+</tr>
+<tr class="even">
+<td>created_at / updated_at</td>
+<td>TIMESTAMP</td>
+<td>NO</td>
+<td>CURRENT</td>
+<td>作成・更新日時</td>
+</tr>
+</tbody>
+</table>
+<p>【インデックス】PRIMARY KEY (id) ／ UNIQUE KEY (email) 【制約】email:
+UNIQUE制約／password: 最低8文字</p>
+<p><strong>テーブル: customers（顧客）</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th>カラム名</th>
+<th>型</th>
+<th>NULL</th>
+<th>デフォルト</th>
+<th>説明</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>id</td>
+<td>BIGINT</td>
+<td>NO</td>
+<td>AUTO</td>
+<td>顧客ID（PK）</td>
+</tr>
+<tr class="even">
+<td>name</td>
+<td>VARCHAR(50)</td>
+<td>NO</td>
+<td>-</td>
+<td>氏名</td>
+</tr>
+<tr class="odd">
+<td>phone</td>
+<td>VARCHAR(20)</td>
+<td>NO</td>
+<td>-</td>
+<td>電話番号</td>
+</tr>
+<tr class="even">
+<td>line_id</td>
+<td>VARCHAR(100)</td>
+<td>YES</td>
+<td>NULL</td>
+<td>メッセージ配信連携用ID</td>
+</tr>
+<tr class="odd">
+<td>external_id</td>
+<td>VARCHAR(100)</td>
+<td>YES</td>
+<td>NULL</td>
+<td>既存ソフト側のID（連携用）</td>
+</tr>
+<tr class="even">
+<td>created_at / updated_at</td>
+<td>TIMESTAMP</td>
+<td>NO</td>
+<td>CURRENT</td>
+<td>作成・更新日時</td>
+</tr>
+</tbody>
+</table>
+<p>【インデックス】PRIMARY KEY (id) ／ INDEX (phone) ／ INDEX
+(external_id) 【制約】phone: 必須</p>
+<p><strong>テーブル: records（対応記録）</strong></p>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>カラム名</th>
+<th>型</th>
+<th>NULL</th>
+<th>デフォルト</th>
+<th>説明</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>id</td>
+<td>BIGINT</td>
+<td>NO</td>
+<td>AUTO</td>
+<td>対応記録ID（PK）</td>
+</tr>
+<tr class="even">
+<td>customer_id</td>
+<td>BIGINT</td>
+<td>NO</td>
+<td>-</td>
+<td>顧客ID（FK）</td>
+</tr>
+<tr class="odd">
+<td>reservation_id</td>
+<td>BIGINT</td>
+<td>YES</td>
+<td>NULL</td>
+<td>予約ID（FK、紐づく予約がある場合）</td>
+</tr>
+<tr class="even">
+<td>menu</td>
+<td>VARCHAR(100)</td>
+<td>NO</td>
+<td>-</td>
+<td>提供内容</td>
+</tr>
+<tr class="odd">
+<td>materials</td>
+<td>TEXT</td>
+<td>YES</td>
+<td>NULL</td>
+<td>使用資材</td>
+</tr>
+<tr class="even">
+<td>duration_minutes</td>
+<td>INT</td>
+<td>YES</td>
+<td>NULL</td>
+<td>対応時間（分）</td>
+</tr>
+<tr class="odd">
+<td>memo</td>
+<td>TEXT</td>
+<td>YES</td>
+<td>NULL</td>
+<td>メモ</td>
+</tr>
+<tr class="even">
+<td>photo_before</td>
+<td>VARCHAR(255)</td>
+<td>YES</td>
+<td>NULL</td>
+<td>前写真パス</td>
+</tr>
+<tr class="odd">
+<td>photo_after</td>
+<td>VARCHAR(255)</td>
+<td>YES</td>
+<td>NULL</td>
+<td>後写真パス</td>
+</tr>
+<tr class="even">
+<td>created_at / updated_at</td>
+<td>TIMESTAMP</td>
+<td>NO</td>
+<td>CURRENT</td>
+<td>作成・更新日時</td>
+</tr>
+</tbody>
+</table>
+<p>【インデックス】PRIMARY KEY (id) ／ INDEX (customer_id) ／ INDEX
+(reservation_id) 【外部キー】customer_id REFERENCES customers(id) ON
+DELETE CASCADE ／ reservation_id REFERENCES reservations(id) ON DELETE
+SET NULL</p>
+<p><strong>テーブル: menus（メニュー）</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th>カラム名</th>
+<th>型</th>
+<th>NULL</th>
+<th>デフォルト</th>
+<th>説明</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>id</td>
+<td>BIGINT</td>
+<td>NO</td>
+<td>AUTO</td>
+<td>メニューID（PK）</td>
+</tr>
+<tr class="even">
+<td>name</td>
+<td>VARCHAR(100)</td>
+<td>NO</td>
+<td>-</td>
+<td>メニュー名</td>
+</tr>
+<tr class="odd">
+<td>price</td>
+<td>INT</td>
+<td>NO</td>
+<td>-</td>
+<td>料金（円）</td>
+</tr>
+<tr class="even">
+<td>duration_minutes</td>
+<td>INT</td>
+<td>NO</td>
+<td>-</td>
+<td>施術時間目安（分）</td>
+</tr>
+<tr class="odd">
+<td>is_active</td>
+<td>BOOLEAN</td>
+<td>NO</td>
+<td>true</td>
+<td>予約画面に表示するかどうか</td>
+</tr>
+<tr class="even">
+<td>created_at / updated_at</td>
+<td>TIMESTAMP</td>
+<td>NO</td>
+<td>CURRENT</td>
+<td>作成・更新日時</td>
+</tr>
+</tbody>
+</table>
+<p>【インデックス】PRIMARY KEY (id) ／ INDEX (is_active)</p>
+<p><strong>テーブル: reservations（予約）</strong></p>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>カラム名</th>
+<th>型</th>
+<th>NULL</th>
+<th>デフォルト</th>
+<th>説明</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>id</td>
+<td>BIGINT</td>
+<td>NO</td>
+<td>AUTO</td>
+<td>予約ID（PK）</td>
+</tr>
+<tr class="even">
+<td>customer_id</td>
+<td>BIGINT</td>
+<td>NO</td>
+<td>-</td>
+<td>顧客ID（FK）</td>
+</tr>
+<tr class="odd">
+<td>menu_id</td>
+<td>BIGINT</td>
+<td>NO</td>
+<td>-</td>
+<td>メニューID（FK）</td>
+</tr>
+<tr class="even">
+<td>scheduled_at</td>
+<td>DATETIME</td>
+<td>NO</td>
+<td>-</td>
+<td>予約日時</td>
+</tr>
+<tr class="odd">
+<td>source</td>
+<td>ENUM</td>
+<td>NO</td>
+<td>‘admin’</td>
+<td>予約経路：admin（管理者登録）／online（顧客オンライン予約）</td>
+</tr>
+<tr class="even">
+<td>notes</td>
+<td>TEXT</td>
+<td>YES</td>
+<td>NULL</td>
+<td>顧客からのご要望（オンライン予約時の自由記述、任意）</td>
+</tr>
+<tr class="odd">
+<td>status</td>
+<td>ENUM</td>
+<td>NO</td>
+<td>‘confirmed’</td>
+<td>予約済／完了／キャンセル</td>
+</tr>
+<tr class="even">
+<td>created_at / updated_at</td>
+<td>TIMESTAMP</td>
+<td>NO</td>
+<td>CURRENT</td>
+<td>作成・更新日時</td>
+</tr>
+</tbody>
+</table>
+<p>【インデックス】PRIMARY KEY (id) ／ INDEX (customer_id) ／ INDEX
+(menu_id) ／ INDEX (scheduled_at) 【外部キー】customer_id REFERENCES
+customers(id) ON DELETE CASCADE ／ menu_id REFERENCES menus(id) ON
+DELETE RESTRICT</p>
+<p><strong>テーブル: business_hours（営業時間・定休日設定）</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th>カラム名</th>
+<th>型</th>
+<th>NULL</th>
+<th>デフォルト</th>
+<th>説明</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>id</td>
+<td>BIGINT</td>
+<td>NO</td>
+<td>AUTO</td>
+<td>ID（PK）</td>
+</tr>
+<tr class="even">
+<td>day_of_week</td>
+<td>TINYINT</td>
+<td>NO</td>
+<td>-</td>
+<td>曜日（0=日〜6=土）</td>
+</tr>
+<tr class="odd">
+<td>open_time</td>
+<td>TIME</td>
+<td>YES</td>
+<td>NULL</td>
+<td>開始時刻（定休日はNULL）</td>
+</tr>
+<tr class="even">
+<td>close_time</td>
+<td>TIME</td>
+<td>YES</td>
+<td>NULL</td>
+<td>終了時刻（定休日はNULL）</td>
+</tr>
+<tr class="odd">
+<td>is_closed</td>
+<td>BOOLEAN</td>
+<td>NO</td>
+<td>false</td>
+<td>定休日フラグ</td>
+</tr>
+</tbody>
+</table>
+<p>【インデックス】PRIMARY KEY (id) ／ UNIQUE KEY (day_of_week)</p>
+<p>MVP（Week22〜24）では曜日ごとの固定の営業時間・定休日のみ管理する。祝日や臨時休業などの個別対応はCould
+have（将来拡張）とする。空き状況は「business_hoursの営業時間」から「reservationsの予約済み時間」を差し引いて計算する。</p>
+<p><strong>テーブル: reminder_logs（リマインド送信ログ）</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th>カラム名</th>
+<th>型</th>
+<th>NULL</th>
+<th>デフォルト</th>
+<th>説明</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>id</td>
+<td>BIGINT</td>
+<td>NO</td>
+<td>AUTO</td>
+<td>ログID（PK）</td>
+</tr>
+<tr class="even">
+<td>reservation_id</td>
+<td>BIGINT</td>
+<td>NO</td>
+<td>-</td>
+<td>予約ID（FK）</td>
+</tr>
+<tr class="odd">
+<td>sent_at</td>
+<td>DATETIME</td>
+<td>YES</td>
+<td>NULL</td>
+<td>送信日時（未送信はNULL）</td>
+</tr>
+<tr class="even">
+<td>status</td>
+<td>ENUM</td>
+<td>NO</td>
+<td>‘scheduled’</td>
+<td>送信済／失敗／送信予定</td>
+</tr>
+</tbody>
+</table>
+<p>【インデックス】PRIMARY KEY (id) ／ INDEX (reservation_id)
+【外部キー】reservation_id REFERENCES reservations(id) ON DELETE
+CASCADE</p>
+<p><strong>テーブル:
+external_sync_logs（既存ソフト連携ログ）</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th>カラム名</th>
+<th>型</th>
+<th>NULL</th>
+<th>デフォルト</th>
+<th>説明</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>id</td>
+<td>BIGINT</td>
+<td>NO</td>
+<td>AUTO</td>
+<td>ログID（PK）</td>
+</tr>
+<tr class="even">
+<td>synced_at</td>
+<td>DATETIME</td>
+<td>NO</td>
+<td>-</td>
+<td>取込実行日時</td>
+</tr>
+<tr class="odd">
+<td>result</td>
+<td>ENUM</td>
+<td>NO</td>
+<td>-</td>
+<td>成功／失敗</td>
+</tr>
+<tr class="even">
+<td>detail</td>
+<td>TEXT</td>
+<td>YES</td>
+<td>NULL</td>
+<td>取込件数・エラー内容など</td>
+</tr>
+</tbody>
+</table>
+<p>【インデックス】PRIMARY KEY (id)</p>
+<h3 id="er図">2.3 ER図</h3>
+<p><strong>テキスト形式のER図</strong></p>
+<pre><code>customers (1) ----&lt; (N) reservations
+customers (1) ----&lt; (N) records
+menus     (1) ----&lt; (N) reservations
+reservations (1) ----&lt; (0..1) records
+reservations (1) ----&lt; (N) reminder_logs</code></pre>
+<p>admins・external_sync_logs・business_hoursは、他テーブルと外部キーで結びつかない独立したテーブル（business_hoursは空き状況の計算時にreservationsと突き合わせて使う設定テーブル）。</p>
+<hr />
+<h2 id="api設計">3. API設計</h2>
+<h3 id="管理者向け">3.1 管理者向け</h3>
+<table>
+<thead>
+<tr class="header">
+<th>メソッド</th>
+<th>エンドポイント</th>
+<th>概要</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>POST</td>
+<td>/api/login</td>
+<td>管理者ログイン</td>
+</tr>
+<tr class="even">
+<td>GET</td>
+<td>/api/customers</td>
+<td>顧客一覧取得（検索・ページング）</td>
+</tr>
+<tr class="odd">
+<td>POST</td>
+<td>/api/customers</td>
+<td>顧客新規登録</td>
+</tr>
+<tr class="even">
+<td>GET</td>
+<td>/api/customers/{id}</td>
+<td>顧客詳細取得</td>
+</tr>
+<tr class="odd">
+<td>PUT</td>
+<td>/api/customers/{id}</td>
+<td>顧客情報更新</td>
+</tr>
+<tr class="even">
+<td>DELETE</td>
+<td>/api/customers/{id}</td>
+<td>顧客削除</td>
+</tr>
+<tr class="odd">
+<td>GET</td>
+<td>/api/customers/{id}/records</td>
+<td>対応記録一覧取得</td>
+</tr>
+<tr class="even">
+<td>POST</td>
+<td>/api/records</td>
+<td>対応記録登録（写真アップロード含む）</td>
+</tr>
+<tr class="odd">
+<td>PUT</td>
+<td>/api/records/{id}</td>
+<td>対応記録更新</td>
+</tr>
+<tr class="even">
+<td>GET</td>
+<td>/api/reservations</td>
+<td>予約一覧取得</td>
+</tr>
+<tr class="odd">
+<td>POST</td>
+<td>/api/reservations</td>
+<td>予約新規登録</td>
+</tr>
+<tr class="even">
+<td>PUT</td>
+<td>/api/reservations/{id}</td>
+<td>予約更新</td>
+</tr>
+<tr class="odd">
+<td>DELETE</td>
+<td>/api/reservations/{id}</td>
+<td>予約キャンセル</td>
+</tr>
+<tr class="even">
+<td>GET</td>
+<td>/api/reminders/logs</td>
+<td>リマインド送信ログ取得</td>
+</tr>
+<tr class="odd">
+<td>POST</td>
+<td>/api/sync/run</td>
+<td>既存ソフトからのデータ取込を実行</td>
+</tr>
+<tr class="even">
+<td>GET</td>
+<td>/api/sync/status</td>
+<td>直近の連携結果を取得</td>
+</tr>
+</tbody>
+</table>
+<h3 id="利用者向け">3.2 利用者向け</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>メソッド</th>
+<th>エンドポイント</th>
+<th>概要</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>POST</td>
+<td>/api/customer/login</td>
+<td>簡易ログイン</td>
+</tr>
+<tr class="even">
+<td>GET</td>
+<td>/api/customer/records</td>
+<td>自分の利用履歴取得</td>
+</tr>
+<tr class="odd">
+<td>GET</td>
+<td>/api/booking/menus</td>
+<td>予約可能なメニュー一覧取得（ログイン不要）</td>
+</tr>
+<tr class="even">
+<td>GET</td>
+<td>/api/booking/availability</td>
+<td>指定メニュー・期間の空き状況取得（ログイン不要）</td>
+</tr>
+<tr class="odd">
+<td>POST</td>
+<td>/api/booking/reservations</td>
+<td>顧客自身による予約の新規作成（ログイン不要）</td>
+</tr>
+</tbody>
+</table>
+<h3 id="api詳細仕様代表例">3.3 API詳細仕様（代表例）</h3>
+<p><strong>API: 予約一覧取得</strong></p>
+<pre><code>【エンドポイント】
+GET /api/reservations
+
+【説明】
+予約の一覧を取得します。
+
+【認証】
+必要（管理者、Bearer Token）
+
+【クエリパラメータ】
+- page (integer, optional): ページ番号（デフォルト: 1）
+- per_page (integer, optional): 1ページあたりの件数（デフォルト: 20、最大: 100）
+- date (string, optional): 絞り込み日付（YYYY-MM-DD）
+
+【レスポンス例（200 OK）】
+{
+  &quot;data&quot;: [
+    {
+      &quot;id&quot;: 123,
+      &quot;customer&quot;: { &quot;id&quot;: 45, &quot;name&quot;: &quot;顧客A&quot; },
+      &quot;scheduled_at&quot;: &quot;2026-10-01T10:00:00+09:00&quot;,
+      &quot;menu&quot;: &quot;メニューA&quot;,
+      &quot;status&quot;: &quot;confirmed&quot;
+    }
+  ],
+  &quot;meta&quot;: { &quot;current_page&quot;: 1, &quot;total&quot;: 32, &quot;per_page&quot;: 20 }
+}</code></pre>
+<p><strong>API: 予約新規登録</strong></p>
+<pre><code>【エンドポイント】
+POST /api/reservations
+
+【説明】
+新しい予約を登録します。
+
+【認証】
+必要（管理者、Bearer Token）
+
+【リクエストボディ】
+{
+  &quot;customer_id&quot;: 45,
+  &quot;menu_id&quot;: 3,
+  &quot;scheduled_at&quot;: &quot;2026-10-01T10:00:00+09:00&quot;
+}
+
+【バリデーション】
+- customer_id: 必須、存在するcustomerのID
+- menu_id: 必須、存在するmenuのID
+- scheduled_at: 必須、未来日時
+
+【レスポンス例（201 Created）】
+{
+  &quot;id&quot;: 123,
+  &quot;customer_id&quot;: 45,
+  &quot;menu_id&quot;: 3,
+  &quot;scheduled_at&quot;: &quot;2026-10-01T10:00:00+09:00&quot;,
+  &quot;source&quot;: &quot;admin&quot;,
+  &quot;status&quot;: &quot;confirmed&quot;
+}
+
+【エラーレスポンス例（422 Unprocessable Entity）】
+{
+  &quot;message&quot;: &quot;入力内容に誤りがあります&quot;,
+  &quot;errors&quot;: {
+    &quot;scheduled_at&quot;: [&quot;予約日時は必須です&quot;]
+  }
+}</code></pre>
+<p><strong>API: 空き状況取得（顧客向け）</strong></p>
+<pre><code>【エンドポイント】
+GET /api/booking/availability
+
+【説明】
+指定したメニューについて、期間内の日時ごとの予約可否（◎予約可／×満席／−営業時間外）を返します。business_hoursの営業時間から、reservationsの予約済み枠を差し引いて計算します。
+
+【認証】
+不要
+
+【クエリパラメータ】
+- menu_id (integer, required): 対象メニューID
+- date_from (string, required): 取得開始日（YYYY-MM-DD）
+- date_to (string, required): 取得終了日（YYYY-MM-DD、最大7日分）
+
+【レスポンス例（200 OK）】
+{
+  &quot;menu_id&quot;: 3,
+  &quot;slots&quot;: [
+    { &quot;datetime&quot;: &quot;2026-09-26T10:00:00+09:00&quot;, &quot;available&quot;: true },
+    { &quot;datetime&quot;: &quot;2026-09-26T10:30:00+09:00&quot;, &quot;available&quot;: true },
+    { &quot;datetime&quot;: &quot;2026-09-26T11:00:00+09:00&quot;, &quot;available&quot;: false }
+  ]
+}
+
+【エラーレスポンス例（422 Unprocessable Entity）】
+{
+  &quot;message&quot;: &quot;入力内容に誤りがあります&quot;,
+  &quot;errors&quot;: {
+    &quot;menu_id&quot;: [&quot;メニューを選択してください&quot;]
+  }
+}</code></pre>
+<p><strong>API: 顧客自身による予約作成</strong></p>
+<pre><code>【エンドポイント】
+POST /api/booking/reservations
+
+【説明】
+顧客自身がメニュー・日時・お客様情報を送信し、予約を確定します。ログイン不要。電話番号が既存のcustomersレコードと一致すればそのレコードを使い、一致しなければ新規にcustomersレコードを作成してから予約に紐づけます。
+
+【認証】
+不要
+
+【リクエストボディ】
+{
+  &quot;name&quot;: &quot;山田太郎&quot;,
+  &quot;phone&quot;: &quot;090-1234-5678&quot;,
+  &quot;menu_id&quot;: 3,
+  &quot;scheduled_at&quot;: &quot;2026-09-26T10:00:00+09:00&quot;,
+  &quot;is_first_visit&quot;: true,
+  &quot;notes&quot;: &quot;前回より少し短めにしたいです&quot;,
+  &quot;agreed_to_notice&quot;: true
+}
+
+【バリデーション】
+- name: 必須、1-50文字
+- phone: 必須、電話番号形式
+- menu_id: 必須、存在するmenuのID
+- scheduled_at: 必須、未来日時かつ空き状況が「予約可」であること（二重予約防止）
+- notes: 任意、200文字以内
+- agreed_to_notice: 必須、true であること（注意事項への同意チェック）
+
+【レスポンス例（201 Created）】
+{
+  &quot;id&quot;: 124,
+  &quot;menu_id&quot;: 3,
+  &quot;scheduled_at&quot;: &quot;2026-09-26T10:00:00+09:00&quot;,
+  &quot;source&quot;: &quot;online&quot;,
+  &quot;status&quot;: &quot;confirmed&quot;
+}
+
+【エラーレスポンス例（422 Unprocessable Entity）】
+{
+  &quot;message&quot;: &quot;選択された日時はすでに埋まっています&quot;,
+  &quot;errors&quot;: {
+    &quot;scheduled_at&quot;: [&quot;この時間帯は予約できません&quot;]
+  }
+}</code></pre>
+<hr />
+<h2 id="工数見積もり">4. 工数見積もり</h2>
+<h3 id="機能別工数表">4.1 機能別工数表</h3>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>機能</th>
+<th>マイグレーション</th>
+<th>モデル</th>
+<th>コントローラー</th>
+<th>ビュー</th>
+<th>合計</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>管理者ログイン</td>
+<td>1h</td>
+<td>1h</td>
+<td>2h</td>
+<td>2h</td>
+<td>6h</td>
+</tr>
+<tr class="even">
+<td>顧客管理（CRUD）</td>
+<td>1h</td>
+<td>1h</td>
+<td>5h</td>
+<td>6h</td>
+<td>13h</td>
+</tr>
+<tr class="odd">
+<td>対応記録（写真添付含む）</td>
+<td>2h</td>
+<td>1h</td>
+<td>6h</td>
+<td>6h</td>
+<td>15h</td>
+</tr>
+<tr class="even">
+<td>予約管理（CRUD）</td>
+<td>1h</td>
+<td>1h</td>
+<td>6h</td>
+<td>6h</td>
+<td>14h</td>
+</tr>
+<tr class="odd">
+<td>自動リマインド（バッチ処理＋API連携）</td>
+<td>1h</td>
+<td>1h</td>
+<td>8h</td>
+<td>2h</td>
+<td>12h</td>
+</tr>
+<tr class="even">
+<td>既存ソフト連携（調査＋実装）</td>
+<td>-</td>
+<td>1h</td>
+<td>8h</td>
+<td>2h</td>
+<td>11h+（調査時間別途）</td>
+</tr>
+<tr class="odd">
+<td>顧客向け利用履歴ページ</td>
+<td>1h</td>
+<td>-</td>
+<td>4h</td>
+<td>4h</td>
+<td>9h</td>
+</tr>
+<tr class="even">
+<td>顧客向け予約：メニュー選択・お客様情報入力（簡易フォーム版）</td>
+<td>1h</td>
+<td>1h</td>
+<td>3h</td>
+<td>4h</td>
+<td>9h</td>
+</tr>
+<tr class="odd">
+<td>顧客向け予約：空き状況カレンダー（自動計算・二重予約防止）</td>
+<td>1h</td>
+<td>1h</td>
+<td>6h</td>
+<td>5h</td>
+<td>13h</td>
+</tr>
+<tr class="even">
+<td><strong>開発工数合計</strong></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td><strong>約102h</strong></td>
+</tr>
+<tr class="odd">
+<td><strong>バッファ（20〜30%）</strong></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td><strong>約20〜31h</strong></td>
+</tr>
+<tr class="even">
+<td><strong>見積もり合計</strong></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td><strong>約122〜133h</strong></td>
+</tr>
+</tbody>
+</table>
+<p>見積もりには必ずバッファを乗せる。想定外のバグ修正・仕様変更・レビューやテストの時間は必ず発生するため、開発工数の20〜30%を上乗せして現実的なスケジュールにする。既存ソフト連携と空き状況カレンダーは特に工数が読みにくいため、実際にはこの見積もりよりさらに幅を持たせておく。</p>
+<p><strong>注記：</strong> 顧客向けオンライン予約はShould
+haveのため、Must
+have機能（顧客管理・対応記録・予約管理・管理画面ログイン・自動リマインド・既存ソフト連携）を優先して完成させる。その中でも空き状況カレンダー（自動計算）は顧客体験に直結するため優先的に実装し、時間が不足する場合は顧客向け利用履歴ページ・顧客ログインを後回しにする。</p>
+<h3 id="スケジュール3週間3段階">4.2 スケジュール（3週間・3段階）</h3>
+<pre><code>Week22（基盤）：環境構築・管理者ログイン・顧客管理・予約管理の基本CRUD
+  → マイルストーン：管理者が顧客と予約を登録できる
+
+Week23（肉付け）：対応記録（写真添付）・自動リマインド・既存ソフト連携
+  → マイルストーン：Must have機能がすべて動く
+
+Week24（仕上げ）：顧客向けオンライン予約（空き状況カレンダー・メニュー選択を優先実装）・バグ修正・デプロイ・README
+  → マイルストーン：本番公開・成果物共有</code></pre>
+<p>既存ソフト連携は「かかる時間が読めない」リスクが最も高いため、Week23の前半に着手し、想定より時間がかかった場合はWeek24の顧客向け利用履歴ページ・顧客ログイン（Should〜Could
+have）を削って調整する。空き状況カレンダーを含む顧客向けオンライン予約は優先度が高いため、できる限り残す。</p>
+<p><strong>スコープの再確認（講師フィードバックを受けて）：</strong>
+当初の見積もり合計（予約システム＋AI提案機能）は3週間に対して工数が過大との指摘を受け、Week22〜24で実装する範囲をMust
+have機能＋顧客向けオンライン予約（空き状況カレンダー優先）に絞り込んだ。AI提案機能は設計まで完了させたうえで、実装はフェーズ2（Week24以降）に先送りする。詳細は「AI提案機能
+要件定義書」8. 制約条件を参照。</p>
+<hr />
+<h2 id="インフラ構成図参考">5. インフラ構成図（参考）</h2>
+<p>必須成果物ではないが、Week19で学んだ内容として参考に載せておく。AI提案機能も同じインフラ上で動かす想定。</p>
+<pre><code>【インターネット】
+      │ HTTPS (443)
+      ▼
+【ドメイン】
+      │
+      ▼
+【Render / Railway（アプリサーバー）】
+  ├── Laravel アプリ（PHP）
+  │     ├── 予約・顧客管理システム
+  │     └── AI提案機能（同一アプリ内の別モジュール）
+  └── Docker コンテナで起動
+      │ 
+      ▼
+【MySQL（DB）】
+      │（写真アップロード時）
+      ▼
+【ストレージ（画像保存）】</code></pre>
+<p>Mermaid記法（README等に埋め込む場合）：</p>
+<pre><code>graph TB
+Client[ブラウザ/スマホ] --&gt;|HTTPS| App[Laravel / PHP]
+App --&gt; DB[(MySQL)]
+App --&gt; Storage[(画像ストレージ)]</code></pre>
+</body>
+</html>

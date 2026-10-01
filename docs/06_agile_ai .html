@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang xml:lang>
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>week20_ai_agile</title>
+  <style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">* { box-sizing: border-box; }
+body {
+font-family: -apple-system, "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", sans-serif;
+max-width: 780px;
+margin: 0 auto;
+padding: 32px 24px 120px;
+line-height: 1.75;
+color: #1a1a1a;
+background: #fdfdfb;
+font-size: 16px;
+}
+h1 {
+font-size: 1.6em;
+border-bottom: 3px solid #2d5aa0;
+padding-bottom: 10px;
+margin-top: 2.2em;
+}
+h1:first-of-type { margin-top: 0; }
+h2 {
+font-size: 1.25em;
+margin-top: 2em;
+padding: 8px 12px;
+background: #eef3fb;
+border-left: 5px solid #2d5aa0;
+border-radius: 4px;
+}
+h3 {
+font-size: 1.05em;
+margin-top: 1.6em;
+color: #2d5aa0;
+}
+p { margin: 0.9em 0; }
+strong { color: #b3541e; }
+code {
+font-family: "SF Mono", Menlo, Consolas, monospace;
+background: #eee;
+padding: 0.15em 0.4em;
+border-radius: 4px;
+font-size: 0.9em;
+}
+pre {
+background: #1e1e2a;
+color: #e6e6e6;
+padding: 14px 16px;
+border-radius: 8px;
+overflow-x: auto;
+font-size: 0.88em;
+line-height: 1.5;
+}
+pre code {
+background: none;
+color: inherit;
+padding: 0;
+}
+table {
+border-collapse: collapse;
+width: 100%;
+margin: 1.2em 0;
+font-size: 0.92em;
+}
+th, td {
+border: 1px solid #d8d8d8;
+padding: 8px 10px;
+text-align: left;
+}
+th { background: #f0f0f0; }
+tr:nth-child(even) { background: #fafafa; }
+hr {
+border: none;
+border-top: 1px dashed #ccc;
+margin: 2.5em 0;
+}
+ul, ol { padding-left: 1.4em; }
+li { margin: 0.35em 0; }
+a { color: #2d5aa0; }
+blockquote {
+border-left: 4px solid #ccc;
+margin: 1em 0;
+padding: 0.3em 1em;
+color: #555;
+background: #f7f7f5;
+}
+#toc {
+background: #fff8e8;
+border: 1px solid #f0dca0;
+border-radius: 8px;
+padding: 16px 24px;
+margin-bottom: 2em;
+}
+#toc h2 { background: none; border: none; padding: 0; margin-top: 0; }
+#toc ul { column-count: 2; }
+@media (max-width: 600px) {
+#toc ul { column-count: 1; }
+}
+details {
+background: #f4f7fb;
+border: 1px solid #cfd9e8;
+border-radius: 8px;
+padding: 12px 16px;
+margin: 1.1em 0;
+}
+details summary {
+cursor: pointer;
+font-weight: 600;
+color: #16324f;
+}
+details summary::marker { color: #2d5aa0; }
+details[open] summary { margin-bottom: 10px; }
+details > p, details strong { margin-top: 0.4em; }
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">week20_ai_agile</h1>
+</header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#week20ai提案機能-アジャイル開発シミュレーション" id="toc-week20ai提案機能-アジャイル開発シミュレーション">Week20：AI提案機能
+アジャイル開発シミュレーション</a>
+<ul>
+<li><a href="#基本課題アジャイル開発シミュレーション" id="toc-基本課題アジャイル開発シミュレーション">基本課題：アジャイル開発シミュレーション</a></li>
+<li><a href="#練習課題1スプリント計画詳細タスク割当ai提案機能分" id="toc-練習課題1スプリント計画詳細タスク割当ai提案機能分">練習課題1：スプリント計画（詳細タスク割当・AI提案機能分）</a></li>
+<li><a href="#練習課題2kpi設定ai提案機能分" id="toc-練習課題2kpi設定ai提案機能分">練習課題2：KPI設定（AI提案機能分）</a></li>
+</ul></li>
+</ul>
+</nav>
+<h1 id="week20ai提案機能-アジャイル開発シミュレーション">Week20：AI提案機能
+アジャイル開発シミュレーション</h1>
+<p>作成日：2026年9月29日（2026年9月30日
+スコープ見直し）　対象：AI提案機能</p>
+<p>この文書は「AI提案機能 要件定義書」「Week19
+設計書：AI提案機能」をもとに、Week22〜24の開発をシミュレーションしたもの。予約・顧客管理システムは別紙「Week20：予約・顧客管理システム
+アジャイル開発シミュレーション」で扱う。</p>
+<p><strong>方針（講師フィードバックを受けて再確認）：</strong>
+予約・顧客管理システムとAI提案機能を合わせた当初の見積もり工数が3週間に対して過大との指摘を受けた。そのため、Week22〜24ではAI提案機能の実装そのものを見送り、予約・顧客管理システムのMust
+have機能＋顧客向けオンライン予約（空き状況カレンダー優先）を「動くところまで」完成させることを最優先とする。AI提案機能は設計（要件定義書・Week19設計書）を確定させた状態でフェーズ2（Week24以降）に先送りする。</p>
+<hr />
+<h2 id="基本課題アジャイル開発シミュレーション">基本課題：アジャイル開発シミュレーション</h2>
+<h3 id="スプリント計画3スプリント各1週間">1.
+スプリント計画（3スプリント、各1週間）</h3>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>スプリント</th>
+<th>目標（ゴール）</th>
+<th>主なタスク</th>
+<th>完了の定義（Definition of Done）</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Sprint1（Week22）</strong></td>
+<td>利用するAI API（LLM）の候補を調査するに留める</td>
+<td>本体システムの環境構築と並行して、AI
+API候補の調査・費用体系の確認（実装はしない）</td>
+<td>候補APIをメモ程度に絞り込めている（必須ではない）</td>
+</tr>
+<tr class="even">
+<td><strong>Sprint2（Week23）</strong></td>
+<td>AI機能には着手しない</td>
+<td>（本体システムのMust have機能開発に専念）</td>
+<td>本体システムのMust have機能6つが完成している</td>
+</tr>
+<tr class="odd">
+<td><strong>Sprint3（Week24）</strong></td>
+<td>AI機能には着手しない</td>
+<td>（予約・顧客管理システムのMust
+have仕上げ＋顧客向けオンライン予約を優先）</td>
+<td>予約・顧客管理システムが本番相当の環境で動作している</td>
+</tr>
+</tbody>
+</table>
+<p>Sprint1〜3（Week22〜24）のいずれにもAI提案機能の実装タスクは割り当てない。実装は全てフェーズ2（Week24以降）に先送りする。</p>
+<h3 id="ユーザーストーリーの優先順位付けai提案機能5個">2.
+ユーザーストーリーの優先順位付け（AI提案機能、5個）</h3>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>順位</th>
+<th>ユーザーストーリー（要約）</th>
+<th>優先度</th>
+<th>対象</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>見込み客として、チャットで自分の悩みや要望を入力したい</td>
+<td>Must have（AI機能内）</td>
+<td>フェーズ2（Week24以降）</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>見込み客として、AIからおすすめメニューとその理由を提示してもらいたい</td>
+<td>Must have（AI機能内）</td>
+<td>フェーズ2（Week24以降）</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>見込み客として、AIの提案結果をそのまま予約に進めたい</td>
+<td>Must have（AI機能内）</td>
+<td>フェーズ2（Week24以降）</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>見込み客として、AIに質問を重ねてもらいながら悩みを絞り込みたい</td>
+<td>Should have（会話履歴の保持）</td>
+<td>フェーズ2（Week24以降・第2段階）</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td>管理者として、AI提案の結果傾向を確認したい</td>
+<td>Could have</td>
+<td>フェーズ2（Week24以降・余裕があれば）</td>
+</tr>
+</tbody>
+</table>
+<p>1〜3は「1往復で提案を受け取り、予約に引き継ぐ」という第1段階の最小実装に必要な最小セット。フェーズ2着手時はこの3つから着手する。</p>
+<h3 id="カンバンボード">3. カンバンボード</h3>
+<p>実際のボード作成はTrelloまたはGitHub
+Projectsで自分自身が行う（アカウント作成が必要なため）。ここではボードの構成と、投入するカードの内容を示す。</p>
+<pre><code>┌─────────┬─────────────┬─────────┬─────────┐
+│  TODO   │ In Progress │ Review  │  Done   │
+└─────────┴─────────────┴─────────┴─────────┘</code></pre>
+<p>【WIP制限】In Progressは3枚まで</p>
+<p><strong>Sprint1（Week22）開始時点のカード</strong> - AI
+API候補の調査（費用体系・レスポンス速度、任意・余裕があれば）</p>
+<p><strong>フェーズ2バックログ（Week24以降に着手するカード・優先度順）</strong>
+- チャットUI（開始画面・第1段階） - AI
+API連携（1往復・フォーム形式・第1段階） -
+メニュー提案ロジック（第1段階） -
+会話履歴の保持・複数ターン化（第2段階・余裕があれば） -
+提案結果の保存（余裕があれば）</p>
+<p>Week22〜24のボードには、フェーズ2バックログのカードを「TODO」列より奥（バックログ）として分けて置き、Sprint1〜3の実作業カードと混ざらないようにする。</p>
+<h3 id="振り返りレポート">4. 振り返りレポート</h3>
+<p><strong>各スプリント終了後に使うテンプレート</strong></p>
+<pre><code>■ Keep（良かったこと・継続すること）
+・
+
+■ Problem（問題点・つまずいたこと）
+・
+
+■ Try（次のスプリントで試すこと）
+・</code></pre>
+<p><strong>計画時点での振り返り</strong> -
+当初はAI提案機能をWeek24（Sprint3）に組み込む計画だったが、予約・顧客管理システムと合算した工数が3週間に対して過大との指摘を受け、AI機能の実装そのものをフェーズ2に切り出した。スプリント計画を分けて可視化していたことで、どこを削れば良いかの判断がしやすかった。
+-
+設計（要件定義書・Week19設計書）は完成させたまま実装だけを先送りする、という切り分け方をしたことで、フェーズ2着手時にゼロから考え直す必要がなくなる。</p>
+<hr />
+<h2 id="練習課題1スプリント計画詳細タスク割当ai提案機能分">練習課題1：スプリント計画（詳細タスク割当・AI提案機能分）</h2>
+<p>設計書「4.1
+機能別工数表」の工数を示す。Week22〜24（Sprint1〜3）ではAI機能の実装工数はゼロとし、全てフェーズ2（Week24以降）の工数として扱う。</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>区分</th>
+<th>タスク</th>
+<th>工数</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Week22〜24（Sprint1〜3）</td>
+<td>AI API候補の調査（任意・余裕があれば）</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td>Week22〜24（Sprint1〜3）</td>
+<td>実装タスク</td>
+<td><strong>0h（見送り）</strong></td>
+</tr>
+<tr class="odd">
+<td>フェーズ2（Week24以降）</td>
+<td>チャットUI（第1段階）</td>
+<td>5h</td>
+</tr>
+<tr class="even">
+<td>フェーズ2（Week24以降）</td>
+<td>AI API連携（1往復・フォーム形式・第1段階）</td>
+<td>4h</td>
+</tr>
+<tr class="odd">
+<td>フェーズ2（Week24以降）</td>
+<td>会話履歴の保持（複数ターン化・第2段階）</td>
+<td>8h</td>
+</tr>
+<tr class="even">
+<td>フェーズ2（Week24以降）</td>
+<td>提案結果の保存（Could have）</td>
+<td>5h</td>
+</tr>
+<tr class="odd">
+<td>フェーズ2 <strong>小計</strong></td>
+<td></td>
+<td><strong>22h</strong></td>
+</tr>
+</tbody>
+</table>
+<p>AI提案機能の開発工数（約22h、バッファ込み約26〜29h）は、Week22〜24の見積もりには含めない。フェーズ2着手時に、第1段階（チャットUI＋AI
+API連携＝9h）を優先的に完成させ、その後余裕があれば会話履歴の保持・提案結果の保存に進む。</p>
+<hr />
+<h2 id="練習課題2kpi設定ai提案機能分">練習課題2：KPI設定（AI提案機能分）</h2>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>KPI</th>
+<th>定義・測定方法</th>
+<th>目標値（例）</th>
+<th>分類</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>AI提案チャットの予約転換率</td>
+<td>AI提案チャットを開始したセッションのうち、「この内容で予約に進む」を押した割合</td>
+<td>20%以上</td>
+<td>エンゲージメント</td>
+</tr>
+</tbody>
+</table>
+<p>このKPIはフェーズ2でAI提案機能を実装した後に計測を開始する。</p>
+</body>
+</html>

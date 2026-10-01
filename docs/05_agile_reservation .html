@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang xml:lang>
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>week20_reservation_agile</title>
+  <style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">* { box-sizing: border-box; }
+body {
+font-family: -apple-system, "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", sans-serif;
+max-width: 780px;
+margin: 0 auto;
+padding: 32px 24px 120px;
+line-height: 1.75;
+color: #1a1a1a;
+background: #fdfdfb;
+font-size: 16px;
+}
+h1 {
+font-size: 1.6em;
+border-bottom: 3px solid #2d5aa0;
+padding-bottom: 10px;
+margin-top: 2.2em;
+}
+h1:first-of-type { margin-top: 0; }
+h2 {
+font-size: 1.25em;
+margin-top: 2em;
+padding: 8px 12px;
+background: #eef3fb;
+border-left: 5px solid #2d5aa0;
+border-radius: 4px;
+}
+h3 {
+font-size: 1.05em;
+margin-top: 1.6em;
+color: #2d5aa0;
+}
+p { margin: 0.9em 0; }
+strong { color: #b3541e; }
+code {
+font-family: "SF Mono", Menlo, Consolas, monospace;
+background: #eee;
+padding: 0.15em 0.4em;
+border-radius: 4px;
+font-size: 0.9em;
+}
+pre {
+background: #1e1e2a;
+color: #e6e6e6;
+padding: 14px 16px;
+border-radius: 8px;
+overflow-x: auto;
+font-size: 0.88em;
+line-height: 1.5;
+}
+pre code {
+background: none;
+color: inherit;
+padding: 0;
+}
+table {
+border-collapse: collapse;
+width: 100%;
+margin: 1.2em 0;
+font-size: 0.92em;
+}
+th, td {
+border: 1px solid #d8d8d8;
+padding: 8px 10px;
+text-align: left;
+}
+th { background: #f0f0f0; }
+tr:nth-child(even) { background: #fafafa; }
+hr {
+border: none;
+border-top: 1px dashed #ccc;
+margin: 2.5em 0;
+}
+ul, ol { padding-left: 1.4em; }
+li { margin: 0.35em 0; }
+a { color: #2d5aa0; }
+blockquote {
+border-left: 4px solid #ccc;
+margin: 1em 0;
+padding: 0.3em 1em;
+color: #555;
+background: #f7f7f5;
+}
+#toc {
+background: #fff8e8;
+border: 1px solid #f0dca0;
+border-radius: 8px;
+padding: 16px 24px;
+margin-bottom: 2em;
+}
+#toc h2 { background: none; border: none; padding: 0; margin-top: 0; }
+#toc ul { column-count: 2; }
+@media (max-width: 600px) {
+#toc ul { column-count: 1; }
+}
+details {
+background: #f4f7fb;
+border: 1px solid #cfd9e8;
+border-radius: 8px;
+padding: 12px 16px;
+margin: 1.1em 0;
+}
+details summary {
+cursor: pointer;
+font-weight: 600;
+color: #16324f;
+}
+details summary::marker { color: #2d5aa0; }
+details[open] summary { margin-bottom: 10px; }
+details > p, details strong { margin-top: 0.4em; }
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">week20_reservation_agile</h1>
+</header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#week20予約顧客管理システム-アジャイル開発シミュレーション" id="toc-week20予約顧客管理システム-アジャイル開発シミュレーション">Week20：予約・顧客管理システム
+アジャイル開発シミュレーション</a>
+<ul>
+<li><a href="#基本課題アジャイル開発シミュレーション" id="toc-基本課題アジャイル開発シミュレーション">基本課題：アジャイル開発シミュレーション</a></li>
+<li><a href="#練習課題1スプリント計画詳細タスク割当予約顧客管理システム分" id="toc-練習課題1スプリント計画詳細タスク割当予約顧客管理システム分">練習課題1：スプリント計画（詳細タスク割当・予約・顧客管理システム分）</a></li>
+<li><a href="#練習課題2kpi設定予約顧客管理システム分" id="toc-練習課題2kpi設定予約顧客管理システム分">練習課題2：KPI設定（予約・顧客管理システム分）</a></li>
+</ul></li>
+</ul>
+</nav>
+<h1 id="week20予約顧客管理システム-アジャイル開発シミュレーション">Week20：予約・顧客管理システム
+アジャイル開発シミュレーション</h1>
+<p>作成日：2026年9月29日　対象：予約・顧客管理システム</p>
+<p>この文書は「予約・顧客管理システム 要件定義書」「Week19
+設計書：予約・顧客管理システム」をもとに、Week22〜24の開発を3つのスプリント（各1週間）に分けてシミュレーションしたもの。AI提案機能は別紙「Week20：AI提案機能
+アジャイル開発シミュレーション」で扱う。</p>
+<p><strong>方針：</strong>
+顧客向けオンライン予約のうち、空き状況カレンダー（自動計算）は顧客体験に直結するため優先実装とする。時間が不足する場合は、顧客向け利用履歴ページ・顧客ログインを先に後回しにする。</p>
+<hr />
+<h2 id="基本課題アジャイル開発シミュレーション">基本課題：アジャイル開発シミュレーション</h2>
+<h3 id="スプリント計画3スプリント各1週間">1.
+スプリント計画（3スプリント、各1週間）</h3>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>スプリント</th>
+<th>目標（ゴール）</th>
+<th>主なタスク</th>
+<th>完了の定義（Definition of Done）</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Sprint1（Week22）</strong></td>
+<td>管理者が顧客・予約を登録・管理できる基盤を完成させる</td>
+<td>環境構築（Docker/Laravel/MySQL）、管理画面ログイン、顧客管理CRUD、予約管理CRUD（管理者向け）、ダッシュボード</td>
+<td>管理者がログイン→顧客登録→予約登録という一連の操作をエラーなく行える</td>
+</tr>
+<tr class="even">
+<td><strong>Sprint2（Week23）</strong></td>
+<td>Must have機能をすべて完成させる</td>
+<td>対応記録（写真添付含む）、自動リマインド送信、既存ソフト連携</td>
+<td>Must have機能6つが一通り動作する</td>
+</tr>
+<tr class="odd">
+<td><strong>Sprint3（Week24）</strong></td>
+<td>顧客向けオンライン予約を優先実装し、可能な範囲でその他のShould
+haveも仕上げる</td>
+<td>①メニュー選択・空き状況カレンダー・お客様情報入力（優先実装）→②余裕があれば顧客向け利用履歴ページ・顧客ログイン→③バグ修正・デプロイ・README作成</td>
+<td>空き状況カレンダーを含む顧客向けオンライン予約が本番相当の環境で動作する</td>
+</tr>
+</tbody>
+</table>
+<h3 id="ユーザーストーリーの優先順位付け予約顧客管理システム14個">2.
+ユーザーストーリーの優先順位付け（予約・顧客管理システム、14個）</h3>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>順位</th>
+<th>ユーザーストーリー（要約）</th>
+<th>優先度</th>
+<th>対象スプリント</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>管理者として、管理画面にログインしたい</td>
+<td>Must have</td>
+<td>Sprint1</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>管理者として、顧客情報を登録・編集したい</td>
+<td>Must have</td>
+<td>Sprint1</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>管理者として、顧客を名前や電話番号で検索したい</td>
+<td>Must have</td>
+<td>Sprint1</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>管理者として、予約を登録・編集・キャンセルしたい</td>
+<td>Must have</td>
+<td>Sprint1</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td>管理者として、ダッシュボードで本日の予約を確認したい</td>
+<td>Must have</td>
+<td>Sprint1</td>
+</tr>
+<tr class="even">
+<td>6</td>
+<td>管理者として、対応記録（メニュー・資材・時間・メモ・写真）を残したい</td>
+<td>Must have</td>
+<td>Sprint2</td>
+</tr>
+<tr class="odd">
+<td>7</td>
+<td>管理者として、来店予定の一定日数前に自動でリマインドを送信したい</td>
+<td>Must have</td>
+<td>Sprint2</td>
+</tr>
+<tr class="even">
+<td>8</td>
+<td>管理者として、リマインドの送信状況を確認したい</td>
+<td>Must have</td>
+<td>Sprint2</td>
+</tr>
+<tr class="odd">
+<td>9</td>
+<td>管理者として、既存の予約管理ソフトのデータを自動で取り込みたい</td>
+<td>Must have</td>
+<td>Sprint2</td>
+</tr>
+<tr class="even">
+<td>10</td>
+<td>顧客として、来店前にリマインドを受け取りたい</td>
+<td>Must have</td>
+<td>Sprint2</td>
+</tr>
+<tr class="odd">
+<td>11</td>
+<td>顧客として、予約する前に空き状況を確認したい</td>
+<td>Should have（優先）</td>
+<td>Sprint3</td>
+</tr>
+<tr class="even">
+<td>12</td>
+<td>顧客として、メニューと空いている日時を自分で選んで予約したい</td>
+<td>Should have（優先）</td>
+<td>Sprint3</td>
+</tr>
+<tr class="odd">
+<td>13</td>
+<td>顧客として、簡単な方法でログインして自分専用のページを見たい</td>
+<td>Should〜Could have（後回し候補）</td>
+<td>Sprint3（時間があれば）</td>
+</tr>
+<tr class="even">
+<td>14</td>
+<td>顧客として、自分の過去の利用履歴を確認したい</td>
+<td>Should〜Could have（後回し候補）</td>
+<td>Sprint3（時間があれば）</td>
+</tr>
+</tbody>
+</table>
+<p>11・12は同じ機能（オンライン予約フロー）の一部のため、実装時はセットで優先的に着手する。</p>
+<h3 id="カンバンボード">3. カンバンボード</h3>
+<p>実際のボード作成はTrelloまたはGitHub
+Projectsで自分自身が行う（アカウント作成が必要なため）。ここではボードの構成と、各スプリントで投入するカードの内容を示す。</p>
+<pre><code>┌─────────┬─────────────┬─────────┬─────────┐
+│  TODO   │ In Progress │ Review  │  Done   │
+└─────────┴─────────────┴─────────┴─────────┘</code></pre>
+<p>【WIP制限】In Progressは3枚まで</p>
+<p><strong>Sprint1開始時点のカード</strong> -
+環境構築（Docker／Laravel／MySQL） - 管理画面ログイン機能 - 顧客管理CRUD
+- 予約管理CRUD（管理者向け） - ダッシュボード</p>
+<p><strong>Sprint3開始時点のカード（優先度順）</strong> -
+空き状況カレンダー（自動計算・二重予約防止） -
+メニュー選択・お客様情報入力 - 顧客向け利用履歴ページ（余裕があれば） -
+顧客ログイン（余裕があれば）</p>
+<h3 id="振り返りレポート">4. 振り返りレポート</h3>
+<p><strong>各スプリント終了後に使うテンプレート</strong></p>
+<pre><code>■ Keep（良かったこと・継続すること）
+・
+
+■ Problem（問題点・つまずいたこと）
+・
+
+■ Try（次のスプリントで試すこと）
+・</code></pre>
+<p><strong>計画時点での振り返り</strong> -
+空き状況カレンダーを優先度の高い位置に置いたことで、Sprint3の中でも「先に着手すべきもの」と「余裕があれば」の線引きが明確になった。
+-
+既存ソフト連携（Sprint2）は工数が読みにくいリスクとして要件定義書の時点から挙げており、スプリント単位に分けたことでそのリスクがSprint2に集中していることが見える化された。</p>
+<hr />
+<h2 id="練習課題1スプリント計画詳細タスク割当予約顧客管理システム分">練習課題1：スプリント計画（詳細タスク割当・予約・顧客管理システム分）</h2>
+<p>設計書「4.1
+機能別工数表」の工数を、3つのスプリントに配分したもの（開発工数のみ、バッファ除く）。空き状況カレンダーを優先実装とするため、Sprint3では他のタスクより先に並べている。</p>
+<table>
+<thead>
+<tr class="header">
+<th>スプリント</th>
+<th>タスク</th>
+<th>工数</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Sprint1（Week22）</strong></td>
+<td>管理者ログイン</td>
+<td>6h</td>
+</tr>
+<tr class="even">
+<td></td>
+<td>顧客管理（CRUD）</td>
+<td>13h</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>予約管理（CRUD）</td>
+<td>14h</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><strong>小計</strong></td>
+<td><strong>33h</strong></td>
+</tr>
+<tr class="odd">
+<td><strong>Sprint2（Week23）</strong></td>
+<td>対応記録（写真添付含む）</td>
+<td>15h</td>
+</tr>
+<tr class="even">
+<td></td>
+<td>自動リマインド（バッチ処理＋API連携）</td>
+<td>12h</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>既存ソフト連携（調査＋実装）</td>
+<td>11h+</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><strong>小計</strong></td>
+<td><strong>38h+</strong></td>
+</tr>
+<tr class="odd">
+<td><strong>Sprint3（Week24）</strong></td>
+<td>空き状況カレンダー（優先実装）</td>
+<td>13h</td>
+</tr>
+<tr class="even">
+<td></td>
+<td>メニュー選択・お客様情報入力（優先実装）</td>
+<td>9h</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>顧客向け利用履歴ページ（後回し候補）</td>
+<td>9h</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><strong>小計</strong></td>
+<td><strong>31h</strong></td>
+</tr>
+</tbody>
+</table>
+<p>3スプリント合計は約102h＋既存ソフト連携の調査時間。1週間あたり約34h強のペースになるため、既存ソフト連携で想定以上に時間がかかった場合は、Sprint3の後回し候補（顧客向け利用履歴ページ）から先に調整する。</p>
+<hr />
+<h2 id="練習課題2kpi設定予約顧客管理システム分">練習課題2：KPI設定（予約・顧客管理システム分）</h2>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>KPI</th>
+<th>定義・測定方法</th>
+<th>目標値（例）</th>
+<th>分類</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>オンライン予約数</td>
+<td>顧客向けオンライン予約機能（空き状況カレンダー経由）を利用した月間予約件数</td>
+<td>公開後3ヶ月で月間予約の30%以上</td>
+<td>ユーザー獲得</td>
+</tr>
+<tr class="even">
+<td>リマインド経由の来店率</td>
+<td>自動リマインドを送信した予約のうち、実際に来店に至った割合</td>
+<td>95%以上</td>
+<td>品質・事業効果</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

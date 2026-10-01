@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang xml:lang>
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>week19_ai_design</title>
+  <style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">* { box-sizing: border-box; }
+body {
+font-family: -apple-system, "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", sans-serif;
+max-width: 780px;
+margin: 0 auto;
+padding: 32px 24px 120px;
+line-height: 1.75;
+color: #1a1a1a;
+background: #fdfdfb;
+font-size: 16px;
+}
+h1 {
+font-size: 1.6em;
+border-bottom: 3px solid #2d5aa0;
+padding-bottom: 10px;
+margin-top: 2.2em;
+}
+h1:first-of-type { margin-top: 0; }
+h2 {
+font-size: 1.25em;
+margin-top: 2em;
+padding: 8px 12px;
+background: #eef3fb;
+border-left: 5px solid #2d5aa0;
+border-radius: 4px;
+}
+h3 {
+font-size: 1.05em;
+margin-top: 1.6em;
+color: #2d5aa0;
+}
+p { margin: 0.9em 0; }
+strong { color: #b3541e; }
+code {
+font-family: "SF Mono", Menlo, Consolas, monospace;
+background: #eee;
+padding: 0.15em 0.4em;
+border-radius: 4px;
+font-size: 0.9em;
+}
+pre {
+background: #1e1e2a;
+color: #e6e6e6;
+padding: 14px 16px;
+border-radius: 8px;
+overflow-x: auto;
+font-size: 0.88em;
+line-height: 1.5;
+}
+pre code {
+background: none;
+color: inherit;
+padding: 0;
+}
+table {
+border-collapse: collapse;
+width: 100%;
+margin: 1.2em 0;
+font-size: 0.92em;
+}
+th, td {
+border: 1px solid #d8d8d8;
+padding: 8px 10px;
+text-align: left;
+}
+th { background: #f0f0f0; }
+tr:nth-child(even) { background: #fafafa; }
+hr {
+border: none;
+border-top: 1px dashed #ccc;
+margin: 2.5em 0;
+}
+ul, ol { padding-left: 1.4em; }
+li { margin: 0.35em 0; }
+a { color: #2d5aa0; }
+blockquote {
+border-left: 4px solid #ccc;
+margin: 1em 0;
+padding: 0.3em 1em;
+color: #555;
+background: #f7f7f5;
+}
+#toc {
+background: #fff8e8;
+border: 1px solid #f0dca0;
+border-radius: 8px;
+padding: 16px 24px;
+margin-bottom: 2em;
+}
+#toc h2 { background: none; border: none; padding: 0; margin-top: 0; }
+#toc ul { column-count: 2; }
+@media (max-width: 600px) {
+#toc ul { column-count: 1; }
+}
+details {
+background: #f4f7fb;
+border: 1px solid #cfd9e8;
+border-radius: 8px;
+padding: 12px 16px;
+margin: 1.1em 0;
+}
+details summary {
+cursor: pointer;
+font-weight: 600;
+color: #16324f;
+}
+details summary::marker { color: #2d5aa0; }
+details[open] summary { margin-bottom: 10px; }
+details > p, details strong { margin-top: 0.4em; }
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">week19_ai_design</h1>
+</header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#week19-設計書ai提案機能画面設計db設計api設計" id="toc-week19-設計書ai提案機能画面設計db設計api設計">Week19
+設計書：AI提案機能（画面設計・DB設計・API設計）</a>
+<ul>
+<li><a href="#画面設計" id="toc-画面設計">1. 画面設計</a></li>
+<li><a href="#db設計" id="toc-db設計">2. DB設計</a></li>
+<li><a href="#api設計" id="toc-api設計">3. API設計</a></li>
+<li><a href="#工数見積もり" id="toc-工数見積もり">4.
+工数見積もり</a></li>
+<li><a href="#インフラ構成図" id="toc-インフラ構成図">5.
+インフラ構成図</a></li>
+</ul></li>
+</ul>
+</nav>
+<h1 id="week19-設計書ai提案機能画面設計db設計api設計">Week19
+設計書：AI提案機能（画面設計・DB設計・API設計）</h1>
+<p>作成日：2026年9月23日　対象：AI提案機能</p>
+<p>この設計書は「AI提案機能
+要件定義書」をもとに、画面設計・DB設計・API設計をまとめたもの。予約・顧客管理システムは別紙「Week19
+設計書：予約・顧客管理システム」で扱う。</p>
+<p><strong>Figmaワイヤーフレーム：</strong> <a href="https://www.figma.com/design/2JolEvuYmxQiFynxv2JfTo/%E7%84%A1%E9%A1%8C?node-id=9-113&amp;t=sqtwBgtZyZ9xfN6Q-1">こちらのリンクから確認できます</a>（左側のページ一覧の「AI提案機能」ページに本機能の5画面があります）</p>
+<p><strong>連携方針：</strong>
+本機能は予約・顧客管理システムのテーブル・APIを一切変更しない。接続点は<code>ai_sessions.customer_id</code>という緩い参照1本と、提案結果を顧客向けメニュー選択画面（本体システム設計書
+No.13）に引き継ぐ導線1箇所だけ。これにより本機能は単独でも動作し、後から接続することも、切り離すこともできる。</p>
+<hr />
+<h2 id="画面設計">1. 画面設計</h2>
+<h3 id="画面一覧">1.1 画面一覧</h3>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>No</th>
+<th>画面名</th>
+<th>対象</th>
+<th>概要</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>AI提案チャット：開始画面</td>
+<td>利用者</td>
+<td>悩み・要望を入力する前の初期画面</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>AI提案チャット：会話中画面</td>
+<td>利用者</td>
+<td>AIと質問・回答を重ねながら絞り込んでいる状態</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>AI提案チャット：提案結果画面</td>
+<td>利用者</td>
+<td>最終的なおすすめメニューと理由を提示し、予約へ導く</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>提案結果一覧（管理者向け・任意）</td>
+<td>管理者</td>
+<td>過去の提案結果を確認する（Could have）</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td>エラーページ</td>
+<td>共通</td>
+<td>404 / 500、およびAI API障害時のエラーメッセージ</td>
+</tr>
+</tbody>
+</table>
+<p>同じ「AI提案チャット」画面を、会話の進行段階（開始・会話中・結果）で3枚に分けてワイヤーフレーム化している。実装上は1つの画面が状態によって表示を切り替える想定。</p>
+<h3 id="主要画面のワイヤーフレーム構成">1.2
+主要画面のワイヤーフレーム構成</h3>
+<p><strong>①AI提案チャット：開始画面（No.1）</strong></p>
+<pre><code>┌─────────────────────────────┐
+│ AI：どんなお悩みですか？        │
+│ 　　（例：髪の乾燥が気になる 等）  │
+├─────────────────────────────┤
+│ （入力エリア）                  │
+│ [送信]                       │
+└─────────────────────────────┘</code></pre>
+<p><strong>②AI提案チャット：会話中画面（No.2）</strong></p>
+<pre><code>┌─────────────────────────────┐
+│ 会話ログ（吹き出し形式）         │
+│ あなた：髪の乾燥が気になります    │
+│ AI：他に気になる点はありますか？   │
+├─────────────────────────────┤
+│ （入力エリア）                  │
+│ [送信]                       │
+└─────────────────────────────┘</code></pre>
+<p><strong>③AI提案チャット：提案結果画面（No.3）</strong></p>
+<pre><code>┌─────────────────────────────┐
+│ 会話ログ（吹き出し形式・折りたたみ） │
+├─────────────────────────────┤
+│ 最終提案：メニューA             │
+│ 理由：乾燥が気になる方向けの      │
+│       うる艶トリートメントです    │
+├─────────────────────────────┤
+│ [この内容で予約に進む]          │
+└─────────────────────────────┘</code></pre>
+<p>「この内容で予約に進む」ボタンが、予約・顧客管理システムとの唯一の接続点。押すと提案内容（メニュー名）を顧客向けメニュー選択画面（No.13）にクエリパラメータで引き継ぎ、該当メニューを選択済みの状態で表示する（自動予約はしない。日時選択・お客様情報入力は顧客自身が行う）。</p>
+<p><strong>④提案結果一覧画面（No.4・管理者向け・Could
+have）</strong></p>
+<pre><code>┌─────────────────────────────┐
+│ 提案結果一覧                   │
+├─────────────────────────────┤
+│ 日時　　　提案メニュー　　予約有無 │
+│ 09/20　　メニューA　　　済       │
+│ 09/18　　メニューB　　　未       │
+└─────────────────────────────┘</code></pre>
+<p><strong>⑤エラーページ（No.5・共通）</strong></p>
+<pre><code>┌─────────────────────────────┐
+│ AI応答の取得に失敗しました        │
+│ 通常のヒアリング（対面）を        │
+│ ご利用ください                  │
+├─────────────────────────────┤
+│ [もう一度試す]                  │
+└─────────────────────────────┘</code></pre>
+<h3 id="画面遷移図">1.3 画面遷移図</h3>
+<pre><code>（利用者がアクセス）
+      │
+      ▼
+AI提案チャット：開始画面(1)
+      │（悩みを入力・送信）
+      ▼
+AI提案チャット：会話中画面(2) ──（会話を繰り返す）
+      │
+      ▼（提案が完了）
+AI提案チャット：提案結果画面(3)
+      │
+      ├──[この内容で予約に進む] → 予約・顧客管理システムの顧客向けメニュー選択画面（No.13）へ（提案メニューを選択済みの状態で遷移）
+      │
+      └──（そのまま終了）
+
+［管理者・任意］
+提案結果一覧(4)（Could have）
+
+AI API障害時など、エラー時は共通エラーページ(5)へ</code></pre>
+<hr />
+<h2 id="db設計">2. DB設計</h2>
+<h3 id="エンティティ一覧">2.1 エンティティ一覧</h3>
+<ul>
+<li>ai_sessions（AI提案セッション）</li>
+<li>ai_messages（AI提案の会話履歴）</li>
+</ul>
+<h3 id="テーブル定義全テーブル">2.2 テーブル定義（全テーブル）</h3>
+<p><strong>テーブル: ai_sessions（AI提案セッション）</strong></p>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>カラム名</th>
+<th>型</th>
+<th>NULL</th>
+<th>デフォルト</th>
+<th>説明</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>id</td>
+<td>BIGINT</td>
+<td>NO</td>
+<td>AUTO</td>
+<td>セッションID（PK）</td>
+</tr>
+<tr class="even">
+<td>customer_id</td>
+<td>BIGINT</td>
+<td>YES</td>
+<td>NULL</td>
+<td>予約・顧客管理システムのcustomers.idへの緩い参照（未ログインでも利用可）</td>
+</tr>
+<tr class="odd">
+<td>result_menu</td>
+<td>VARCHAR(100)</td>
+<td>YES</td>
+<td>NULL</td>
+<td>最終提案メニュー（未完了はNULL）</td>
+</tr>
+<tr class="even">
+<td>status</td>
+<td>ENUM</td>
+<td>NO</td>
+<td>‘in_progress’</td>
+<td>進行中／完了</td>
+</tr>
+<tr class="odd">
+<td>created_at / updated_at</td>
+<td>TIMESTAMP</td>
+<td>NO</td>
+<td>CURRENT</td>
+<td>作成・更新日時</td>
+</tr>
+</tbody>
+</table>
+<p>【インデックス】PRIMARY KEY (id) ／ INDEX (customer_id)
+【外部キー】なし（customer_idは緩い参照のみで、予約・顧客管理システム側のテーブルへの外部キー制約は張らない）</p>
+<p><strong>テーブル: ai_messages（AI提案の会話履歴）</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th>カラム名</th>
+<th>型</th>
+<th>NULL</th>
+<th>デフォルト</th>
+<th>説明</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>id</td>
+<td>BIGINT</td>
+<td>NO</td>
+<td>AUTO</td>
+<td>メッセージID（PK）</td>
+</tr>
+<tr class="even">
+<td>session_id</td>
+<td>BIGINT</td>
+<td>NO</td>
+<td>-</td>
+<td>セッションID（FK）</td>
+</tr>
+<tr class="odd">
+<td>role</td>
+<td>ENUM</td>
+<td>NO</td>
+<td>-</td>
+<td>user／ai</td>
+</tr>
+<tr class="even">
+<td>content</td>
+<td>TEXT</td>
+<td>NO</td>
+<td>-</td>
+<td>発言内容</td>
+</tr>
+<tr class="odd">
+<td>created_at</td>
+<td>TIMESTAMP</td>
+<td>NO</td>
+<td>CURRENT</td>
+<td>作成日時</td>
+</tr>
+</tbody>
+</table>
+<p>【インデックス】PRIMARY KEY (id) ／ INDEX (session_id)
+【外部キー】session_id REFERENCES ai_sessions(id) ON DELETE CASCADE</p>
+<h3 id="er図">2.3 ER図</h3>
+<p><strong>テキスト形式のER図</strong></p>
+<pre><code>ai_sessions (1) ----&lt; (N) ai_messages</code></pre>
+<p>ai_sessions.customer_idは、予約・顧客管理システムのcustomers.idへの緩い参照（外部キー制約なし）。上記のER図には含めず、他システムのテーブルとは直接結びつけない。</p>
+<hr />
+<h2 id="api設計">3. API設計</h2>
+<table>
+<thead>
+<tr class="header">
+<th>メソッド</th>
+<th>エンドポイント</th>
+<th>概要</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>POST</td>
+<td>/api/ai/sessions</td>
+<td>AI提案セッション開始</td>
+</tr>
+<tr class="even">
+<td>POST</td>
+<td>/api/ai/sessions/{id}/messages</td>
+<td>メッセージ送信・AI応答取得</td>
+</tr>
+<tr class="odd">
+<td>GET</td>
+<td>/api/ai/sessions/{id}</td>
+<td>セッション内容・提案結果の取得</td>
+</tr>
+</tbody>
+</table>
+<h3 id="api詳細仕様代表例">3.1 API詳細仕様（代表例）</h3>
+<p><strong>API: メッセージ送信・AI応答取得</strong></p>
+<pre><code>【エンドポイント】
+POST /api/ai/sessions/{id}/messages
+
+【説明】
+利用者のメッセージをAIに送信し、応答を取得します。
+
+【認証】
+不要（利用者は未ログインでも利用可能）
+
+【リクエストボディ】
+{
+  &quot;content&quot;: &quot;髪の乾燥が気になります&quot;
+}
+
+【バリデーション】
+- content: 必須、1-500文字
+
+【レスポンス例（200 OK）】
+{
+  &quot;role&quot;: &quot;ai&quot;,
+  &quot;content&quot;: &quot;乾燥が気になるとのことですね。他に気になる点はありますか？&quot;,
+  &quot;is_final&quot;: false
+}
+
+【エラーレスポンス例（422 Unprocessable Entity）】
+{
+  &quot;message&quot;: &quot;入力内容に誤りがあります&quot;,
+  &quot;errors&quot;: {
+    &quot;content&quot;: [&quot;メッセージを入力してください&quot;]
+  }
+}</code></pre>
+<p><strong>API: セッション内容・提案結果の取得</strong></p>
+<pre><code>【エンドポイント】
+GET /api/ai/sessions/{id}
+
+【説明】
+セッションの会話履歴と最終提案結果を取得します。
+
+【認証】
+不要
+
+【レスポンス例（提案完了時 200 OK）】
+{
+  &quot;id&quot;: 88,
+  &quot;status&quot;: &quot;completed&quot;,
+  &quot;result_menu&quot;: &quot;メニューA&quot;,
+  &quot;messages&quot;: [
+    { &quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;髪の乾燥が気になります&quot; },
+    { &quot;role&quot;: &quot;ai&quot;, &quot;content&quot;: &quot;メニューAをおすすめします。理由は...&quot; }
+  ]
+}
+
+【エラーレスポンス例（404 Not Found）】
+{
+  &quot;message&quot;: &quot;指定されたセッションが見つかりません&quot;
+}</code></pre>
+<hr />
+<h2 id="工数見積もり">4. 工数見積もり</h2>
+<h3 id="機能別工数表">4.1 機能別工数表</h3>
+<table>
+<thead>
+<tr class="header">
+<th>機能</th>
+<th>マイグレーション</th>
+<th>モデル</th>
+<th>コントローラー</th>
+<th>ビュー</th>
+<th>合計</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>チャットUI</td>
+<td>-</td>
+<td>-</td>
+<td>1h</td>
+<td>4h</td>
+<td>5h</td>
+</tr>
+<tr class="even">
+<td>AI API連携（1往復・フォーム形式）</td>
+<td>-</td>
+<td>-</td>
+<td>3h</td>
+<td>1h</td>
+<td>4h</td>
+</tr>
+<tr class="odd">
+<td>会話履歴の保持（複数ターン化）</td>
+<td>1h</td>
+<td>1h</td>
+<td>4h</td>
+<td>2h</td>
+<td>8h</td>
+</tr>
+<tr class="even">
+<td>提案結果の保存（Could have）</td>
+<td>1h</td>
+<td>1h</td>
+<td>2h</td>
+<td>1h</td>
+<td>5h</td>
+</tr>
+<tr class="odd">
+<td><strong>開発工数合計</strong></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td><strong>約22h</strong></td>
+</tr>
+<tr class="even">
+<td><strong>バッファ（20〜30%）</strong></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td><strong>約4〜7h</strong></td>
+</tr>
+<tr class="odd">
+<td><strong>見積もり合計</strong></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td><strong>約26〜29h</strong></td>
+</tr>
+</tbody>
+</table>
+<p>利用するAI
+APIの費用体系・レスポンス速度が未確定なため、動作確認や調整にかかる時間を見込んでバッファを乗せている。この約22h（バッファ込み約26〜29h）は、下記の通りWeek22〜24では消化せず、フェーズ2で着手する時間として見込んでおく。</p>
+<h3 id="スケジュール">4.2 スケジュール</h3>
+<pre><code>【スコープの再確認（講師フィードバックを受けて）】
+予約・顧客管理システムとAI提案機能を合わせた当初の見積もりが3週間に対して過大との
+指摘を受けたため、Week22〜24ではAI提案機能の実装を見送る。
+Must have機能＋顧客向けオンライン予約（空き状況カレンダー優先）を優先して
+「動くところまで」完成させることを最優先とする。
+
+AI提案機能は設計（本ドキュメント）を確定させた状態でフェーズ2（Week24以降）に先送りする。
+フェーズ2着手時の進め方は以下の2段階アプローチのまま変更しない：
+
+第1段階：AI APIを選定し、1往復（フォーム形式）で最小実装
+  → マイルストーン：悩みを送信すると提案が1回で返ってくる
+
+第2段階：余裕があれば、ai_sessions／ai_messagesで会話履歴を持たせ、
+         複数ターンのチャット形式に拡張
+  → マイルストーン：会話しながら絞り込める</code></pre>
+<hr />
+<h2 id="インフラ構成図">5. インフラ構成図</h2>
+<p>本機能は予約・顧客管理システムと同じLaravelアプリ内の別モジュールとして動くため、インフラ構成は別紙「Week19
+設計書：予約・顧客管理システム」のインフラ構成図と共通。追加で必要になるのは、外部AI
+API（LLM）への通信のみ。</p>
+<pre><code>【Render / Railway上のLaravelアプリ】
+  └── AI提案モジュール ──HTTPS通信──▶ 【外部AI API（LLM）】</code></pre>
+</body>
+</html>
