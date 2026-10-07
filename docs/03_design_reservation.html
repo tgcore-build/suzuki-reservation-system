@@ -237,7 +237,7 @@ details > p, details strong { margin-top: 0.4em; }
 <td>10</td>
 <td>既存ソフト連携設定</td>
 <td>管理者</td>
-<td>連携方式の設定・手動取込の実行</td>
+<td>CSVファイルの取込（Must）。API連携は先方ソフトの対応次第でCould</td>
 </tr>
 <tr class="odd">
 <td>11</td>
@@ -267,7 +267,7 @@ details > p, details strong { margin-top: 0.4em; }
 <td>15</td>
 <td>予約：お客様情報入力・確定（顧客向け）</td>
 <td>利用者</td>
-<td>氏名・電話番号等を入力し予約を確定する</td>
+<td>氏名・電話番号・メールアドレス等を入力し予約を確定する</td>
 </tr>
 <tr class="even">
 <td>16</td>
@@ -275,6 +275,8 @@ details > p, details strong { margin-top: 0.4em; }
 <td>共通</td>
 <td>404 / 500</td>
 </tr>
+<tr class="odd"><td>17</td><td>メニュー管理</td><td>管理者</td><td>メニューの登録・編集・削除（料金・所要時間・公開／非公開・表示順）</td></tr>
+<tr class="even"><td>18</td><td>営業時間設定</td><td>管理者</td><td>曜日ごとの営業／定休日と開店・閉店時刻の設定</td></tr>
 </tbody>
 </table>
 <h3 id="主要画面のワイヤーフレーム構成最低5画面">1.2
@@ -361,6 +363,7 @@ Beautyなど）の空き状況カレンダーを参考にした構成。</p>
 ├─────────────────────────────┤
 │ お名前　　　[               ]  │
 │ 電話番号　　[               ]  │
+│ メールアドレス　[               ]  │
 │ 来店は初めてですか？ ○はい ○いいえ │
 │ ご要望（任意）                  │
 │ [                          ] │
@@ -404,7 +407,7 @@ have（今回のスコープ外）とする。</p>
 <h2 id="db設計">2. DB設計</h2>
 <h3 id="エンティティ一覧">2.1 エンティティ一覧</h3>
 <ul>
-<li>admins（管理者）</li>
+<li>users（管理者アカウント。Laravel Breeze標準のテーブルを使用）</li>
 <li>customers（顧客）</li>
 <li>records（対応記録）</li>
 <li>menus（メニュー）</li>
@@ -414,50 +417,8 @@ have（今回のスコープ外）とする。</p>
 <li>business_hours（営業時間・定休日設定）</li>
 </ul>
 <h3 id="テーブル定義全テーブル">2.2 テーブル定義（全テーブル）</h3>
-<p><strong>テーブル: admins（管理者）</strong></p>
-<table>
-<thead>
-<tr class="header">
-<th>カラム名</th>
-<th>型</th>
-<th>NULL</th>
-<th>デフォルト</th>
-<th>説明</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>id</td>
-<td>BIGINT</td>
-<td>NO</td>
-<td>AUTO</td>
-<td>管理者ID（PK）</td>
-</tr>
-<tr class="even">
-<td>email</td>
-<td>VARCHAR(100)</td>
-<td>NO</td>
-<td>-</td>
-<td>ログイン用メールアドレス</td>
-</tr>
-<tr class="odd">
-<td>password</td>
-<td>VARCHAR(255)</td>
-<td>NO</td>
-<td>-</td>
-<td>パスワード（ハッシュ）</td>
-</tr>
-<tr class="even">
-<td>created_at / updated_at</td>
-<td>TIMESTAMP</td>
-<td>NO</td>
-<td>CURRENT</td>
-<td>作成・更新日時</td>
-</tr>
-</tbody>
-</table>
-<p>【インデックス】PRIMARY KEY (id) ／ UNIQUE KEY (email) 【制約】email:
-UNIQUE制約／password: 最低8文字</p>
+<p><strong>管理者アカウント（users テーブル）</strong></p>
+<p>管理者のログインには、Laravel Breezeが標準で作成する <code>users</code> テーブル（id・name・email・password・created_at・updated_at 等）をそのまま使う。管理者専用の <code>admins</code> テーブルは作らない。管理者は店主1人のため、新規登録画面（<code>/register</code>）は閉鎖し、公開の登録口は設けない。認証はBladeのセッション認証（Breeze標準）に統一する。</p>
 <p><strong>テーブル: customers（顧客）</strong></p>
 <table>
 <thead>
@@ -491,12 +452,18 @@ UNIQUE制約／password: 最低8文字</p>
 <td>-</td>
 <td>電話番号</td>
 </tr>
+<tr class="odd"><td>email</td><td>VARCHAR(100)</td><td>YES</td><td>NULL</td><td>メールアドレス（予約確認・前日リマインドの送信先）</td></tr>
+<tr class="even"><td>address</td><td>VARCHAR(255)</td><td>YES</td><td>NULL</td><td>住所</td></tr>
+<tr class="odd"><td>birthday</td><td>DATE</td><td>YES</td><td>NULL</td><td>生年月日</td></tr>
+<tr class="even"><td>karte_number</td><td>VARCHAR(4)</td><td>YES</td><td>NULL</td><td>カルテ番号（生年月日の月日4桁。保存時に自動設定）</td></tr>
+<tr class="odd"><td>gender</td><td>VARCHAR(10)</td><td>YES</td><td>NULL</td><td>性別</td></tr>
+<tr class="even"><td>memo</td><td>TEXT</td><td>YES</td><td>NULL</td><td>備考（アレルギー・好みなど）</td></tr>
 <tr class="even">
 <td>line_id</td>
 <td>VARCHAR(100)</td>
 <td>YES</td>
 <td>NULL</td>
-<td>メッセージ配信連携用ID</td>
+<td>メッセージ配信連携用ID（将来拡張用。リマインドはメールで送る）</td>
 </tr>
 <tr class="odd">
 <td>external_id</td>
@@ -514,8 +481,8 @@ UNIQUE制約／password: 最低8文字</p>
 </tr>
 </tbody>
 </table>
-<p>【インデックス】PRIMARY KEY (id) ／ INDEX (phone) ／ INDEX
-(external_id) 【制約】phone: 必須</p>
+<p>【インデックス】PRIMARY KEY (id) ／ UNIQUE KEY (phone) ／ INDEX (karte_number) ／ INDEX
+(external_id) 【制約】phone: 必須・重複不可／karte_number: 生年月日の月日4桁（例: 2月2日→0202）を保存時に自動設定／最終来店日・来店からの経過日数・会員ステータスはカラムを持たず、予約データから計算して表示する</p>
 <p><strong>テーブル: records（対応記録）</strong></p>
 <table>
 <colgroup>
@@ -658,6 +625,8 @@ SET NULL</p>
 <td>true</td>
 <td>予約画面に表示するかどうか</td>
 </tr>
+<tr class="odd"><td>description</td><td>TEXT</td><td>YES</td><td>NULL</td><td>メニューの説明</td></tr>
+<tr class="even"><td>sort_order</td><td>SMALLINT UNSIGNED</td><td>NO</td><td>0</td><td>表示順（小さいほど上）</td></tr>
 <tr class="even">
 <td>created_at / updated_at</td>
 <td>TIMESTAMP</td>
@@ -668,6 +637,7 @@ SET NULL</p>
 </tbody>
 </table>
 <p>【インデックス】PRIMARY KEY (id) ／ INDEX (is_active)</p>
+<p>メニューは管理画面（メニュー管理）から登録・編集・削除する（Week22で実装）。</p>
 <p><strong>テーブル: reservations（予約）</strong></p>
 <table>
 <colgroup>
@@ -769,7 +739,7 @@ DELETE RESTRICT</p>
 <td>ID（PK）</td>
 </tr>
 <tr class="even">
-<td>day_of_week</td>
+<td>weekday</td>
 <td>TINYINT</td>
 <td>NO</td>
 <td>-</td>
@@ -790,15 +760,15 @@ DELETE RESTRICT</p>
 <td>終了時刻（定休日はNULL）</td>
 </tr>
 <tr class="odd">
-<td>is_closed</td>
+<td>is_open</td>
 <td>BOOLEAN</td>
 <td>NO</td>
-<td>false</td>
-<td>定休日フラグ</td>
+<td>true</td>
+<td>営業日フラグ（falseの曜日が定休日）</td>
 </tr>
 </tbody>
 </table>
-<p>【インデックス】PRIMARY KEY (id) ／ UNIQUE KEY (day_of_week)</p>
+<p>【インデックス】PRIMARY KEY (id) ／ UNIQUE KEY (weekday)</p>
 <p>MVP（Week22〜24）では曜日ごとの固定の営業時間・定休日のみ管理する。祝日や臨時休業などの個別対応はCould
 have（将来拡張）とする。空き状況は「business_hoursの営業時間」から「reservationsの予約済み時間」を差し引いて計算する。</p>
 <p><strong>テーブル: reminder_logs（リマインド送信ログ）</strong></p>
@@ -839,7 +809,7 @@ have（将来拡張）とする。空き状況は「business_hoursの営業時�
 <td>ENUM</td>
 <td>NO</td>
 <td>‘scheduled’</td>
-<td>送信済／失敗／送信予定</td>
+<td>送信済／失敗／送信予定／送信対象外（メール未登録）</td>
 </tr>
 </tbody>
 </table>
@@ -897,10 +867,11 @@ customers (1) ----&lt; (N) records
 menus     (1) ----&lt; (N) reservations
 reservations (1) ----&lt; (0..1) records
 reservations (1) ----&lt; (N) reminder_logs</code></pre>
-<p>admins・external_sync_logs・business_hoursは、他テーブルと外部キーで結びつかない独立したテーブル（business_hoursは空き状況の計算時にreservationsと突き合わせて使う設定テーブル）。</p>
+<p>users・external_sync_logs・business_hoursは、他テーブルと外部キーで結びつかない独立したテーブル（business_hoursは空き状況の計算時にreservationsと突き合わせて使う設定テーブル）。</p>
 <hr />
 <h2 id="api設計">3. API設計</h2>
 <h3 id="管理者向け">3.1 管理者向け</h3>
+<p>管理者画面はBladeによるサーバーサイド描画で、ログインはLaravel Breezeのセッション認証を使う。以下は機能ごとのエンドポイント設計であり、実装ではweb.phpのルート（例：<code>/customers</code>）として実現する。ログイン・ログアウトはBreeze標準の <code>/login</code>・<code>/logout</code> を使い、<code>/api/login</code> は設けない。</p>
 <table>
 <thead>
 <tr class="header">
@@ -912,7 +883,7 @@ reservations (1) ----&lt; (N) reminder_logs</code></pre>
 <tbody>
 <tr class="odd">
 <td>POST</td>
-<td>/api/login</td>
+<td>/login（Breeze標準・セッション認証）</td>
 <td>管理者ログイン</td>
 </tr>
 <tr class="even">
@@ -1043,7 +1014,7 @@ GET /api/reservations
 予約の一覧を取得します。
 
 【認証】
-必要（管理者、Bearer Token）
+必要（管理者ログイン済みのセッション。Breezeのセッション認証）
 
 【クエリパラメータ】
 - page (integer, optional): ページ番号（デフォルト: 1）
@@ -1071,7 +1042,7 @@ POST /api/reservations
 新しい予約を登録します。
 
 【認証】
-必要（管理者、Bearer Token）
+必要（管理者ログイン済みのセッション。Breezeのセッション認証）
 
 【リクエストボディ】
 {
@@ -1139,7 +1110,7 @@ GET /api/booking/availability
 POST /api/booking/reservations
 
 【説明】
-顧客自身がメニュー・日時・お客様情報を送信し、予約を確定します。ログイン不要。電話番号が既存のcustomersレコードと一致すればそのレコードを使い、一致しなければ新規にcustomersレコードを作成してから予約に紐づけます。
+顧客自身がメニュー・日時・お客様情報を送信し、予約を確定します。ログイン不要。電話番号が既存のcustomersレコードと一致すればそのレコードを使い、一致しなければ新規にcustomersレコードを作成してから予約に紐づけます。入力されたメールアドレスはcustomers.emailに保存し、予約確認・前日リマインドのメール送信先として使います。
 
 【認証】
 不要
@@ -1148,6 +1119,7 @@ POST /api/booking/reservations
 {
   &quot;name&quot;: &quot;山田太郎&quot;,
   &quot;phone&quot;: &quot;090-1234-5678&quot;,
+  &quot;email&quot;: &quot;taro@example.com&quot;,
   &quot;menu_id&quot;: 3,
   &quot;scheduled_at&quot;: &quot;2026-09-26T10:00:00+09:00&quot;,
   &quot;is_first_visit&quot;: true,
@@ -1158,6 +1130,7 @@ POST /api/booking/reservations
 【バリデーション】
 - name: 必須、1-50文字
 - phone: 必須、電話番号形式
+- email: 必須、メール形式、100文字以内（予約確認・前日リマインドメールの送信先）
 - menu_id: 必須、存在するmenuのID
 - scheduled_at: 必須、未来日時かつ空き状況が「予約可」であること（二重予約防止）
 - notes: 任意、200文字以内
@@ -1243,7 +1216,7 @@ POST /api/booking/reservations
 <td>12h</td>
 </tr>
 <tr class="even">
-<td>既存ソフト連携（調査＋実装）</td>
+<td>既存ソフト連携（CSV取込＝Must／API連携＝Could、調査＋実装）</td>
 <td>-</td>
 <td>1h</td>
 <td>8h</td>
@@ -1300,7 +1273,7 @@ POST /api/booking/reservations
 </tr>
 </tbody>
 </table>
-<p>見積もりには必ずバッファを乗せる。想定外のバグ修正・仕様変更・レビューやテストの時間は必ず発生するため、開発工数の20〜30%を上乗せして現実的なスケジュールにする。既存ソフト連携と空き状況カレンダーは特に工数が読みにくいため、実際にはこの見積もりよりさらに幅を持たせておく。</p>
+<p>※この表の工数は実装のみで、テストコード（PHPUnit）の工数は含まない。各機能にテスト工数を加算する（Issueごとの工数は09_task_breakdown.htmlを参照）。見積もりには必ずバッファを乗せる。想定外のバグ修正・仕様変更・レビューやテストの時間は必ず発生するため、開発工数の20〜30%を上乗せして現実的なスケジュールにする。既存ソフト連携と空き状況カレンダーは特に工数が読みにくいため、実際にはこの見積もりよりさらに幅を持たせておく。</p>
 <p><strong>注記：</strong> 顧客向けオンライン予約はShould
 haveのため、Must
 have機能（顧客管理・対応記録・予約管理・管理画面ログイン・自動リマインド・既存ソフト連携）を優先して完成させる。その中でも空き状況カレンダー（自動計算）は顧客体験に直結するため優先的に実装し、時間が不足する場合は顧客向け利用履歴ページ・顧客ログインを後回しにする。</p>
