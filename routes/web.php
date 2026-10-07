@@ -25,3 +25,4 @@ Route::middleware('auth')->group(function () {
     Route::get('business-hours', [\App\Http\Controllers\BusinessHourController::class, 'edit'])->name('business-hours.edit');
     Route::put('business-hours', [\App\Http\Controllers\BusinessHourController::class, 'update'])->name('business-hours.update');
 });
+Route::resource('reservations', \App\Http\Controllers\ReservationController::class)->except('show')->middleware('auth');
