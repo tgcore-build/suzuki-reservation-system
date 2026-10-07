@@ -18,6 +18,9 @@
                     <x-nav-link :href="route('customers.index')" :active="request()->routeIs('customers.*')">
                         顧客管理
                     </x-nav-link>
+                    <x-nav-link :href="route('menus.index')" :active="request()->routeIs('menus.*')">
+                        メニュー管理
+                    </x-nav-link>
                 </div>
             </div>
 
