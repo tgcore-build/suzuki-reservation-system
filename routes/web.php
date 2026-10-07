@@ -20,3 +20,4 @@ Route::middleware('auth')->group(function () {
 require __DIR__.'/auth.php';
 
 Route::resource('customers', \App\Http\Controllers\CustomerController::class)->middleware('auth');
+Route::resource('menus', \App\Http\Controllers\MenuController::class)->except('show')->middleware('auth');
