@@ -18,3 +18,5 @@ Route::middleware('auth')->group(function () {
 });
 
 require __DIR__.'/auth.php';
+
+Route::resource('customers', \App\Http\Controllers\CustomerController::class)->middleware('auth');
