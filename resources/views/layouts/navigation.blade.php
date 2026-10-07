@@ -21,6 +21,9 @@
                     <x-nav-link :href="route('menus.index')" :active="request()->routeIs('menus.*')">
                         メニュー管理
                     </x-nav-link>
+                    <x-nav-link :href="route('business-hours.edit')" :active="request()->routeIs('business-hours.*')">
+                        営業時間
+                    </x-nav-link>
                 </div>
             </div>
 
