@@ -32,3 +32,8 @@ Route::middleware('auth')->group(function () {
     Route::put('records/{record}', [\App\Http\Controllers\RecordController::class, 'update'])->name('records.update');
     Route::delete('records/{record}', [\App\Http\Controllers\RecordController::class, 'destroy'])->name('records.destroy');
 });
+
+// お客様向けオンライン予約（ログイン不要）
+Route::get('/book', [\App\Http\Controllers\BookingController::class, 'index'])->name('booking.index');
+Route::post('/book', [\App\Http\Controllers\BookingController::class, 'store'])->middleware('throttle:10,1')->name('booking.store');
+Route::get('/book/complete', [\App\Http\Controllers\BookingController::class, 'complete'])->name('booking.complete');
