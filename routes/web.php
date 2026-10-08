@@ -24,3 +24,11 @@ Route::middleware('auth')->group(function () {
     Route::put('business-hours', [\App\Http\Controllers\BusinessHourController::class, 'update'])->name('business-hours.update');
 });
 Route::resource('reservations', \App\Http\Controllers\ReservationController::class)->except('show')->middleware('auth');
+
+Route::middleware('auth')->group(function () {
+    Route::get('customers/{customer}/records/create', [\App\Http\Controllers\RecordController::class, 'create'])->name('records.create');
+    Route::post('customers/{customer}/records', [\App\Http\Controllers\RecordController::class, 'store'])->name('records.store');
+    Route::get('records/{record}/edit', [\App\Http\Controllers\RecordController::class, 'edit'])->name('records.edit');
+    Route::put('records/{record}', [\App\Http\Controllers\RecordController::class, 'update'])->name('records.update');
+    Route::delete('records/{record}', [\App\Http\Controllers\RecordController::class, 'destroy'])->name('records.destroy');
+});
