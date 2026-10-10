@@ -16,22 +16,68 @@ use Illuminate\View\View;
 
 class BookingController extends Controller
 {
-    private const STEP = 15;          // 時間の刻み（分）
+    private const STEP = 30;          // 予約できる時間の刻み（分）
     private const LEAD_MINUTES = 60;  // 何分前まで予約できるか
     private const MAX_DAYS = 60;      // 何日先まで予約できるか
 
+    // 空き状況の表（1週間 / 2週間）
     public function index(Request $request): View
     {
         $menus = Menu::where('is_active', true)->orderBy('sort_order')->get();
         $menu = $menus->firstWhere('id', (int) $request->query('menu_id'));
-        $date = $this->parseDate($request->query('date'));
-        $slots = ($menu && $date) ? $this->availableSlots($date, $menu) : null;
+        $weeks = (int) $request->query('weeks') === 2 ? 2 : 1;
+        $start = $this->parseStart($request->query('start'));
 
-        return view('booking.index', compact('menus', 'menu', 'date', 'slots'));
+        $weekGrids = [];
+        $slotMap = [];
+        $closed = [];
+        $times = [];
+
+        if ($menu) {
+            $hours = BusinessHour::all()->keyBy('weekday');
+
+            for ($w = 0; $w < $weeks; $w++) {
+                $days = [];
+                for ($d = 0; $d < 7; $d++) {
+                    $day = $start->copy()->addDays($w * 7 + $d);
+                    $key = $day->format('Y-m-d');
+                    $days[] = $day;
+                    $slotMap[$key] = $this->availableSlots($day, $menu);
+                    $closed[$key] = isset($hours[$day->dayOfWeek]) && ! $hours[$day->dayOfWeek]->is_open;
+                }
+                $weekGrids[] = $days;
+            }
+
+            $times = collect($slotMap)->flatten()->unique()->sort()->values()->all();
+        }
+
+        $thisWeek = today()->startOfWeek(Carbon::MONDAY);
+        $prev = $start->copy()->subDays($weeks * 7);
+        $next = $start->copy()->addDays($weeks * 7);
+
+        return view('booking.index', [
+            'menus' => $menus,
+            'menu' => $menu,
+            'weeks' => $weeks,
+            'start' => $start,
+            'weekGrids' => $weekGrids,
+            'slotMap' => $slotMap,
+            'closed' => $closed,
+            'times' => $times,
+            'prevStart' => $prev->lt($thisWeek) ? null : $prev->format('Y-m-d'),
+            'nextStart' => $next->gt(today()->addDays(self::MAX_DAYS)) ? null : $next->format('Y-m-d'),
+            'thisWeek' => $thisWeek->format('Y-m-d'),
+        ]);
     }
 
     public function store(Request $request): RedirectResponse
     {
+        // 表で選んだ「日付|時間」を、日付と時間に分ける
+        if ($request->filled('slot')) {
+            [$slotDate, $slotTime] = array_pad(explode('|', (string) $request->input('slot'), 2), 2, null);
+            $request->merge(['date' => $slotDate, 'time' => $slotTime]);
+        }
+
         $data = $request->validate([
             'menu_id' => ['required', 'integer'],
             'date' => ['required', 'date_format:Y-m-d'],
@@ -98,6 +144,22 @@ class BookingController extends Controller
         return view('booking.complete', ['booked' => session('booked')]);
     }
 
+    // 指定日を含む週の月曜日。今週より前や不正な値は、今週の月曜日にする
+    private function parseStart(?string $value): Carbon
+    {
+        $thisWeek = today()->startOfWeek(Carbon::MONDAY);
+        if (! $value) {
+            return $thisWeek;
+        }
+        try {
+            $monday = Carbon::createFromFormat('Y-m-d', $value)->startOfDay()->startOfWeek(Carbon::MONDAY);
+        } catch (\Throwable $e) {
+            return $thisWeek;
+        }
+
+        return $monday->lt($thisWeek) ? $thisWeek : $monday;
+    }
+
     private function parseDate(?string $value): ?Carbon
     {
         if (! $value) {
@@ -118,6 +180,10 @@ class BookingController extends Controller
     // 営業時間・既存の予約・現在時刻から、予約できる開始時刻（H:i）の一覧を返す
     private function availableSlots(Carbon $date, Menu $menu): array
     {
+        if ($date->lt(today()) || $date->gt(today()->addDays(self::MAX_DAYS))) {
+            return [];
+        }
+
         $hour = BusinessHour::where('weekday', $date->dayOfWeek)->first();
         if (! $hour || ! $hour->is_open) {
             return [];

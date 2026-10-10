@@ -22,9 +22,9 @@ class BookingTest extends TestCase
     {
         parent::setUp();
 
-        $this->travelTo(now()->setDate(2026, 10, 5)->setTime(9, 0));
+        $this->travelTo(now()->setDate(2026, 10, 5)->setTime(9, 0)); // 月曜日
 
-        $day = today()->addDays(3);
+        $day = today()->addDays(3); // 2026-10-08（木）
         $this->date = $day->format('Y-m-d');
 
         BusinessHour::create([
@@ -55,13 +55,29 @@ class BookingTest extends TestCase
         ], $override);
     }
 
-    public function test_open_slots_are_listed(): void
+    private function gridUrl(array $extra = []): string
     {
-        $this->get('/book?menu_id=' . $this->menu->id . '&date=' . $this->date)
+        return '/book?' . http_build_query(array_merge(['menu_id' => $this->menu->id], $extra));
+    }
+
+    public function test_open_slots_are_listed_in_the_weekly_table(): void
+    {
+        $this->get($this->gridUrl())
             ->assertOk()
-            ->assertSee('value="10:00"', false)
-            ->assertSee('value="18:00"', false)
-            ->assertDontSee('value="18:15"', false);
+            ->assertSee('value="' . $this->date . '|10:00"', false)
+            ->assertSee('value="' . $this->date . '|18:00"', false)
+            ->assertDontSee('value="' . $this->date . '|18:30"', false);
+    }
+
+    public function test_two_week_view_includes_next_week(): void
+    {
+        $nextWeekDay = today()->addDays(10); // 2026-10-15（木）。営業日は曜日で決まるので、来週の木曜日も営業日
+
+        $this->get($this->gridUrl(['weeks' => 1]))
+            ->assertDontSee('value="' . $nextWeekDay->format('Y-m-d') . '|10:00"', false);
+
+        $this->get($this->gridUrl(['weeks' => 2]))
+            ->assertSee('value="' . $nextWeekDay->format('Y-m-d') . '|10:00"', false);
     }
 
     public function test_booked_time_is_not_offered(): void
@@ -75,18 +91,38 @@ class BookingTest extends TestCase
             'status' => 'confirmed',
         ]);
 
-        $this->get('/book?menu_id=' . $this->menu->id . '&date=' . $this->date)
-            ->assertDontSee('value="10:00"', false)
-            ->assertDontSee('value="10:45"', false)
-            ->assertSee('value="11:00"', false);
+        $this->get($this->gridUrl())
+            ->assertDontSee('value="' . $this->date . '|10:00"', false)
+            ->assertDontSee('value="' . $this->date . '|10:30"', false)
+            ->assertSee('value="' . $this->date . '|11:00"', false);
     }
 
     public function test_closed_day_has_no_slots(): void
     {
         BusinessHour::query()->update(['is_open' => false]);
 
-        $this->get('/book?menu_id=' . $this->menu->id . '&date=' . $this->date)
+        $this->get($this->gridUrl())
             ->assertSee('予約できる時間がありません');
+    }
+
+    public function test_booking_from_the_table_selection_creates_reservation(): void
+    {
+        Mail::fake();
+
+        $this->post('/book', [
+            'menu_id' => $this->menu->id,
+            'slot' => $this->date . '|13:30',
+            'name' => 'テスト花子',
+            'phone' => '090-1111-2222',
+            'email' => 'hanako@example.com',
+        ])->assertRedirect(route('booking.complete'));
+
+        $this->assertDatabaseHas('reservations', [
+            'source' => 'online',
+            'status' => 'confirmed',
+            'scheduled_at' => $this->date . ' 13:30:00',
+        ]);
+        Mail::assertSent(ReservationConfirmed::class);
     }
 
     public function test_booking_creates_customer_and_reservation(): void
