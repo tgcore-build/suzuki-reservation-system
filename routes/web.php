@@ -37,3 +37,11 @@ Route::middleware('auth')->group(function () {
 Route::get('/book', [\App\Http\Controllers\BookingController::class, 'index'])->name('booking.index');
 Route::post('/book', [\App\Http\Controllers\BookingController::class, 'store'])->middleware('throttle:10,1')->name('booking.store');
 Route::get('/book/complete', [\App\Http\Controllers\BookingController::class, 'complete'])->name('booking.complete');
+
+// 顧客のCSV取り込み（※ /customers/import は顧客詳細と衝突するので別のURLにしています）
+Route::middleware('auth')->prefix('customer-import')->name('customer-import.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\CustomerImportController::class, 'create'])->name('create');
+    Route::get('template', [\App\Http\Controllers\CustomerImportController::class, 'template'])->name('template');
+    Route::post('preview', [\App\Http\Controllers\CustomerImportController::class, 'preview'])->name('preview');
+    Route::post('confirm', [\App\Http\Controllers\CustomerImportController::class, 'confirm'])->name('confirm');
+});
