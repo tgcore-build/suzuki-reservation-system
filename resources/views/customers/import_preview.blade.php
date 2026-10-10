@@ -13,8 +13,8 @@
         <div class="max-w-5xl mx-auto sm:px-6 lg:px-8 space-y-4">
             <div class="bg-white shadow-sm sm:rounded-lg p-6 text-sm">
                 <p class="mb-4">
-                    登録する：<strong>{{ $newCount }}件</strong>　／　
-                    重複でスキップ：{{ $dupCount }}件　／　
+                    登録する：<strong>{{ $newCount }}件</strong>　／
+                    重複でスキップ：{{ $dupCount }}件　／
                     エラーでスキップ：{{ $errCount }}件
                 </p>
 
@@ -50,58 +50,20 @@
                                     default => 'text-red-700',
                                 };
                             @endphp
-cat > tests/Feature/CustomerImportTest.php <<'EOF'
-<?php
-
-namespace Tests\Feature;
-
-use App\Models\Customer;
-use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Http\UploadedFile;
-use Tests\TestCase;
-
-class CustomerImportTest extends TestCase
-{
-    use RefreshDatabase;
-
-    public function test_preview_and_confirm_import(): void
-    {
-        $this->actingAs(User::factory()->create());
-        Customer::create(['name' => '既存 二郎', 'phone' => '09011110002']);
-
-        $csv = "氏名,電話番号,メールアドレス,生年月日,住所,メモ\n"
-            . "新規 一郎,090-1111-0001,a@example.com,1980/5/20,名古屋,メモ1\n"
-            . "既存 二郎,09011110002,,,,\n"
-            . "新規 三郎,9011110003,,,,\n"
-            . ",09011110004,,,,\n"
-            . "エラー 五郎,abc,,,,\n";
-
-        $file = UploadedFile::fake()->createWithContent('customers.csv', $csv);
-
-        $this->post(route('customer-import.preview'), ['file' => $file])
-            ->assertOk()
-            ->assertSee('2件を登録する');
-
-        $this->post(route('customer-import.confirm'))
-            ->assertRedirect(route('customers.index'));
-
-        $this->assertSame(3, Customer::count());
-        $this->assertDatabaseHas('customers', ['name' => '新規 一郎', 'karte_number' => '0520']);
-        $this->assertDatabaseHas('customers', ['name' => '新規 三郎', 'phone' => '09011110003']);
-    }
-
-    public function test_import_requires_login(): void
-    {
-        $this->get(route('customer-import.create'))->assertRedirect('/login');
-    }
-
-    public function test_file_without_required_columns_is_rejected(): void
-    {
-        $this->actingAs(User::factory()->create());
-        $file = UploadedFile::fake()->createWithContent('bad.csv', "あ,い\n1,2\n");
-
-        $this->post(route('customer-import.preview'), ['file' => $file])
-            ->assertSessionHasErrors('file');
-    }
-}
+                            <tr class="border-t">
+                                <td class="py-2">{{ $row['line'] }}</td>
+                                <td class="py-2">{{ $row['data']['name'] }}</td>
+                                <td class="py-2">{{ $row['data']['phone'] ?? '—' }}</td>
+                                <td class="py-2">{{ $row['data']['email'] ?? '—' }}</td>
+                                <td class="py-2">{{ $row['data']['birthday'] ?? '—' }}</td>
+                                <td class="py-2 {{ $color }}">
+                                    {{ $row['status'] === 'new' ? '登録します' : $row['reason'] }}
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</x-app-layout>

@@ -40,37 +40,154 @@ class CustomerImportController extends Controller
         $request->validate(['file' => ['required', 'file', 'max:2048']], [], ['file' => 'CSVファイル']);
 
         $text = $this->toUtf8(file_get_contents($request->file('file')->getRealPath()));
-        $rows =
-cat > resources/views/customers/import.blade.php <<'EOF'
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">顧客のCSV取り込み</h2>
-    </x-slot>
+        $rows = $this->parse($text);
 
-    <div class="py-8">
-        <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white shadow-sm sm:rounded-lg p-6 space-y-4 text-sm">
-                @if ($errors->any())
-                    <div class="p-3 bg-red-100 text-red-800 rounded">{{ $errors->first() }}</div>
-                @endif
+        if ($rows === null) {
+            return back()->withErrors(['file' => '1行目の見出しに「氏名」と「電話番号」の列が見つかりません。']);
+        }
 
-                <p>CSVファイルを選ぶと、登録前に内容を確認できます（まだ登録はされません）。</p>
-                <ul class="list-disc list-inside text-gray-600">
-                    <li>1行目は見出しにしてください。「氏名」と「電話番号」の列は必須です。</li>
-                    <li>ほかに「メールアドレス」「生年月日」「住所」「メモ」の列を読み取ります。</li>
-                    <li>同じ電話番号のお客様がすでにいる行は、取り込まずにスキップします。</li>
-                    <li>文字コードはUTF-8とShift-JISに対応しています。</li>
-                </ul>
-                <a href="{{ route('customer-import.template') }}" class="text-indigo-600 underline">サンプルCSVをダウンロード</a>
+        session(['customer_import' => $rows]);
 
-                <form method="POST" action="{{ route('customer-import.preview') }}" enctype="multipart/form-data" class="space-y-4">
-                    @csrf
-                    <input type="file" name="file" accept=".csv,text/csv" required>
-                    <div>
-                        <button type="submit" class="inline-flex items-center px-4 py-2 bg-gray-800 rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700">内容を確認する</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</x-app-layout>
+        return view('customers.import_preview', ['rows' => collect($rows)]);
+    }
+
+    public function confirm(): RedirectResponse
+    {
+        $rows = collect(session('customer_import'));
+
+        if ($rows->isEmpty()) {
+            return redirect()->route('customer-import.create')
+                ->withErrors(['file' => '取り込むデータがありません。もう一度ファイルを選んでください。']);
+        }
+
+        $new = $rows->where('status', 'new');
+
+        DB::transaction(function () use ($new) {
+            foreach ($new as $row) {
+                Customer::create($row['data']);
+            }
+        });
+
+        session()->forget('customer_import');
+
+        $dup = $rows->where('status', 'duplicate')->count();
+        $err = $rows->where('status', 'error')->count();
+
+        return redirect()->route('customers.index')
+            ->with('status', "{$new->count()}件を登録しました（重複{$dup}件・エラー{$err}件は取り込んでいません）。");
+    }
+
+    // Excelで保存したCSVはShift-JISのことが多いので、文字コードをUTF-8にそろえる
+    private function toUtf8(string $text): string
+    {
+        $text = preg_replace('/^\xEF\xBB\xBF/', '', $text);
+        $encoding = mb_detect_encoding($text, ['UTF-8', 'SJIS-win', 'EUC-JP'], true) ?: 'SJIS-win';
+
+        return $encoding === 'UTF-8' ? $text : mb_convert_encoding($text, 'UTF-8', $encoding);
+    }
+
+    private function parse(string $text): ?array
+    {
+        $stream = fopen('php://temp', 'r+');
+        fwrite($stream, $text);
+        rewind($stream);
+
+        $header = fgetcsv($stream);
+        if (! $header) {
+            return null;
+        }
+
+        $map = [];
+        foreach ($header as $i => $h) {
+            $h = mb_strtolower(trim((string) $h));
+            foreach (self::COLUMNS as $key => $aliases) {
+                if (in_array($h, array_map('mb_strtolower', $aliases), true)) {
+                    $map[$key] = $i;
+                    break;
+                }
+            }
+        }
+        if (! isset($map['name'], $map['phone'])) {
+            return null;
+        }
+
+        $existing = Customer::pluck('phone')->filter()
+            ->mapWithKeys(fn ($p) => [preg_replace('/\D/', '', $p) => true])->all();
+        $seen = [];
+        $rows = [];
+        $line = 1;
+
+        while (($cols = fgetcsv($stream)) !== false) {
+            $line++;
+            if (count($cols) === 1 && trim((string) $cols[0]) === '') {
+                continue;
+            }
+
+            $get = fn (string $key) => isset($map[$key]) ? trim((string) ($cols[$map[$key]] ?? '')) : '';
+
+            $name = $get('name');
+            $phone = $this->normalizePhone($get('phone'));
+            $email = $get('email');
+            $birthday = $this->normalizeBirthday($get('birthday'));
+
+            $status = 'new';
+            $reason = '';
+            if ($name === '') {
+                [$status, $reason] = ['error', '氏名が空です'];
+            } elseif ($phone === null) {
+                [$status, $reason] = ['error', '電話番号の形式が正しくありません'];
+            } elseif ($email !== '' && ! filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                [$status, $reason] = ['error', 'メールアドレスの形式が正しくありません'];
+            } elseif ($get('birthday') !== '' && $birthday === null) {
+                [$status, $reason] = ['error', '生年月日の形式が正しくありません（例：1980-05-20）'];
+            } elseif (isset($existing[$phone])) {
+                [$status, $reason] = ['duplicate', '同じ電話番号のお客様が登録済みです'];
+            } elseif (isset($seen[$phone])) {
+                [$status, $reason] = ['duplicate', '同じ電話番号がファイル内で重複しています'];
+            } else {
+                $seen[$phone] = true;
+            }
+
+            $rows[] = [
+                'line' => $line,
+                'status' => $status,
+                'reason' => $reason,
+                'data' => [
+                    'name' => $name,
+                    'phone' => $phone,
+                    'email' => $email ?: null,
+                    'birthday' => $birthday,
+                    'address' => $get('address') ?: null,
+                    'memo' => $get('memo') ?: null,
+                ],
+            ];
+        }
+        fclose($stream);
+
+        return $rows;
+    }
+
+    // 数字だけにそろえる。Excelで先頭の0が消えた携帯番号（9012345678）は0を補う
+    private function normalizePhone(string $value): ?string
+    {
+        $digits = preg_replace('/\D/', '', $value);
+        if (strlen($digits) === 10 && preg_match('/^[789]/', $digits)) {
+            $digits = '0' . $digits;
+        }
+
+        return in_array(strlen($digits), [10, 11], true) ? $digits : null;
+    }
+
+    private function normalizeBirthday(string $value): ?string
+    {
+        if ($value === '') {
+            return null;
+        }
+        $value = str_replace('日', '', str_replace(['年', '月', '/'], '-', $value));
+        if (! preg_match('/^(\d{4})-(\d{1,2})-(\d{1,2})$/', $value, $m) || ! checkdate((int) $m[2], (int) $m[3], (int) $m[1])) {
+            return null;
+        }
+
+        return sprintf('%04d-%02d-%02d', $m[1], $m[2], $m[3]);
+    }
+}

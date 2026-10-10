@@ -58,8 +58,8 @@
                         @if ($record->memo)<div class="mt-1 text-gray-700 whitespace-pre-line">{{ $record->memo }}</div>@endif
                         @if ($record->photo_before || $record->photo_after)
                             <div class="mt-3 flex gap-3">
-                                @if ($record->photo_before)<div><div class="text-xs text-gray-500">施術前</div><img src="{{ asset('storage/' . $record->photo_before) }}" class="w-32 rounded"></div>@endif
-                                @if ($record->photo_after)<div><div class="text-xs text-gray-500">施術後</div><img src="{{ asset('storage/' . $record->photo_after) }}" class="w-32 rounded"></div>@endif
+                                @if ($record->photo_before)<div><div class="text-xs text-gray-500">施術前</div><img src="{{ $record->photoUrl('photo_before') }}" class="w-32 rounded"></div>@endif
+                                @if ($record->photo_after)<div><div class="text-xs text-gray-500">施術後</div><img src="{{ $record->photoUrl('photo_after') }}" class="w-32 rounded"></div>@endif
                             </div>
                         @endif
                     </div>

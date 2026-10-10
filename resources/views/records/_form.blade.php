@@ -43,14 +43,14 @@
         <div>
             <label class="block text-sm text-gray-700 mb-1">施術前の写真</label>
             @if ($record->photo_before)
-                <img src="{{ asset('storage/' . $record->photo_before) }}" class="w-40 rounded mb-2">
+                <img src="{{ $record->photoUrl('photo_before') }}" class="w-40 rounded mb-2">
             @endif
             <input type="file" name="photo_before" accept="image/*" class="text-sm">
         </div>
         <div>
             <label class="block text-sm text-gray-700 mb-1">施術後の写真</label>
             @if ($record->photo_after)
-                <img src="{{ asset('storage/' . $record->photo_after) }}" class="w-40 rounded mb-2">
+                <img src="{{ $record->photoUrl('photo_after') }}" class="w-40 rounded mb-2">
             @endif
             <input type="file" name="photo_after" accept="image/*" class="text-sm">
         </div>
