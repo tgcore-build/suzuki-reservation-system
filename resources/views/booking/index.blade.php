@@ -43,7 +43,7 @@
             @if (count($slots) === 0)
                 <p class="text-sm text-gray-600">この日は予約できる時間がありません（休業日、または満席です）。別の日をお選びください。</p>
             @else
-                <form method="POST" action="{{ route('booking.store') }}" class="space-y-4">
+                <form method="POST" action="{{ route('booking.store') }}" class="space-y-4" onsubmit="this.querySelector('button[type=submit]').disabled = true">
                     @csrf
                     <input type="hidden" name="menu_id" value="{{ $menu->id }}">
                     <input type="hidden" name="date" value="{{ $date->format('Y-m-d') }}">
