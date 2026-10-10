@@ -45,3 +45,6 @@ Route::middleware('auth')->prefix('customer-import')->name('customer-import.')->
     Route::post('preview', [\App\Http\Controllers\CustomerImportController::class, 'preview'])->name('preview');
     Route::post('confirm', [\App\Http\Controllers\CustomerImportController::class, 'confirm'])->name('confirm');
 });
+
+// 予約表（週表示・2週間表示）
+Route::get('/schedule', [\App\Http\Controllers\ScheduleController::class, 'index'])->middleware('auth')->name('schedule.index');

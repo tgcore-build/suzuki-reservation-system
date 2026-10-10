@@ -21,6 +21,9 @@
                     <x-nav-link :href="route('reservations.index')" :active="request()->routeIs('reservations.*')">
                         予約管理
                     </x-nav-link>
+                <x-nav-link :href="route('schedule.index')" :active="request()->routeIs('schedule.*')">
+                    予約表
+                </x-nav-link>
                     <x-nav-link :href="route('menus.index')" :active="request()->routeIs('menus.*')">
                         メニュー管理
                     </x-nav-link>
