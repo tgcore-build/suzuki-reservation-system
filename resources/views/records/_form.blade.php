@@ -1,4 +1,4 @@
-<form method="POST" action="{{ $action }}" enctype="multipart/form-data" class="space-y-5">
+<form method="POST" action="{{ $action }}" enctype="multipart/form-data" class="space-y-5" onsubmit="this.querySelector('button[type=submit]').disabled = true">
     @csrf
     @if ($method !== 'POST')
         @method($method)
