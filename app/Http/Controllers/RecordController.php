@@ -40,7 +40,7 @@ class RecordController extends Controller
 
         foreach (['photo_before', 'photo_after'] as $field) {
             if ($request->hasFile($field) && $record->$field) {
-                Storage::disk('public')->delete($record->$field);
+                Storage::disk(config('salon.photo_disk'))->delete($record->$field);
             }
         }
         $data = $this->storePhotos($request, $data);
@@ -54,7 +54,7 @@ class RecordController extends Controller
     {
         foreach (['photo_before', 'photo_after'] as $field) {
             if ($record->$field) {
-                Storage::disk('public')->delete($record->$field);
+                Storage::disk(config('salon.photo_disk'))->delete($record->$field);
             }
         }
         $customerId = $record->customer_id;
@@ -88,7 +88,7 @@ class RecordController extends Controller
     {
         foreach (['photo_before', 'photo_after'] as $field) {
             if ($request->hasFile($field)) {
-                $data[$field] = $request->file($field)->store('records', 'public');
+                $data[$field] = $request->file($field)->store('records', config('salon.photo_disk'));
             } else {
                 unset($data[$field]);
             }
