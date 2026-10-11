@@ -42,8 +42,48 @@
             </div>
 
             <div class="bg-white shadow-sm sm:rounded-lg p-6">
-                <h3 class="font-semibold text-gray-800 mb-2">リマインド送信状況</h3>
-                <p class="text-sm text-gray-500">リマインドメール機能の実装後に表示されます（Week23予定）。</p>
+                <h3 class="font-semibold text-gray-800 mb-1">リマインド送信状況</h3>
+                <p class="text-xs text-gray-500 mb-4">毎日18:00に、翌日の予約（確定のもの）へリマインドメールを自動送信します。</p>
+
+                <div class="text-sm font-semibold text-gray-700 mb-2">明日（{{ today()->addDay()->format('n/j') }}）の予約</div>
+                <table class="w-full text-sm text-left mb-6">
+                    <tbody>
+                        @forelse ($tomorrowReservations as $r)
+                            <tr class="border-b">
+                                <td class="py-2 whitespace-nowrap">{{ $r->scheduled_at->format('H:i') }}</td>
+                                <td class="py-2">{{ $r->customer->name }}</td>
+                                <td class="py-2 text-right whitespace-nowrap">
+                                    @if ($r->reminder_sent_at)
+                                        <span class="text-green-700">送信済み（{{ \Illuminate\Support\Carbon::parse($r->reminder_sent_at)->format('n/j H:i') }}）</span>
+                                    @elseif (! $r->customer->email)
+                                        <span class="text-red-600">メール未登録（送れません）</span>
+                                    @elseif ($r->status !== 'confirmed')
+                                        <span class="text-gray-500">対象外（確定前）</span>
+                                    @else
+                                        <span class="text-gray-600">未送信（18:00に自動送信）</span>
+                                    @endif
+                                </td>
+                            </tr>
+                        @empty
+                            <tr><td class="py-3 text-gray-500">明日の予約はありません。</td></tr>
+                        @endforelse
+                    </tbody>
+                </table>
+
+                <div class="text-sm font-semibold text-gray-700 mb-2">最近送ったリマインド</div>
+                <table class="w-full text-sm text-left">
+                    <tbody>
+                        @forelse ($recentReminders as $r)
+                            <tr class="border-b">
+                                <td class="py-2 whitespace-nowrap">{{ \Illuminate\Support\Carbon::parse($r->reminder_sent_at)->format('n/j H:i') }}</td>
+                                <td class="py-2">{{ $r->customer->name }} 様</td>
+                                <td class="py-2 text-gray-500">{{ $r->scheduled_at->format('n/j H:i') }} の予約</td>
+                            </tr>
+                        @empty
+                            <tr><td class="py-3 text-gray-500">まだ送信履歴はありません。</td></tr>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
