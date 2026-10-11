@@ -10,24 +10,40 @@ class DashboardController extends Controller
 {
     public function index(): View
     {
-        $today = today();
+        $tomorrow = today()->addDay();
 
         $todayReservations = Reservation::with(['customer', 'menu'])
-            ->whereDate('scheduled_at', $today)
             ->where('status', '!=', 'cancelled')
+            ->whereBetween('scheduled_at', [today()->startOfDay(), today()->endOfDay()])
             ->orderBy('scheduled_at')
             ->get();
 
-        $tomorrowCount = Reservation::whereDate('scheduled_at', $today->copy()->addDay())
+        // 明日の予約（リマインドメールの送信対象）
+        $tomorrowReservations = Reservation::with(['customer', 'menu'])
             ->where('status', '!=', 'cancelled')
+            ->whereBetween('scheduled_at', [$tomorrow->copy()->startOfDay(), $tomorrow->copy()->endOfDay()])
+            ->orderBy('scheduled_at')
+            ->get();
+
+        // 明日から7日間の予約
+        $weekCount = Reservation::where('status', '!=', 'cancelled')
+            ->whereBetween('scheduled_at', [$tomorrow->copy()->startOfDay(), today()->addDays(7)->endOfDay()])
             ->count();
 
-        $weekCount = Reservation::whereBetween('scheduled_at', [$today->copy()->addDay()->startOfDay(), $today->copy()->addDays(7)->endOfDay()])
-            ->where('status', '!=', 'cancelled')
-            ->count();
+        // 最近送ったリマインド
+        $recentReminders = Reservation::with(['customer', 'menu'])
+            ->whereNotNull('reminder_sent_at')
+            ->orderByDesc('reminder_sent_at')
+            ->limit(5)
+            ->get();
 
-        $customerCount = Customer::count();
-
-        return view('dashboard', compact('todayReservations', 'tomorrowCount', 'weekCount', 'customerCount'));
+        return view('dashboard', [
+            'tomorrowCount' => $tomorrowReservations->count(),
+            'weekCount' => $weekCount,
+            'customerCount' => Customer::count(),
+            'todayReservations' => $todayReservations,
+            'tomorrowReservations' => $tomorrowReservations,
+            'recentReminders' => $recentReminders,
+        ]);
     }
 }
