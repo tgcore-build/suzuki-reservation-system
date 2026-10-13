@@ -19,15 +19,16 @@ class AiPing extends Command
         $this->info('メニュー ' . $menus->count() . '件で相談します: ' . $this->argument('message'));
 
         try {
-            $result = $advisor->advise($this->argument('message'), $menus);
+            $result = $advisor->chat([['role' => 'user', 'content' => $this->argument('message')]], $menus, 'normal');
         } catch (AiUnavailableException $e) {
             $this->error($e->getMessage());
 
             return self::FAILURE;
         }
 
+        $this->line('AIの返事: ' . $result['reply']);
+        $this->line('会話の終わり: ' . ($result['is_final'] ? 'はい' : 'いいえ（続けて質問）'));
         $this->line('おすすめ: ' . ($result['menu']?->name ?? '（なし）'));
-        $this->line('理由: ' . $result['reason']);
 
         return self::SUCCESS;
     }
