@@ -30,6 +30,9 @@
                     <x-nav-link :href="route('business-hours.edit')" :active="request()->routeIs('business-hours.*')">
                         営業時間
                     </x-nav-link>
+                    <x-nav-link :href="route('ai-guidelines.edit')" :active="request()->routeIs('ai-guidelines.*')">
+                        AI設定
+                    </x-nav-link>
                 </div>
             </div>
 

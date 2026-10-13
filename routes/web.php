@@ -52,3 +52,10 @@ Route::get('/schedule', [\App\Http\Controllers\ScheduleController::class, 'index
 // AI提案（お客様向け・ログイン不要）
 Route::get('/ai', [\App\Http\Controllers\AiAdviceController::class, 'index'])->name('ai.index');
 Route::post('/ai', [\App\Http\Controllers\AiAdviceController::class, 'store'])->middleware('throttle:5,1')->name('ai.store');
+Route::post('/ai/reset', [\App\Http\Controllers\AiAdviceController::class, 'reset'])->name('ai.reset');
+
+// AI相談の設定（管理者）
+Route::middleware('auth')->group(function () {
+    Route::get('ai-guidelines', [\App\Http\Controllers\AiGuidelineController::class, 'edit'])->name('ai-guidelines.edit');
+    Route::put('ai-guidelines', [\App\Http\Controllers\AiGuidelineController::class, 'update'])->name('ai-guidelines.update');
+});
