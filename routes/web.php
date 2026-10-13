@@ -48,3 +48,7 @@ Route::middleware('auth')->prefix('customer-import')->name('customer-import.')->
 
 // 予約表（週表示・2週間表示）
 Route::get('/schedule', [\App\Http\Controllers\ScheduleController::class, 'index'])->middleware('auth')->name('schedule.index');
+
+// AI提案（お客様向け・ログイン不要）
+Route::get('/ai', [\App\Http\Controllers\AiAdviceController::class, 'index'])->name('ai.index');
+Route::post('/ai', [\App\Http\Controllers\AiAdviceController::class, 'store'])->middleware('throttle:5,1')->name('ai.store');
