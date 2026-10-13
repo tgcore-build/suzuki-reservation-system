@@ -31,6 +31,7 @@
             </select>
         </div>
         <button type="submit" class="px-4 py-2 bg-gray-800 rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700">空き状況を見る</button>
+        <p class="text-sm text-gray-600">メニューに迷ったら → <a href="{{ route('ai.index') }}" class="underline">AIに相談する</a></p>
     </form>
 
     @if ($menu)
