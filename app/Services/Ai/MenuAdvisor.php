@@ -5,6 +5,8 @@ namespace App\Services\Ai;
 use App\Http\Controllers\AiGuidelineController;
 use App\Models\Menu;
 use App\Models\Setting;
+use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
@@ -37,6 +39,15 @@ class MenuAdvisor
         try {
             $response = Http::withHeaders(['x-goog-api-key' => $key])
                 ->timeout((int) config('ai.timeout'))
+                // 混雑（429/503）や一時的なエラー・時間切れのときは、少し待ってもう1回だけ試す
+                ->retry(2, app()->runningUnitTests() ? 0 : 1500, function (\Throwable $e) {
+                    if ($e instanceof ConnectionException) {
+                        return true;
+                    }
+
+                    return $e instanceof RequestException
+                        && in_array($e->response->status(), [429, 500, 503], true);
+                }, throw: false)
                 ->post("https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent", [
                     'systemInstruction' => ['parts' => [['text' => $this->instruction($menus, $phase)]]],
                     'contents' => $contents,
