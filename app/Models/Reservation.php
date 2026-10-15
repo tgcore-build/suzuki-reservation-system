@@ -13,9 +13,12 @@ class Reservation extends Model
         'cancelled' => 'キャンセル',
     ];
 
-    protected $fillable = ['customer_id', 'menu_id', 'scheduled_at', 'source', 'notes', 'status'];
+    protected $fillable = [
+        'customer_id', 'menu_id', 'scheduled_at', 'source', 'notes', 'status',
+        'booked_name', 'booked_email', 'needs_review',
+    ];
 
-    protected $casts = ['scheduled_at' => 'datetime'];
+    protected $casts = ['scheduled_at' => 'datetime', 'needs_review' => 'boolean'];
 
     public function customer(): BelongsTo
     {

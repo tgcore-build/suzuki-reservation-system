@@ -6,8 +6,11 @@ use App\Models\Customer;
 use App\Models\Menu;
 use App\Models\Reservation;
 use Carbon\Carbon;
+use Illuminate\Contracts\Cache\LockTimeoutException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
@@ -43,11 +46,13 @@ class ReservationController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $data = $this->validated($request, null);
-        $data['source'] = 'admin';
-        $data['status'] = 'confirmed';
+        $this->withDayLock($request, function () use ($request) {
+            $data = $this->validated($request, null);
+            $data['source'] = 'admin';
+            $data['status'] = 'confirmed';
 
-        Reservation::create($data);
+            Reservation::create($data);
+        });
 
         return redirect()->route('reservations.index')->with('status', '予約を登録しました。');
     }
@@ -59,10 +64,12 @@ class ReservationController extends Controller
 
     public function update(Request $request, Reservation $reservation): RedirectResponse
     {
-        $data = $this->validated($request, $reservation);
-        $data['status'] = $request->input('status', $reservation->status);
+        $this->withDayLock($request, function () use ($request, $reservation) {
+            $data = $this->validated($request, $reservation);
+            $data['status'] = $request->input('status', $reservation->status);
 
-        $reservation->update($data);
+            $reservation->update($data);
+        });
 
         return redirect()->route('reservations.index')->with('status', '予約を更新しました。');
     }
@@ -73,6 +80,24 @@ class ReservationController extends Controller
         $reservation->update(['status' => 'cancelled']);
 
         return redirect()->route('reservations.index')->with('status', '予約をキャンセルしました。');
+    }
+
+    // 同じ日の予約は1件ずつ処理して、同時操作による二重予約を防ぐ（お客様向け予約と同じロック）
+    private function withDayLock(Request $request, callable $callback): void
+    {
+        try {
+            $day = Carbon::parse((string) $request->input('scheduled_at'))->format('Y-m-d');
+        } catch (\Throwable $e) {
+            $day = 'invalid'; // 日時の形式エラーは、このあとの入力チェックで表示する
+        }
+
+        try {
+            Cache::lock('reservation:' . $day, 10)->block(5, fn () => DB::transaction($callback));
+        } catch (LockTimeoutException $e) {
+            throw ValidationException::withMessages([
+                'scheduled_at' => '混み合っています。もう一度お試しください。',
+            ]);
+        }
     }
 
     private function formData(?Reservation $reservation = null): array

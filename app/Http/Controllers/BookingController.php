@@ -8,8 +8,11 @@ use App\Models\Customer;
 use App\Models\Menu;
 use App\Models\Reservation;
 use Carbon\Carbon;
+use Illuminate\Contracts\Cache\LockTimeoutException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
@@ -96,35 +99,33 @@ class BookingController extends Controller
 
         $menu = Menu::where('is_active', true)->find($data['menu_id']);
         $date = $this->parseDate($data['date']);
-
-        if (! $menu || ! $date || ! in_array($data['time'], $this->availableSlots($date, $menu), true)) {
-            throw ValidationException::withMessages([
-                'time' => '選択された時間は予約できません。別の時間をお選びください。',
-            ]);
-        }
-
-        $digits = preg_replace('/\D/', '', $data['phone']);
-        $customer = Customer::whereRaw("REPLACE(phone, '-', '') = ?", [$digits])->first();
-        if (! $customer) {
-            $customer = Customer::create([
-                'name' => $data['name'],
-                'phone' => $digits,
-                'email' => $data['email'],
-            ]);
-        } elseif (! $customer->email) {
-            $customer->update(['email' => $data['email']]);
-        }
-
-        $reservation = Reservation::create([
-            'customer_id' => $customer->id,
-            'menu_id' => $menu->id,
-            'scheduled_at' => $date->copy()->setTimeFromTimeString($data['time']),
-            'source' => 'online',
-            'status' => 'confirmed',
+        $unavailable = ValidationException::withMessages([
+            'time' => '選択された時間は予約できません。別の時間をお選びください。',
         ]);
 
+        if (! $menu || ! $date) {
+            throw $unavailable;
+        }
+
+        // 同じ日の予約は1件ずつ処理して、同時送信による二重予約を防ぐ
         try {
-            Mail::to($data['email'])->send(new ReservationConfirmed($reservation->load('customer', 'menu')));
+            $reservation = Cache::lock('reservation:' . $date->format('Y-m-d'), 10)->block(5, function () use ($data, $menu, $date, $unavailable) {
+                return DB::transaction(function () use ($data, $menu, $date, $unavailable) {
+                    if (! in_array($data['time'], $this->availableSlots($date, $menu), true)) {
+                        throw $unavailable;
+                    }
+
+                    return $this->createReservation($data, $menu, $date);
+                });
+            });
+        } catch (LockTimeoutException $e) {
+            throw ValidationException::withMessages([
+                'time' => '混み合っています。もう一度お試しください。',
+            ]);
+        }
+
+        try {
+            Mail::to($data['email'])->send(new ReservationConfirmed($reservation->load('menu')));
         } catch (\Throwable $e) {
             report($e); // メール送信に失敗しても予約は成立させる
         }
@@ -142,6 +143,48 @@ class BookingController extends Controller
         }
 
         return view('booking.complete', ['booked' => session('booked')]);
+    }
+
+    // 電話番号が一致すれば既存の顧客に予約を付ける。名前かメールが登録と違う場合は「要確認」にする
+    private function createReservation(array $data, Menu $menu, Carbon $date): Reservation
+    {
+        $digits = preg_replace('/\D/', '', $data['phone']);
+        $customer = Customer::whereRaw("REPLACE(phone, '-', '') = ?", [$digits])->first();
+        $needsReview = false;
+
+        if (! $customer) {
+            $customer = Customer::create([
+                'name' => $data['name'],
+                'phone' => $digits,
+                'email' => $data['email'],
+            ]);
+        } else {
+            $sameName = $this->normalizeName($customer->name) === $this->normalizeName($data['name']);
+            $sameEmail = ! $customer->email || strcasecmp($customer->email, $data['email']) === 0;
+            $needsReview = ! $sameName || ! $sameEmail;
+
+            // 本人と確認できないときは、登録内容を書き換えない
+            if ($sameName && ! $customer->email) {
+                $customer->update(['email' => $data['email']]);
+            }
+        }
+
+        return Reservation::create([
+            'customer_id' => $customer->id,
+            'menu_id' => $menu->id,
+            'scheduled_at' => $date->copy()->setTimeFromTimeString($data['time']),
+            'source' => 'online',
+            'status' => 'confirmed',
+            'booked_name' => $data['name'],
+            'booked_email' => $data['email'],
+            'needs_review' => $needsReview,
+        ]);
+    }
+
+    // 空白（全角を含む）を取り除いて比べる
+    private function normalizeName(string $name): string
+    {
+        return preg_replace('/[\s　]+/u', '', $name);
     }
 
     // 指定日を含む週の月曜日。今週より前や不正な値は、今週の月曜日にする

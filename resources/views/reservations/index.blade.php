@@ -54,7 +54,12 @@
                             @forelse ($reservations as $r)
                                 <tr class="border-b {{ $r->status === 'cancelled' ? 'text-gray-400' : '' }}">
                                     <td class="py-2 whitespace-nowrap">{{ $r->scheduled_at->format('Y/m/d') }}（{{ $weekdays[$r->scheduled_at->dayOfWeek] }}） {{ $r->scheduled_at->format('H:i') }}</td>
-                                    <td class="py-2"><a href="{{ route('customers.show', $r->customer) }}" class="text-indigo-600 underline">{{ $r->customer->name }}</a></td>
+                                    <td class="py-2"><a href="{{ route('customers.show', $r->customer) }}" class="text-indigo-600 underline">{{ $r->customer->name }}</a>
+                                        @if ($r->needs_review)
+                                            <span class="ml-1 px-1.5 py-0.5 text-xs rounded bg-amber-100 text-amber-800" title="電話番号は一致しましたが、入力された名前またはメールが登録と違います">要確認</span>
+                                            <div class="text-xs text-gray-500">入力：{{ $r->booked_name }} / {{ $r->booked_email }}</div>
+                                        @endif
+                                    </td>
                                     <td class="py-2">{{ $r->menu->name }}（{{ $r->menu->duration_minutes }}分）</td>
                                     <td class="py-2">{{ \App\Models\Reservation::STATUSES[$r->status] }}</td>
                                     <td class="py-2">{{ $r->source === 'online' ? 'オンライン' : '管理者' }}</td>
