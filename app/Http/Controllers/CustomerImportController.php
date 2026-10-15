@@ -37,7 +37,7 @@ class CustomerImportController extends Controller
 
     public function preview(Request $request): View|RedirectResponse
     {
-        $request->validate(['file' => ['required', 'file', 'max:2048']], [], ['file' => 'CSVファイル']);
+        $request->validate(['file' => ['required', 'file', 'mimes:csv,txt', 'max:2048']], [], ['file' => 'CSVファイル']);
 
         $text = $this->toUtf8(file_get_contents($request->file('file')->getRealPath()));
         $rows = $this->parse($text);
