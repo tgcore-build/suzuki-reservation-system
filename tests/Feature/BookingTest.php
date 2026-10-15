@@ -166,4 +166,41 @@ class BookingTest extends TestCase
 
         $this->assertSame(0, Reservation::count());
     }
+
+    public function test_phone_match_with_different_name_is_flagged_and_does_not_leak_name(): void
+    {
+        Mail::fake();
+        $customer = Customer::create(['name' => '既存の花子', 'phone' => '090-1111-2222']);
+
+        $this->post('/book', $this->bookingData(['name' => '別の人', 'email' => 'other@example.com']))
+            ->assertRedirect(route('booking.complete'));
+
+        $reservation = Reservation::first();
+        $this->assertTrue($reservation->needs_review);
+        $this->assertSame('別の人', $reservation->booked_name);
+        $this->assertNull($customer->fresh()->email); // 登録内容は書き換えない
+
+        Mail::assertSent(ReservationConfirmed::class, function (ReservationConfirmed $mail) {
+            $html = $mail->render();
+
+            return str_contains($html, '別の人 様') && ! str_contains($html, '既存の花子');
+        });
+    }
+
+    public function test_phone_match_with_same_name_is_not_flagged(): void
+    {
+        Mail::fake();
+        $customer = Customer::create(['name' => 'テスト 花子', 'phone' => '090-1111-2222']);
+
+        $this->post('/book', $this->bookingData())->assertRedirect(route('booking.complete'));
+
+        $this->assertFalse(Reservation::first()->needs_review);
+        $this->assertSame('hanako@example.com', $customer->fresh()->email);
+    }
+
+    public function test_validation_messages_are_japanese(): void
+    {
+        $this->post('/book', $this->bookingData(['name' => '']))
+            ->assertSessionHasErrors(['name' => 'お名前を入力してください。']);
+    }
 }
