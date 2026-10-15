@@ -17,6 +17,11 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
+        // 初期パスワードが分かっているテスト用ユーザーなので、本番では作らない
+        if (app()->isProduction()) {
+            return;
+        }
+
         User::factory()->create([
             'name' => 'Test User',
             'email' => 'test@example.com',

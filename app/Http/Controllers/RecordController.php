@@ -71,8 +71,8 @@ class RecordController extends Controller
             'materials' => ['nullable', 'string'],
             'duration_minutes' => ['nullable', 'integer', 'min:1', 'max:600'],
             'memo' => ['nullable', 'string'],
-            'photo_before' => ['nullable', 'image', 'max:5120'],
-            'photo_after' => ['nullable', 'image', 'max:5120'],
+            'photo_before' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            'photo_after' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
         ], [], [
             'performed_on' => '施術日',
             'menu' => 'メニュー',
