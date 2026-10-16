@@ -33,6 +33,11 @@ class Customer extends Model
         return $this->hasMany(Reservation::class);
     }
 
+    public function aiSessions(): HasMany
+    {
+        return $this->hasMany(AiSession::class);
+    }
+
     public function records(): HasMany
     {
         return $this->hasMany(Record::class);
