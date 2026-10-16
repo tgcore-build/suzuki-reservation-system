@@ -43,7 +43,7 @@
                             @forelse ($sessions as $s)
                                 <tr class="border-b">
                                     <td class="py-2 whitespace-nowrap">{{ $s->created_at->format('Y/m/d H:i') }}</td>
-                                    <td class="py-2">{{ $s->result_menu ?? '—' }}</td>
+                                    <td class="py-2">{{ $s->resultMenuName() ?? '—' }}</td>
                                     <td class="py-2">{{ \App\Models\AiSession::STATUSES[$s->status] ?? $s->status }}</td>
                                     <td class="py-2">{{ $s->messages_count }}回</td>
                                     <td class="py-2">

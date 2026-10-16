@@ -15,6 +15,9 @@
                     <div class="flex py-3"><dt class="w-40 text-gray-500">氏名</dt><dd>{{ $customer->name }}</dd></div>
                     <div class="flex py-3"><dt class="w-40 text-gray-500">電話番号</dt><dd>{{ $customer->phone ?? '—' }}</dd></div>
                     <div class="flex py-3"><dt class="w-40 text-gray-500">メールアドレス</dt><dd>{{ $customer->email ?? '—' }}</dd></div>
+                    @if ($customer->email2)
+                        <div class="flex py-3"><dt class="w-40 text-gray-500">メールアドレス（2つ目）</dt><dd>{{ $customer->email2 }}</dd></div>
+                    @endif
                     <div class="flex py-3"><dt class="w-40 text-gray-500">住所</dt><dd>{{ $customer->address ?? '—' }}</dd></div>
                     <div class="flex py-3"><dt class="w-40 text-gray-500">生年月日</dt><dd>{{ $customer->birthday?->format('Y/m/d') ?? '—' }}</dd></div>
                     <div class="flex py-3"><dt class="w-40 text-gray-500">性別</dt><dd>{{ $customer->gender ?? '—' }}</dd></div>
@@ -75,10 +78,10 @@
                         <tr><th class="py-2">日時</th><th class="py-2">提案メニュー</th><th class="py-2"></th></tr>
                     </thead>
                     <tbody>
-                        @forelse ($customer->aiSessions()->orderByDesc('created_at')->get() as $s)
+                        @forelse ($customer->aiSessions()->with('resultMenu')->orderByDesc('created_at')->get() as $s)
                             <tr class="border-t">
                                 <td class="py-2">{{ $s->created_at->format('Y/m/d H:i') }}</td>
-                                <td class="py-2">{{ $s->result_menu ?? '—' }}</td>
+                                <td class="py-2">{{ $s->resultMenuName() ?? '—' }}</td>
                                 <td class="py-2 text-right"><a href="{{ route('ai-sessions.show', $s) }}" class="text-indigo-600 underline">会話を見る</a></td>
                             </tr>
                         @empty

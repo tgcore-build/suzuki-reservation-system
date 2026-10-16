@@ -13,7 +13,8 @@
                 </form>
             @endif
         </div>
-        <p class="text-sm text-gray-600 mb-4">髪のお悩みやご要望を、お書きください。AIがいくつか質問しながら、合いそうなメニューをご提案します。</p>
+        <p class="text-sm text-gray-600 mb-2">髪のお悩みやご要望を、お書きください。AIがいくつか質問しながら、合いそうなメニューをご提案します。</p>
+        <p class="text-xs text-gray-500 mb-4 p-2 bg-gray-50 rounded">ご相談の内容は、メニューのご提案のため外部のAIサービス（Google Gemini）に送信され、当店でも記録として保存します。お名前・電話番号などの個人情報は書かないでください。</p>
 
         {{-- 会話のログ --}}
         <div class="space-y-3 mb-4">

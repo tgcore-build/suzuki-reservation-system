@@ -165,5 +165,6 @@ return [
         'password_confirmation' => 'パスワード（確認）',
         'current_password' => '現在のパスワード',
         'phone' => '電話番号',
+        'email2' => 'メールアドレス（2つ目）',
     ],
 ];

@@ -72,6 +72,7 @@ class CustomerController extends Controller
             'name' => ['required', 'string', 'max:50'],
             'phone' => ['required', 'string', 'max:20', Rule::unique('customers', 'phone')->ignore($customer?->id)],
             'email' => ['nullable', 'email', 'max:100'],
+            'email2' => ['nullable', 'email', 'max:100'],
             'address' => ['nullable', 'string', 'max:255'],
             'birthday' => ['nullable', 'date', 'before_or_equal:today'],
             'gender' => ['nullable', 'string', 'max:10'],

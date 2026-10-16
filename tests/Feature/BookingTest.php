@@ -203,4 +203,47 @@ class BookingTest extends TestCase
         $this->post('/book', $this->bookingData(['name' => '']))
             ->assertSessionHasErrors(['name' => 'お名前を入力してください。']);
     }
+
+    public function test_phone_with_only_hyphens_is_rejected(): void
+    {
+        $this->post('/book', $this->bookingData(['phone' => '----------']))->assertSessionHasErrors('phone');
+        $this->post('/book', $this->bookingData(['phone' => '090-1111-22223']))->assertSessionHasErrors('phone'); // 12桁
+
+        $this->assertSame(0, Customer::count());
+    }
+
+    public function test_new_email_is_saved_as_second_address(): void
+    {
+        Mail::fake();
+        $customer = Customer::create(['name' => 'テスト花子', 'phone' => '090-1111-2222', 'email' => 'old@example.com']);
+
+        $this->post('/book', $this->bookingData(['email' => 'new@example.com']))->assertRedirect(route('booking.complete'));
+
+        $customer->refresh();
+        $this->assertSame('old@example.com', $customer->email); // 登録済みのアドレスは上書きしない
+        $this->assertSame('new@example.com', $customer->email2);
+        $this->assertFalse(Reservation::first()->needs_review);
+    }
+
+    public function test_third_email_is_flagged_without_overwriting(): void
+    {
+        Mail::fake();
+        $customer = Customer::create(['name' => 'テスト花子', 'phone' => '090-1111-2222', 'email' => 'a@example.com', 'email2' => 'b@example.com']);
+
+        $this->post('/book', $this->bookingData(['email' => 'c@example.com']))->assertRedirect(route('booking.complete'));
+
+        $customer->refresh();
+        $this->assertSame(['a@example.com', 'b@example.com'], [$customer->email, $customer->email2]);
+        $this->assertTrue(Reservation::first()->needs_review);
+    }
+
+    public function test_different_name_does_not_add_email(): void
+    {
+        Mail::fake();
+        $customer = Customer::create(['name' => '既存の花子', 'phone' => '090-1111-2222', 'email' => 'old@example.com']);
+
+        $this->post('/book', $this->bookingData(['name' => '別の人', 'email' => 'other@example.com']));
+
+        $this->assertNull($customer->fresh()->email2);
+    }
 }

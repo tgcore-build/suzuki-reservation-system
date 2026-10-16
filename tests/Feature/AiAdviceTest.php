@@ -96,6 +96,7 @@ class AiAdviceTest extends TestCase
         $session->refresh();
         $this->assertSame('completed', $session->status);
         $this->assertSame('うる艶トリートメント', $session->result_menu);
+        $this->assertSame($this->menu->id, $session->result_menu_id);
         $this->assertSame(4, $session->messages()->count());
         $this->assertSame(1, AiSession::count());
 
@@ -234,5 +235,41 @@ class AiAdviceTest extends TestCase
         $this->post('/ai', ['message' => '2回目'])->assertSessionHasErrors('message');
 
         Http::assertSentCount(1);
+    }
+
+    public function test_result_stays_linked_after_menu_is_renamed(): void
+    {
+        $this->fakeAnswers(
+            ['reply' => '質問です', 'is_final' => false, 'menu_id' => null],
+            ['reply' => 'おすすめです', 'is_final' => true, 'menu_id' => $this->menu->id],
+        );
+        $this->post('/ai', ['message' => '乾燥が気になります']);
+        $this->post('/ai', ['message' => 'パサつきです']);
+
+        $this->menu->update(['name' => '新しい名前のトリートメント']);
+
+        $this->get('/ai')->assertOk()
+            ->assertSee('新しい名前のトリートメント')
+            ->assertSee('menu_id=' . $this->menu->id, false);
+    }
+
+    public function test_daily_limit_per_ip_address(): void
+    {
+        config(['ai.ip_daily_limit' => 1]);
+        $this->fakeAnswers(
+            ['reply' => '質問です', 'is_final' => false, 'menu_id' => null],
+            ['reply' => '質問です', 'is_final' => false, 'menu_id' => null],
+        );
+
+        $this->withServerVariables(['REMOTE_ADDR' => '10.0.0.1'])->post('/ai', ['message' => '1回目'])->assertSessionHasNoErrors();
+        $this->withServerVariables(['REMOTE_ADDR' => '10.0.0.1'])->post('/ai', ['message' => '2回目'])->assertSessionHasErrors('message');
+        $this->withServerVariables(['REMOTE_ADDR' => '10.0.0.2'])->post('/ai', ['message' => '別の人'])->assertSessionHasNoErrors();
+
+        Http::assertSentCount(2);
+    }
+
+    public function test_page_tells_that_messages_are_sent_to_external_ai(): void
+    {
+        $this->get('/ai')->assertOk()->assertSee('外部のAIサービス');
     }
 }

@@ -14,7 +14,7 @@
 | 認証・権限 | 管理画面はすべてログイン必須。新規登録画面はない。テスト用ユーザー（`DatabaseSeeder`）は本番では作らない | `routes/web.php`、`routes/auth.php` |
 | ログイン試行の制限 | 5回失敗すると一定時間ログインできない | `LoginRequest` |
 | パスワード再設定 | メールで再設定用リンクを送る（本番ではメール送信の設定が必要） | `routes/auth.php` |
-| 送信回数の制限 | オンライン予約は1分に10回、AI相談は1分に5回まで | `routes/web.php` |
+| 送信回数の制限 | オンライン予約は1分に10回、AI相談は1分に5回まで。AI相談は1日の上限も、全体とIPアドレスごとに設ける | `routes/web.php` |
 | ファイルアップロード | 写真は jpg / png / webp、5MB まで。CSV は csv / txt、2MB まで。ファイル名はランダムに付け直す | `RecordController`、`CustomerImportController` |
 | セッション・Cookie | HttpOnly、SameSite=Lax。本番では Secure（HTTPS だけで送信） | `config/session.php` |
 | HTTPS | 本番では URL をすべて https にし、HSTS ヘッダーを付ける | `AppServiceProvider`、`SecurityHeaders` |
@@ -81,6 +81,9 @@
 - お客様から受け取るのは、予約に必要な名前・電話番号・メールアドレスだけ。
 - 顧客は管理画面から削除できる（対応記録も一緒に削除される）。
 - AI相談の会話記録と、削除した顧客の写真ファイルは、今は自動では削除しない（必要になったら追加する）。
+- AI相談の内容（頭皮の症状など健康に関わる情報を含むことがある）は Google Gemini に送られる。
+  - 無料枠では、入力内容が Google のサービス改善に使われることがある。本番運用では有料枠に切り替える予定。
+  - それまでは、相談画面に「外部のAIサービスに送信される」「個人情報は書かない」ことを表示している。
 
 ## 7. 依存パッケージ
 
