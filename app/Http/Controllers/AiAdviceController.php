@@ -19,8 +19,8 @@ class AiAdviceController extends Controller
     public function index(Request $request): View
     {
         $aiSession = $this->currentSession($request);
-        $resultMenu = $aiSession?->result_menu
-            ? Menu::where('is_active', true)->where('name', $aiSession->result_menu)->first()
+        $resultMenu = $aiSession?->result_menu_id
+            ? Menu::where('is_active', true)->find($aiSession->result_menu_id)
             : null;
 
         return view('ai.index', [
@@ -43,13 +43,13 @@ class AiAdviceController extends Controller
             return back()->withInput()->withErrors(['message' => '現在ご案内できるメニューがありません。']);
         }
 
-        // 1日の問い合わせ回数の上限（費用が増えすぎないように）
-        $limitKey = 'ai-advice:' . today()->format('Y-m-d');
-        $count = (int) Cache::get($limitKey, 0);
-        if ($count >= (int) config('ai.daily_limit')) {
+        // 1日の問い合わせ回数の上限（費用が増えすぎないように）。1人で使い切れないよう、IPアドレスごとにも上限を設ける
+        // 同時に送られても正しく数えられるように、Cache::increment で数える
+        $day = today()->format('Y-m-d');
+        if ($this->countUp("ai-advice:ip:{$day}:" . $request->ip()) > (int) config('ai.ip_daily_limit')
+            || $this->countUp("ai-advice:{$day}") > (int) config('ai.daily_limit')) {
             return back()->withInput()->withErrors(['message' => '本日のAI相談の受付は終了しました。メニュー選択からご予約ください。']);
         }
-        Cache::put($limitKey, $count + 1, now()->endOfDay());
 
         // 進行中の会話がなければ、新しく始める（終わった会話の続きはしない）
         $aiSession = $this->currentSession($request);
@@ -84,7 +84,11 @@ class AiAdviceController extends Controller
             $aiSession->messages()->create(['role' => 'ai', 'content' => $result['reply']]);
 
             if ($result['is_final']) {
-                $aiSession->update(['status' => 'completed', 'result_menu' => $result['menu']?->name]);
+                $aiSession->update([
+                    'status' => 'completed',
+                    'result_menu_id' => $result['menu']?->id,
+                    'result_menu' => $result['menu']?->name,
+                ]);
             }
         });
 
@@ -99,6 +103,14 @@ class AiAdviceController extends Controller
         $request->session()->forget(self::SESSION_KEY);
 
         return redirect()->route('ai.index');
+    }
+
+    // 回数を1増やして、増やしたあとの回数を返す（その日のうちだけ数える）
+    private function countUp(string $key): int
+    {
+        Cache::add($key, 0, now()->endOfDay());
+
+        return (int) Cache::increment($key);
     }
 
     private function currentSession(Request $request): ?AiSession

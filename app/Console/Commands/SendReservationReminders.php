@@ -25,20 +25,31 @@ class SendReservationReminders extends Command
             ->get();
 
         $sent = 0;
+        $failed = 0;
         foreach ($reservations as $reservation) {
-            $email = $reservation->customer?->email;
+            // オンライン予約は、その予約で入力されたアドレスに送る（確認メールと同じ宛先）
+            $email = $reservation->booked_email ?: $reservation->customer?->email;
             if (! $email) {
                 $this->line("スキップ（メール未登録）: 予約#{$reservation->id}");
                 continue;
             }
 
-            Mail::to($email)->send(new ReservationReminder($reservation));
+            // 1件失敗しても、残りの人には送る（失敗した予約は送信済みにしないので、再実行で送り直せる）
+            try {
+                Mail::to($email)->send(new ReservationReminder($reservation));
+            } catch (\Throwable $e) {
+                report($e);
+                $this->error("送信失敗: 予約#{$reservation->id}");
+                $failed++;
+                continue;
+            }
+
             Reservation::whereKey($reservation->id)->update(['reminder_sent_at' => now()]);
             $sent++;
         }
 
-        $this->info("送信: {$sent}件 / 対象日: {$date->format('Y-m-d')}");
+        $this->info("送信: {$sent}件 / 失敗: {$failed}件 / 対象日: {$date->format('Y-m-d')}");
 
-        return self::SUCCESS;
+        return $failed > 0 ? self::FAILURE : self::SUCCESS;
     }
 }

@@ -17,7 +17,7 @@ class AiSessionController extends Controller
             'booked' => ['nullable', Rule::in(['yes', 'no'])],
         ]);
 
-        $sessions = AiSession::with('customer')
+        $sessions = AiSession::with('customer', 'resultMenu')
             ->withCount(['messages' => fn ($q) => $q->where('role', 'user')])
             ->when($request->filled('status'), fn ($q) => $q->where('status', $request->input('status')))
             ->when($request->input('booked') === 'yes', fn ($q) => $q->whereNotNull('customer_id'))
@@ -32,7 +32,7 @@ class AiSessionController extends Controller
 
     public function show(AiSession $aiSession): View
     {
-        $aiSession->load('customer', 'messages');
+        $aiSession->load('customer', 'resultMenu', 'messages');
 
         return view('ai-sessions.show', compact('aiSession'));
     }

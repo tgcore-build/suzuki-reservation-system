@@ -20,6 +20,13 @@
     </div>
 
     <div>
+        <x-input-label for="email2" value="メールアドレス（2つ目）" />
+        <x-text-input id="email2" name="email2" type="email" class="mt-1 block w-full" :value="old('email2', $c?->email2)" />
+        <p class="mt-1 text-xs text-gray-500">オンライン予約で、登録と違うアドレスが入力されたときに自動で入ります。</p>
+        <x-input-error class="mt-2" :messages="$errors->get('email2')" />
+    </div>
+
+    <div>
         <x-input-label for="address" value="住所" />
         <x-text-input id="address" name="address" type="text" class="mt-1 block w-full" :value="old('address', $c?->address)" />
         <x-input-error class="mt-2" :messages="$errors->get('address')" />

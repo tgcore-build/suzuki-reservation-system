@@ -87,7 +87,12 @@ class BookingController extends Controller
             'date' => ['required', 'date_format:Y-m-d'],
             'time' => ['required', 'date_format:H:i'],
             'name' => ['required', 'string', 'max:100'],
-            'phone' => ['required', 'regex:/^[0-9\-]{10,13}$/'],
+            'phone' => ['required', 'string', 'max:20', function (string $attribute, mixed $value, \Closure $fail) {
+                // ハイフンを取り除いて、数字が10〜11桁か確認する（「----------」などを通さない）
+                if (! preg_match('/^[0-9\-]+$/', $value) || ! preg_match('/^\d{10,11}$/', str_replace('-', '', $value))) {
+                    $fail('電話番号は、数字10〜11桁で入力してください（ハイフンはあってもなくても構いません）。');
+                }
+            }],
             'email' => ['required', 'email', 'max:255'],
         ], [], [
             'menu_id' => 'メニュー',
@@ -163,12 +168,22 @@ class BookingController extends Controller
             ]);
         } else {
             $sameName = $this->normalizeName($customer->name) === $this->normalizeName($data['name']);
-            $sameEmail = ! $customer->email || strcasecmp($customer->email, $data['email']) === 0;
-            $needsReview = ! $sameName || ! $sameEmail;
+            $knownEmail = collect([$customer->email, $customer->email2])
+                ->filter()
+                ->contains(fn ($e) => strcasecmp($e, $data['email']) === 0);
 
-            // 本人と確認できないときは、登録内容を書き換えない
-            if ($sameName && ! $customer->email) {
-                $customer->update(['email' => $data['email']]);
+            if (! $sameName) {
+                // 本人と確認できないときは、登録内容を書き換えない
+                $needsReview = true;
+            } elseif (! $knownEmail) {
+                // 登録済みのアドレスは上書きせず、空いている欄に追加する。2つとも埋まっていたら要確認
+                if (! $customer->email) {
+                    $customer->update(['email' => $data['email']]);
+                } elseif (! $customer->email2) {
+                    $customer->update(['email2' => $data['email']]);
+                } else {
+                    $needsReview = true;
+                }
             }
         }
 

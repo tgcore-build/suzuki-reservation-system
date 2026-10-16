@@ -1,4 +1,4 @@
-<p>{{ $reservation->customer->name }} 様</p>
+<p>{{ $reservation->booked_name ?? $reservation->customer?->name }} 様</p>
 
 <p>ご予約のお知らせです。</p>
 

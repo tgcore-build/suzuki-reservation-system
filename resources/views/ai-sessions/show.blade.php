@@ -13,7 +13,7 @@
                     <dt class="text-gray-500">日時</dt>
                     <dd>{{ $aiSession->created_at->format('Y/m/d H:i') }}</dd>
                     <dt class="text-gray-500">提案メニュー</dt>
-                    <dd>{{ $aiSession->result_menu ?? '—' }}</dd>
+                    <dd>{{ $aiSession->resultMenuName() ?? '—' }}</dd>
                     <dt class="text-gray-500">状態</dt>
                     <dd>{{ \App\Models\AiSession::STATUSES[$aiSession->status] ?? $aiSession->status }}</dd>
                     <dt class="text-gray-500">予約</dt>

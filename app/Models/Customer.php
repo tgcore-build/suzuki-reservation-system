@@ -13,7 +13,7 @@ class Customer extends Model
     public const REGULAR_VISITS = 3;
 
     protected $fillable = [
-        'name', 'phone', 'email', 'address', 'birthday',
+        'name', 'phone', 'email', 'email2', 'address', 'birthday',
         'karte_number', 'gender', 'memo', 'line_id', 'external_id',
     ];
 

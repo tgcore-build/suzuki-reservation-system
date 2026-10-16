@@ -41,7 +41,8 @@
 - 管理画面「AI提案結果」で、提案メニュー・予約の有無・会話内容を確認できる。AI相談のあと同じブラウザで予約すると、その相談が顧客に紐づき、顧客詳細にも表示される（「要確認」の予約では紐づけない）。
 - 会話は `ai_sessions` / `ai_messages` に保存。1回目は必ず質問、最大4回で必ず提案して終える（`AI_MAX_TURNS`）。
 - AIに渡す知識は、メニュー管理の「説明」と、管理画面「AI設定」の「お店の判断基準」。一覧にないメニューは作らず、頭皮の症状は断定せず専門医をすすめる。
-- AI API は Gemini（`gemini-3.1-flash-lite`）。複数モデルを実測し、速さ（約1〜2秒）と答えの質で選定。呼び出しは `app/Services/Ai/MenuAdvisor.php` に集約し、他のAPIへ差し替えられる構成。混雑・時間切れは1回だけ再試行。1日の利用回数に上限（`AI_DAILY_LIMIT`）。
+- AI API は Gemini（`gemini-3.1-flash-lite`）。複数モデルを実測し、速さ（約1〜2秒）と答えの質で選定。呼び出しは `app/Services/Ai/MenuAdvisor.php` に集約し、他のAPIへ差し替えられる構成。混雑・時間切れは1回だけ再試行（待ち時間は1回8秒まで、`AI_TIMEOUT`）。1日の利用回数に、全体（`AI_DAILY_LIMIT`）とIPアドレスごと（`AI_IP_DAILY_LIMIT`）の上限。
+- 相談画面に「外部のAIサービス（Google Gemini）に送信される」ことを表示。
 - 点検用コマンド `php artisan ai:eval` で、よくある相談12件（`database/ai-eval-cases.txt`）への提案を一覧にし、判断基準を直すたびに比較できる。
 
 ## 技術構成
