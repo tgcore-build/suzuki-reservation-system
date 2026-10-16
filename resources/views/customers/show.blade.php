@@ -69,6 +69,26 @@
             </div>
 
             <div class="bg-white shadow-sm sm:rounded-lg p-6">
+                <h3 class="font-semibold text-gray-800 mb-4">AI提案結果</h3>
+                <table class="w-full text-sm text-left">
+                    <thead class="text-gray-500">
+                        <tr><th class="py-2">日時</th><th class="py-2">提案メニュー</th><th class="py-2"></th></tr>
+                    </thead>
+                    <tbody>
+                        @forelse ($customer->aiSessions()->orderByDesc('created_at')->get() as $s)
+                            <tr class="border-t">
+                                <td class="py-2">{{ $s->created_at->format('Y/m/d H:i') }}</td>
+                                <td class="py-2">{{ $s->result_menu ?? '—' }}</td>
+                                <td class="py-2 text-right"><a href="{{ route('ai-sessions.show', $s) }}" class="text-indigo-600 underline">会話を見る</a></td>
+                            </tr>
+                        @empty
+                            <tr><td colspan="3" class="py-4 text-center text-gray-500">AI提案結果はありません</td></tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="bg-white shadow-sm sm:rounded-lg p-6">
                 <h3 class="font-semibold text-gray-800 mb-4">予約履歴</h3>
                 <table class="w-full text-sm text-left">
                     <thead class="text-gray-500">

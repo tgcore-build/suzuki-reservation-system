@@ -59,3 +59,6 @@ Route::middleware('auth')->group(function () {
     Route::get('ai-guidelines', [\App\Http\Controllers\AiGuidelineController::class, 'edit'])->name('ai-guidelines.edit');
     Route::put('ai-guidelines', [\App\Http\Controllers\AiGuidelineController::class, 'update'])->name('ai-guidelines.update');
 });
+
+// AI提案結果の一覧（管理者）
+Route::resource('ai-sessions', \App\Http\Controllers\AiSessionController::class)->only(['index', 'show'])->middleware('auth');

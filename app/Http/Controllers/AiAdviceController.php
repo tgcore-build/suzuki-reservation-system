@@ -14,7 +14,7 @@ use Illuminate\View\View;
 
 class AiAdviceController extends Controller
 {
-    private const SESSION_KEY = 'ai_session_id';
+    public const SESSION_KEY = 'ai_session_id';
 
     public function index(Request $request): View
     {

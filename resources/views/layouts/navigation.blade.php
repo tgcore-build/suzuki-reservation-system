@@ -33,6 +33,9 @@
                     <x-nav-link :href="route('ai-guidelines.edit')" :active="request()->routeIs('ai-guidelines.*')">
                         AI設定
                     </x-nav-link>
+                    <x-nav-link :href="route('ai-sessions.index')" :active="request()->routeIs('ai-sessions.*')">
+                        AI提案結果
+                    </x-nav-link>
                 </div>
             </div>
 

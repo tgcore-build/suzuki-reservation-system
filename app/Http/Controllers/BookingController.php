@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Mail\ReservationConfirmed;
+use App\Models\AiSession;
 use App\Models\BusinessHour;
 use App\Models\Customer;
 use App\Models\Menu;
@@ -124,6 +125,8 @@ class BookingController extends Controller
             ]);
         }
 
+        $this->linkAiSession($request, $reservation);
+
         try {
             Mail::to($data['email'])->send(new ReservationConfirmed($reservation->load('menu')));
         } catch (\Throwable $e) {
@@ -179,6 +182,21 @@ class BookingController extends Controller
             'booked_email' => $data['email'],
             'needs_review' => $needsReview,
         ]);
+    }
+
+    // 同じブラウザでAI相談をしてから予約した場合、その相談を予約した顧客に紐づける
+    // （本人確認ができない「要確認」の予約では紐づけない）
+    private function linkAiSession(Request $request, Reservation $reservation): void
+    {
+        $id = $request->session()->get(AiAdviceController::SESSION_KEY);
+        if (! $id || $reservation->needs_review) {
+            return;
+        }
+
+        AiSession::whereKey($id)
+            ->where('status', 'completed')
+            ->whereNull('customer_id')
+            ->update(['customer_id' => $reservation->customer_id]);
     }
 
     // 空白（全角を含む）を取り除いて比べる
