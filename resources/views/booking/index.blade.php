@@ -154,7 +154,7 @@
                             </div>
                             <div>
                                 <label class="block text-sm text-gray-700 mb-1">生年月日（任意）</label>
-                                <input type="date" name="birthday" value="{{ old('birthday') }}" class="w-full border-gray-300 rounded-md shadow-sm text-sm">
+                                <input id="birthday" type="text" name="birthday" value="{{ old('birthday') }}" data-birthday autocomplete="bday" placeholder="1990/01/01" class="w-full border-gray-300 rounded-md shadow-sm text-sm">
                                 <p class="mt-1 text-xs text-gray-500">生年月日の月日は、お客様のカルテ番号に使います。次回からの「かんたんログイン」にも使います。ご来店のときにお伺いすることもできます。</p>
                             </div>
                         @endif

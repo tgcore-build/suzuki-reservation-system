@@ -59,13 +59,10 @@ class MyPageTest extends TestCase
 
     public function test_wrong_birthday_is_rejected_with_the_same_message(): void
     {
-        $wrongBirthday = $this->loginStep1(['birthday' => '1990-04-02'])->assertSessionHasErrors('phone');
-        $unknownPhone = $this->loginStep1(['phone' => '08000000000'])->assertSessionHasErrors('phone');
+        $message = '電話番号または生年月日が正しくありません。生年月日を登録していない方は、下の「こちらから登録」をご利用ください。';
+        $this->loginStep1(['birthday' => '1990-04-02'])->assertStatus(422)->assertSee($message);
+        $this->loginStep1(['phone' => '08000000000'])->assertStatus(422)->assertSee($message);
 
-        $this->assertSame(
-            session()->get('errors')->first('phone'),
-            '電話番号または生年月日が正しくありません。生年月日を登録していない方は、下の「こちらから登録」をご利用ください。'
-        );
         $this->get('/my')->assertRedirect(route('my.login'));
     }
 
@@ -75,7 +72,7 @@ class MyPageTest extends TestCase
             $this->loginStep1(['birthday' => '2000-01-01']);
         }
 
-        $this->loginStep1()->assertSessionHasErrors('phone');
+        $this->loginStep1()->assertStatus(422)->assertSee('ログインの試行回数が多すぎます');
         $this->get('/my')->assertRedirect(route('my.login'));
     }
 
@@ -299,5 +296,83 @@ class MyPageTest extends TestCase
             ->assertSee('毛先が気になる')
             ->assertSee('value="dryness" checked', false);
         $this->get(route('reservations.index', ['past' => 1]))->assertOk()->assertSee('事前カウンセリング');
+    }
+
+    public function test_login_accepts_various_birthday_formats(): void
+    {
+        foreach (['1990/04/01', '1990/4/1', '19900401', '１９９０／４／１', '1990年4月1日'] as $birthday) {
+            $this->loginStep1(['birthday' => $birthday])->assertRedirect(route('my.verify'));
+            $this->post('/my/logout');
+        }
+    }
+
+    public function test_login_error_is_shown_on_the_page_and_keeps_booking_destination(): void
+    {
+        $menu = Menu::create(['name' => 'カット', 'price' => 6600, 'duration_minutes' => 60, 'is_active' => true, 'sort_order' => 1]);
+
+        // 存在しない日付：その場でエラー付きの画面を返す（移動し直さないので、2回読み込まれてもエラーが消えない）
+        $this->loginStep1(['birthday' => '1990/02/30', 'next' => 'book', 'menu_id' => $menu->id])
+            ->assertStatus(422)
+            ->assertSee('生年月日は、1990/01/01 のように入力してください。')
+            ->assertSee('text-red-600', false)
+            ->assertSee('name="next" value="book"', false)
+            ->assertSee('name="menu_id" value="' . $menu->id . '"', false)
+            ->assertSee('value="09011112222"', false);
+
+        // 電話番号・生年月日の違いも、その場で表示する
+        $this->loginStep1(['birthday' => '1990/04/02', 'next' => 'book'])
+            ->assertStatus(422)
+            ->assertSee('電話番号または生年月日が正しくありません。');
+
+        // 直したら、予約画面に戻る
+        $this->loginStep1(['birthday' => '1990/4/1', 'next' => 'book', 'menu_id' => $menu->id])
+            ->assertRedirect(route('booking.index', ['menu_id' => $menu->id]));
+    }
+
+    public function test_birthday_inputs_use_the_calendar_widget(): void
+    {
+        $this->get('/my/login')->assertSee('data-birthday', false);
+        $this->get('/my/birthday')->assertOk();
+        $this->post('/my/birthday/send', ['phone' => '08000000000']);
+        $this->get('/my/birthday')->assertSee('data-birthday', false);
+
+        $menu = Menu::create(['name' => 'カット', 'price' => 6600, 'duration_minutes' => 60, 'is_active' => true, 'sort_order' => 1]);
+        BusinessHour::create(['weekday' => today()->addDays(3)->dayOfWeek, 'is_open' => true, 'open_time' => '10:00', 'close_time' => '19:00']);
+        $this->get(route('booking.index', ['menu_id' => $menu->id]))->assertSee('data-birthday', false);
+    }
+
+    public function test_birthday_registration_accepts_slash_format(): void
+    {
+        $this->customer->update(['birthday' => null]);
+        $this->post('/my/birthday/send', ['phone' => '090-1111-2222']);
+        $code = null;
+        Mail::assertSent(CustomerLoginCode::class, function ($mail) use (&$code) {
+            $code = $mail->code;
+
+            return true;
+        });
+
+        $this->post('/my/birthday', ['code' => $code, 'birthday' => '1990/4/1'])->assertRedirect(route('my.index'));
+        $this->assertSame('1990-04-01', $this->customer->fresh()->birthday->format('Y-m-d'));
+    }
+
+    public function test_booking_accepts_slash_birthday(): void
+    {
+        $menu = Menu::create(['name' => 'カット', 'price' => 6600, 'duration_minutes' => 60, 'is_active' => true, 'sort_order' => 1]);
+        $day = today()->addDays(3);
+        BusinessHour::create(['weekday' => $day->dayOfWeek, 'is_open' => true, 'open_time' => '10:00', 'close_time' => '19:00']);
+
+        $this->post('/book', [
+            'menu_id' => $menu->id, 'date' => $day->format('Y-m-d'), 'time' => '10:00',
+            'name' => '新しい人', 'phone' => '080-2222-3333', 'email' => 'new@example.com', 'birthday' => '1995/5/5',
+        ])->assertRedirect(route('booking.complete'));
+
+        $this->assertSame('0505', Customer::where('name', '新しい人')->first()->karte_number);
+
+        $this->post('/my/logout');
+        $this->post('/book', [
+            'menu_id' => $menu->id, 'date' => $day->format('Y-m-d'), 'time' => '11:00',
+            'name' => '別の新しい人', 'phone' => '080-4444-5555', 'email' => 'new2@example.com', 'birthday' => '1995/2/30',
+        ])->assertSessionHasErrors(['birthday' => '生年月日は、1990/01/01 のように入力してください。']);
     }
 }

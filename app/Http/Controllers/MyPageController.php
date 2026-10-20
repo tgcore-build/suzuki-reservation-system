@@ -6,11 +6,16 @@ use App\Mail\CustomerLoginCode;
 use App\Models\Customer;
 use App\Models\Reservation;
 use App\Services\CustomerLogin;
+use App\Support\BirthdayInput;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Support\MessageBag;
+use Illuminate\Support\ViewErrorBag;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
@@ -33,22 +38,39 @@ class MyPageController extends Controller
         ]);
     }
 
-    public function login(Request $request): RedirectResponse
+    public function login(Request $request): RedirectResponse|Response
     {
-        $data = $request->validate([
+        BirthdayInput::prepare($request);
+
+        // エラーのときは、ログイン画面へ移動し直さず、その場でエラー付きの画面を返す。
+        // 移動し直すと、エラーは「次の1回の表示」でしか出ないため、ブラウザ（Safari など）が
+        // 同じ画面を2回読み込むと、エラーが消えてしまうことがある。行き先（予約画面から来たか）も残す
+        $back = function (array $errors) use ($request) {
+            $request->flashOnly('phone', 'birthday'); // 入力した値を、この画面の old() で使う
+
+            return response()->view('my.login', [
+                'next' => $this->next($request),
+                'menuId' => (int) $request->input('menu_id') ?: null,
+                'errors' => (new ViewErrorBag)->put('default', new MessageBag($errors)),
+            ], 422);
+        };
+
+        $validator = Validator::make($request->all(), [
             'phone' => ['required', 'string', 'max:20'],
             'birthday' => ['required', 'date_format:Y-m-d'],
-        ], [], [
+        ], ['birthday.date_format' => BirthdayInput::MESSAGE], [
             'phone' => '電話番号',
             'birthday' => '生年月日',
         ]);
+        if ($validator->fails()) {
+            return $back($validator->errors()->toArray());
+        }
+        $data = $validator->validated();
 
         // 同じ電話番号で何度も試せないようにする（10分に5回まで）
         $limitKey = 'customer-login:' . preg_replace('/\D/', '', $data['phone']);
         if (RateLimiter::tooManyAttempts($limitKey, 5)) {
-            throw ValidationException::withMessages([
-                'phone' => 'ログインの試行回数が多すぎます。しばらくしてから、もう一度お試しください。',
-            ]);
+            return $back(['phone' => 'ログインの試行回数が多すぎます。しばらくしてから、もう一度お試しください。']);
         }
 
         $customer = $this->login->findByPhoneAndBirthday($data['phone'], $data['birthday']);
@@ -57,9 +79,7 @@ class MyPageController extends Controller
             Log::warning('お客様ログイン失敗', ['ip' => $request->ip()]);
 
             // 電話番号が登録されているかどうかが分からないように、同じメッセージにする
-            throw ValidationException::withMessages([
-                'phone' => '電話番号または生年月日が正しくありません。生年月日を登録していない方は、下の「こちらから登録」をご利用ください。',
-            ]);
+            return $back(['phone' => '電話番号または生年月日が正しくありません。生年月日を登録していない方は、下の「こちらから登録」をご利用ください。']);
         }
 
         RateLimiter::clear($limitKey);
@@ -243,10 +263,11 @@ class MyPageController extends Controller
 
     public function birthdayRegister(Request $request): RedirectResponse
     {
+        BirthdayInput::prepare($request);
         $data = $request->validate([
             'code' => ['required', 'digits:6'],
             'birthday' => ['required', 'date_format:Y-m-d', 'before_or_equal:today', 'after:1900-01-01'],
-        ], [], ['code' => '確認コード', 'birthday' => '生年月日']);
+        ], ['birthday.date_format' => BirthdayInput::MESSAGE], ['code' => '確認コード', 'birthday' => '生年月日']);
 
         $customer = Customer::find((int) $request->session()->get(self::BIRTHDAY_KEY));
         if (! $customer || $customer->birthday || ! $this->login->checkCode($customer, $data['code'])) {

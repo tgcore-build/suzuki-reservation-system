@@ -9,6 +9,7 @@ use App\Models\Customer;
 use App\Models\Menu;
 use App\Models\Reservation;
 use App\Services\CustomerLogin;
+use App\Support\BirthdayInput;
 use Carbon\Carbon;
 use Illuminate\Contracts\Cache\LockTimeoutException;
 use Illuminate\Database\UniqueConstraintViolationException;
@@ -86,6 +87,8 @@ class BookingController extends Controller
             $request->merge(['date' => $slotDate, 'time' => $slotTime]);
         }
 
+        BirthdayInput::prepare($request); // 「1990/1/1」なども受け付ける
+
         // 登録済みのお客様は、かんたんログインしてから予約する。ログインしていない人は、はじめてのお客様として登録する
         // かんたんログイン中は、お名前・電話番号の入力を省く（メールは、登録がない場合だけ入力してもらう）
         $loggedIn = $login->customer($request);
@@ -107,7 +110,7 @@ class BookingController extends Controller
             'menu_id' => ['required', 'integer'],
             'date' => ['required', 'date_format:Y-m-d'],
             'time' => ['required', 'date_format:H:i'],
-        ] + $customerRules, [], [
+        ] + $customerRules, ['birthday.date_format' => BirthdayInput::MESSAGE], [
             'menu_id' => 'メニュー',
             'date' => '日付',
             'time' => '時間',

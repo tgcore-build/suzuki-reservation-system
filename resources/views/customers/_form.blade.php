@@ -34,7 +34,7 @@
 
     <div>
         <x-input-label for="birthday" value="生年月日" />
-        <x-text-input id="birthday" name="birthday" type="date" class="mt-1 block w-full" :value="old('birthday', $c?->birthday?->format('Y-m-d'))" />
+        <x-text-input id="birthday" name="birthday" type="text" data-birthday autocomplete="off" placeholder="1990/01/01" class="mt-1 block w-full" :value="old('birthday', $c?->birthday?->format('Y-m-d'))" />
         <p class="mt-1 text-xs text-gray-500">入力すると、カルテ番号（誕生日の月日4桁）が自動で付きます。</p>
         <x-input-error class="mt-2" :messages="$errors->get('birthday')" />
     </div>

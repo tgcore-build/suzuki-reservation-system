@@ -27,10 +27,12 @@
             <div>
                 <label for="phone" class="block text-sm text-gray-700 mb-1">電話番号</label>
                 <input id="phone" type="tel" name="phone" value="{{ old('phone') }}" required autocomplete="tel" placeholder="09012345678" class="w-full border-gray-300 rounded-md shadow-sm text-sm">
+                @error('phone')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
             </div>
             <div>
                 <label for="birthday" class="block text-sm text-gray-700 mb-1">生年月日</label>
-                <input id="birthday" type="date" name="birthday" value="{{ old('birthday') }}" required class="w-full border-gray-300 rounded-md shadow-sm text-sm">
+                <input id="birthday" type="text" name="birthday" value="{{ old('birthday') }}" required data-birthday autocomplete="bday" placeholder="1990/01/01" class="w-full border-gray-300 rounded-md shadow-sm text-sm">
+                @error('birthday')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
             </div>
 
             <button type="submit" class="w-full px-4 py-3 bg-gray-800 rounded-md font-semibold text-sm text-white hover:bg-gray-700">ログイン</button>
