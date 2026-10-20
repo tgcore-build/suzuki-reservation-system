@@ -52,6 +52,7 @@ Route::prefix('my')->name('my.')->controller(\App\Http\Controllers\MyPageControl
     Route::post('birthday', 'birthdayRegister')->middleware('throttle:10,1');
     Route::get('counseling/{reservation}', 'counselingForm')->name('counseling');
     Route::put('counseling/{reservation}', 'counseling');
+    Route::get('counseling/{reservation}/done', 'counselingDone')->name('counseling.done');
 });
 
 // 顧客のCSV取り込み（※ /customers/import は顧客詳細と衝突するので別のURLにしています）

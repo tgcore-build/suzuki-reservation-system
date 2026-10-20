@@ -275,8 +275,13 @@ class MyPageTest extends TestCase
         $this->get(route('my.counseling', $own))->assertRedirect(route('my.login', ['next' => 'book']));
 
         $this->loginStep1();
+        $this->get(route('my.counseling.done', $own))->assertRedirect(route('booking.index')); // まだ送信していない
         $this->put(route('my.counseling', $own), ['concerns' => ['dryness'], 'concern_note' => '毛先が気になる'])
-            ->assertRedirect(route('my.counseling', $own));
+            ->assertRedirect(route('my.counseling.done', $own));
+        $this->get(route('my.counseling.done', $own))->assertOk()
+            ->assertSee('事前カウンセリングを送信しました')
+            ->assertSee('乾燥・パサつき')
+            ->assertSee('毛先が気になる');
         $this->assertSame(['dryness'], $own->fresh()->concerns);
         $this->assertNotNull($own->fresh()->counseled_at);
 
@@ -284,6 +289,8 @@ class MyPageTest extends TestCase
         $this->get(route('my.counseling', $othersReservation))->assertRedirect();
         $this->put(route('my.counseling', $othersReservation), ['concerns' => ['dryness']])->assertRedirect();
         $this->assertNull($othersReservation->fresh()->counseled_at);
+        $othersReservation->update(['counseled_at' => now()]);
+        $this->get(route('my.counseling.done', $othersReservation))->assertRedirect(route('booking.index'));
 
         // 管理者が対応記録を作るとき、事前カウンセリングが入っている
         $this->travelTo(now()->setDate(2026, 10, 10)->setTime(11, 0));

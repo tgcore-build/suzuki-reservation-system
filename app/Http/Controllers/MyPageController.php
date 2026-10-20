@@ -196,7 +196,17 @@ class MyPageController extends Controller
             'counseled_at' => now(),
         ]);
 
-        return redirect()->route('my.counseling', $reservation)->with('status', 'ありがとうございます。ご来店のときに、担当者が確認いたします。');
+        return redirect()->route('my.counseling.done', $reservation);
+    }
+
+    // 事前カウンセリングの送信完了
+    public function counselingDone(Request $request, Reservation $reservation): View|RedirectResponse
+    {
+        if (! $this->ownUpcoming($request, $reservation) || ! $reservation->counseled_at) {
+            return redirect()->route('booking.index');
+        }
+
+        return view('my.counseling-done', ['reservation' => $reservation->load('menu')]);
     }
 
     // 生年月日が未登録の方：登録メールに届くコードで本人と確認してから、生年月日を登録する

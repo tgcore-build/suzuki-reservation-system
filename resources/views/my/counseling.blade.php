@@ -10,9 +10,6 @@
             気になることにチェックをつけてください。ご来店のときに、担当者が内容を確認してからご案内します。
         </p>
 
-        @if (session('status'))
-            <div class="mb-4 p-3 bg-green-100 text-green-800 rounded text-sm">{{ session('status') }}</div>
-        @endif
         @if ($errors->any())
             <div class="mb-4 p-3 bg-red-100 text-red-800 rounded text-sm">
                 @foreach ($errors->all() as $error)<div>{{ $error }}</div>@endforeach
