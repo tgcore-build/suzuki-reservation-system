@@ -59,6 +59,12 @@
                                             <span class="ml-1 px-1.5 py-0.5 text-xs rounded bg-amber-100 text-amber-800" title="電話番号は一致しましたが、入力された名前またはメールが登録と違います">要確認</span>
                                             <div class="text-xs text-gray-500">入力：{{ $r->booked_name }} / {{ $r->booked_email }}</div>
                                         @endif
+                                        @if ($r->counseled_at)
+                                            <div class="mt-1 text-xs text-gray-600">
+                                                <span class="px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700">事前カウンセリング</span>
+                                                {{ implode('、', $r->concernLabels()) }}@if ($r->concern_note)　{{ \Illuminate\Support\Str::limit($r->concern_note, 40) }}@endif
+                                            </div>
+                                        @endif
                                     </td>
                                     <td class="py-2">{{ $r->menu->name }}（{{ $r->menu->duration_minutes }}分）</td>
                                     <td class="py-2">{{ \App\Models\Reservation::STATUSES[$r->status] }}</td>

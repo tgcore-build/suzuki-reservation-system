@@ -8,8 +8,10 @@ use App\Models\BusinessHour;
 use App\Models\Customer;
 use App\Models\Menu;
 use App\Models\Reservation;
+use App\Services\CustomerLogin;
 use Carbon\Carbon;
 use Illuminate\Contracts\Cache\LockTimeoutException;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -25,7 +27,7 @@ class BookingController extends Controller
     private const MAX_DAYS = 60;      // 何日先まで予約できるか
 
     // 空き状況の表（1週間 / 2週間）
-    public function index(Request $request): View
+    public function index(Request $request, CustomerLogin $login): View
     {
         $menus = Menu::where('is_active', true)->orderBy('sort_order')->get();
         $menu = $menus->firstWhere('id', (int) $request->query('menu_id'));
@@ -71,10 +73,12 @@ class BookingController extends Controller
             'prevStart' => $prev->lt($thisWeek) ? null : $prev->format('Y-m-d'),
             'nextStart' => $next->gt(today()->addDays(self::MAX_DAYS)) ? null : $next->format('Y-m-d'),
             'thisWeek' => $thisWeek->format('Y-m-d'),
+            'loggedIn' => $loggedIn = $login->customer($request),
+            'maskedEmail' => CustomerLogin::maskEmail($loggedIn?->email),
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, CustomerLogin $login): RedirectResponse
     {
         // 表で選んだ「日付|時間」を、日付と時間に分ける
         if ($request->filled('slot')) {
@@ -82,10 +86,12 @@ class BookingController extends Controller
             $request->merge(['date' => $slotDate, 'time' => $slotTime]);
         }
 
-        $data = $request->validate([
-            'menu_id' => ['required', 'integer'],
-            'date' => ['required', 'date_format:Y-m-d'],
-            'time' => ['required', 'date_format:H:i'],
+        // 登録済みのお客様は、かんたんログインしてから予約する。ログインしていない人は、はじめてのお客様として登録する
+        // かんたんログイン中は、お名前・電話番号の入力を省く（メールは、登録がない場合だけ入力してもらう）
+        $loggedIn = $login->customer($request);
+        $customerRules = $loggedIn ? [
+            'email' => [$loggedIn->email ? 'nullable' : 'required', 'email', 'max:255'],
+        ] : [
             'name' => ['required', 'string', 'max:100'],
             'phone' => ['required', 'string', 'max:20', function (string $attribute, mixed $value, \Closure $fail) {
                 // ハイフンを取り除いて、数字が10〜11桁か確認する（「----------」などを通さない）
@@ -94,14 +100,27 @@ class BookingController extends Controller
                 }
             }],
             'email' => ['required', 'email', 'max:255'],
-        ], [], [
+            'birthday' => ['nullable', 'date_format:Y-m-d', 'before_or_equal:today', 'after:1900-01-01'],
+        ];
+
+        $data = $request->validate([
+            'menu_id' => ['required', 'integer'],
+            'date' => ['required', 'date_format:Y-m-d'],
+            'time' => ['required', 'date_format:H:i'],
+        ] + $customerRules, [], [
             'menu_id' => 'メニュー',
             'date' => '日付',
             'time' => '時間',
             'name' => 'お名前',
             'phone' => '電話番号',
             'email' => 'メールアドレス',
+            'birthday' => '生年月日',
         ]);
+
+        if ($loggedIn) {
+            $data['name'] = $loggedIn->name;
+            $data['email'] = $loggedIn->email ?: $data['email'];
+        }
 
         $menu = Menu::where('is_active', true)->find($data['menu_id']);
         $date = $this->parseDate($data['date']);
@@ -115,19 +134,29 @@ class BookingController extends Controller
 
         // 同じ日の予約は1件ずつ処理して、同時送信による二重予約を防ぐ
         try {
-            $reservation = Cache::lock('reservation:' . $date->format('Y-m-d'), 10)->block(5, function () use ($data, $menu, $date, $unavailable) {
-                return DB::transaction(function () use ($data, $menu, $date, $unavailable) {
+            $reservation = Cache::lock('reservation:' . $date->format('Y-m-d'), 10)->block(5, function () use ($data, $menu, $date, $unavailable, $loggedIn) {
+                return DB::transaction(function () use ($data, $menu, $date, $unavailable, $loggedIn) {
                     if (! in_array($data['time'], $this->availableSlots($date, $menu), true)) {
                         throw $unavailable;
                     }
 
-                    return $this->createReservation($data, $menu, $date);
+                    return $loggedIn
+                        ? $this->createLoggedInReservation($loggedIn, $data, $menu, $date)
+                        : $this->createNewCustomerReservation($data, $menu, $date);
                 });
             });
         } catch (LockTimeoutException $e) {
             throw ValidationException::withMessages([
                 'time' => '混み合っています。もう一度お試しください。',
             ]);
+        } catch (UniqueConstraintViolationException $e) {
+            throw $this->alreadyRegistered(); // 同じ電話番号で、ほぼ同時に登録された場合
+        }
+
+        // はじめてのお客様は、登録した内容でログインした状態にする（このあと事前カウンセリングに進めるように）
+        $isNewCustomer = ! $loggedIn;
+        if ($isNewCustomer) {
+            $login->login($request, $reservation->customer);
         }
 
         $this->linkAiSession($request, $reservation);
@@ -141,6 +170,8 @@ class BookingController extends Controller
         return redirect()->route('booking.complete')->with('booked', [
             'at' => $reservation->scheduled_at->format('Y年n月j日 H:i'),
             'menu' => $menu->name,
+            'reservation_id' => $reservation->id,
+            'new_customer' => $isNewCustomer,
         ]);
     }
 
@@ -153,39 +184,20 @@ class BookingController extends Controller
         return view('booking.complete', ['booked' => session('booked')]);
     }
 
-    // 電話番号が一致すれば既存の顧客に予約を付ける。名前かメールが登録と違う場合は「要確認」にする
-    private function createReservation(array $data, Menu $menu, Carbon $date): Reservation
+    // はじめてのお客様の予約。登録済みの電話番号なら、ログインを案内する（他人の名前で予約したり、登録を書き換えたりできないように）
+    private function createNewCustomerReservation(array $data, Menu $menu, Carbon $date): Reservation
     {
         $digits = preg_replace('/\D/', '', $data['phone']);
-        $customer = Customer::whereRaw("REPLACE(phone, '-', '') = ?", [$digits])->first();
-        $needsReview = false;
-
-        if (! $customer) {
-            $customer = Customer::create([
-                'name' => $data['name'],
-                'phone' => $digits,
-                'email' => $data['email'],
-            ]);
-        } else {
-            $sameName = $this->normalizeName($customer->name) === $this->normalizeName($data['name']);
-            $knownEmail = collect([$customer->email, $customer->email2])
-                ->filter()
-                ->contains(fn ($e) => strcasecmp($e, $data['email']) === 0);
-
-            if (! $sameName) {
-                // 本人と確認できないときは、登録内容を書き換えない
-                $needsReview = true;
-            } elseif (! $knownEmail) {
-                // 登録済みのアドレスは上書きせず、空いている欄に追加する。2つとも埋まっていたら要確認
-                if (! $customer->email) {
-                    $customer->update(['email' => $data['email']]);
-                } elseif (! $customer->email2) {
-                    $customer->update(['email2' => $data['email']]);
-                } else {
-                    $needsReview = true;
-                }
-            }
+        if (Customer::whereRaw("REPLACE(phone, '-', '') = ?", [$digits])->exists()) {
+            throw $this->alreadyRegistered();
         }
+
+        $customer = Customer::create([
+            'name' => $data['name'],
+            'phone' => $digits,
+            'email' => $data['email'],
+            'birthday' => $data['birthday'] ?? null, // 月日がカルテ番号になる（Customer モデルで自動設定）
+        ]);
 
         return Reservation::create([
             'customer_id' => $customer->id,
@@ -195,7 +207,33 @@ class BookingController extends Controller
             'status' => 'confirmed',
             'booked_name' => $data['name'],
             'booked_email' => $data['email'],
-            'needs_review' => $needsReview,
+        ]);
+    }
+
+    private function alreadyRegistered(): ValidationException
+    {
+        return ValidationException::withMessages([
+            'phone' => 'この電話番号は、すでにご登録があります。「かんたんログイン」をしてから、ご予約ください。',
+        ]);
+    }
+
+    // かんたんログイン中の予約（電話番号と生年月日で本人と確認できているので、要確認にしない）
+    private function createLoggedInReservation(Customer $customer, array $data, Menu $menu, Carbon $date): Reservation
+    {
+        // 1つ目のアドレスがない人が入力したアドレスは、2つ目に入れる
+        if (! $customer->email && ! $customer->email2) {
+            $customer->update(['email2' => $data['email']]);
+        }
+
+        return Reservation::create([
+            'customer_id' => $customer->id,
+            'menu_id' => $menu->id,
+            'scheduled_at' => $date->copy()->setTimeFromTimeString($data['time']),
+            'source' => 'online',
+            'status' => 'confirmed',
+            'booked_name' => $customer->name,
+            'booked_email' => $data['email'],
+            'needs_review' => false,
         ]);
     }
 
@@ -212,12 +250,6 @@ class BookingController extends Controller
             ->where('status', 'completed')
             ->whereNull('customer_id')
             ->update(['customer_id' => $reservation->customer_id]);
-    }
-
-    // 空白（全角を含む）を取り除いて比べる
-    private function normalizeName(string $name): string
-    {
-        return preg_replace('/[\s　]+/u', '', $name);
     }
 
     // 指定日を含む週の月曜日。今週より前や不正な値は、今週の月曜日にする

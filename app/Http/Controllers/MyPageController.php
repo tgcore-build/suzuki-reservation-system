@@ -1,0 +1,270 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Mail\CustomerLoginCode;
+use App\Models\Customer;
+use App\Models\Reservation;
+use App\Services\CustomerLogin;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
+use Illuminate\View\View;
+
+// お客様向け：簡易ログインと利用履歴
+class MyPageController extends Controller
+{
+    private const BIRTHDAY_KEY = 'customer_login.birthday_customer_id';
+
+    public function __construct(private CustomerLogin $login)
+    {
+    }
+
+    // 1段階目：電話番号＋生年月日
+    public function loginForm(Request $request): View
+    {
+        return view('my.login', [
+            'next' => $this->next($request),
+            'menuId' => (int) $request->query('menu_id') ?: null,
+        ]);
+    }
+
+    public function login(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'phone' => ['required', 'string', 'max:20'],
+            'birthday' => ['required', 'date_format:Y-m-d'],
+        ], [], [
+            'phone' => '電話番号',
+            'birthday' => '生年月日',
+        ]);
+
+        // 同じ電話番号で何度も試せないようにする（10分に5回まで）
+        $limitKey = 'customer-login:' . preg_replace('/\D/', '', $data['phone']);
+        if (RateLimiter::tooManyAttempts($limitKey, 5)) {
+            throw ValidationException::withMessages([
+                'phone' => 'ログインの試行回数が多すぎます。しばらくしてから、もう一度お試しください。',
+            ]);
+        }
+
+        $customer = $this->login->findByPhoneAndBirthday($data['phone'], $data['birthday']);
+        if (! $customer) {
+            RateLimiter::hit($limitKey, 600);
+            Log::warning('お客様ログイン失敗', ['ip' => $request->ip()]);
+
+            // 電話番号が登録されているかどうかが分からないように、同じメッセージにする
+            throw ValidationException::withMessages([
+                'phone' => '電話番号または生年月日が正しくありません。生年月日を登録していない方は、下の「こちらから登録」をご利用ください。',
+            ]);
+        }
+
+        RateLimiter::clear($limitKey);
+        $this->login->login($request, $customer);
+
+        return $this->next($request) === 'book'
+            ? redirect()->route('booking.index', array_filter(['menu_id' => (int) $request->input('menu_id') ?: null]))
+            : redirect()->route('my.verify');
+    }
+
+    public function logout(Request $request): RedirectResponse
+    {
+        $this->login->logout($request);
+
+        return redirect()->route('booking.index');
+    }
+
+    // 2段階目：メールに届くコード
+    public function verifyForm(Request $request): View|RedirectResponse
+    {
+        $customer = $this->login->customer($request);
+        if (! $customer) {
+            return redirect()->route('my.login');
+        }
+        if ($this->login->isVerified($request)) {
+            return redirect()->route('my.index');
+        }
+
+        return view('my.verify', [
+            'customer' => $customer,
+            'maskedEmail' => CustomerLogin::maskEmail($customer->email),
+            'codeSent' => (bool) session('code_sent'),
+        ]);
+    }
+
+    public function sendCode(Request $request): RedirectResponse
+    {
+        $customer = $this->login->customer($request);
+        if (! $customer) {
+            return redirect()->route('my.login');
+        }
+        // コードは、お店に登録されている1つ目のアドレスにだけ送る（予約のときに入力されたアドレスには送らない）
+        if (! $customer->email) {
+            return redirect()->route('my.verify');
+        }
+
+        $limitKey = 'customer-login-code-send:' . $customer->id;
+        if (RateLimiter::tooManyAttempts($limitKey, 3)) {
+            return redirect()->route('my.verify')->withErrors([
+                'code' => 'コードの送信回数が多すぎます。しばらくしてから、もう一度お試しください。',
+            ]);
+        }
+        RateLimiter::hit($limitKey, 600);
+
+        Mail::to($customer->email)->send(new CustomerLoginCode($customer->name, $this->login->issueCode($customer)));
+
+        return redirect()->route('my.verify')->with('code_sent', true);
+    }
+
+    public function verify(Request $request): RedirectResponse
+    {
+        $customer = $this->login->customer($request);
+        if (! $customer) {
+            return redirect()->route('my.login');
+        }
+
+        $data = $request->validate(['code' => ['required', 'digits:6']], [], ['code' => '確認コード']);
+
+        if (! $this->login->verifyCode($request, $customer, $data['code'])) {
+            Log::warning('お客様の確認コードの誤り', ['customer_id' => $customer->id, 'ip' => $request->ip()]);
+
+            return redirect()->route('my.verify')->with('code_sent', true)->withErrors([
+                'code' => '確認コードが正しくないか、有効期間が過ぎています。まちがえが続いた場合は、コードを送り直してください。',
+            ]);
+        }
+
+        return redirect()->route('my.index');
+    }
+
+    // 利用履歴（2段階目まで確認できた人だけ）
+    public function index(Request $request): View|RedirectResponse
+    {
+        $customer = $this->login->customer($request);
+        if (! $customer) {
+            return redirect()->route('my.login');
+        }
+        if (! $this->login->isVerified($request)) {
+            return redirect()->route('my.verify');
+        }
+
+        return view('my.index', [
+            'customer' => $customer,
+            'upcoming' => $customer->reservations()->with('menu')
+                ->where('status', 'confirmed')->where('scheduled_at', '>=', now())
+                ->orderBy('scheduled_at')->get(),
+            'pastReservations' => $customer->reservations()->with('menu')
+                ->where('status', '!=', 'cancelled')->where('scheduled_at', '<', now())
+                ->orderByDesc('scheduled_at')->limit(20)->get(),
+            'records' => $customer->records()->orderByDesc('performed_on')->get(),
+            'aiSessions' => $customer->aiSessions()->with(['resultMenu', 'messages'])
+                ->where('status', 'completed')->orderByDesc('created_at')->get(),
+        ]);
+    }
+
+    // 事前カウンセリング（ご来店前に、お悩みやご要望を入力する）。かんたんログインした本人の、これからの予約だけ
+    public function counselingForm(Request $request, Reservation $reservation): View|RedirectResponse
+    {
+        if (! $this->ownUpcoming($request, $reservation)) {
+            return redirect()->route('my.login', ['next' => 'book']);
+        }
+
+        return view('my.counseling', ['reservation' => $reservation->load('menu')]);
+    }
+
+    public function counseling(Request $request, Reservation $reservation): RedirectResponse
+    {
+        if (! $this->ownUpcoming($request, $reservation)) {
+            return redirect()->route('my.login', ['next' => 'book']);
+        }
+
+        $data = $request->validate([
+            'concerns' => ['nullable', 'array'],
+            'concerns.*' => ['string', Rule::in(array_keys(config('salon.concerns')))],
+            'concern_note' => ['nullable', 'string', 'max:1000'],
+        ], [], [
+            'concerns' => 'お悩み',
+            'concerns.*' => 'お悩み',
+            'concern_note' => 'お悩み・ご要望',
+        ]);
+
+        $reservation->update([
+            'concerns' => array_values($data['concerns'] ?? []),
+            'concern_note' => $data['concern_note'] ?? null,
+            'counseled_at' => now(),
+        ]);
+
+        return redirect()->route('my.counseling', $reservation)->with('status', 'ありがとうございます。ご来店のときに、担当者が確認いたします。');
+    }
+
+    // 生年月日が未登録の方：登録メールに届くコードで本人と確認してから、生年月日を登録する
+    public function birthdayForm(Request $request): View
+    {
+        return view('my.birthday', [
+            'pending' => $request->session()->has(self::BIRTHDAY_KEY), // 送った・送らないに関係なく、コードの入力画面にする
+        ]);
+    }
+
+    public function birthdaySendCode(Request $request): RedirectResponse
+    {
+        $data = $request->validate(['phone' => ['required', 'string', 'max:20']], [], ['phone' => '電話番号']);
+
+        $limitKey = 'customer-birthday-code:' . preg_replace('/\D/', '', $data['phone']);
+        if (RateLimiter::tooManyAttempts($limitKey, 3)) {
+            throw ValidationException::withMessages([
+                'phone' => 'コードの送信回数が多すぎます。しばらくしてから、もう一度お試しください。',
+            ]);
+        }
+        RateLimiter::hit($limitKey, 600);
+
+        // 登録があって、メールがあり、生年月日が未登録の方にだけ送る。どの場合も同じ画面にして、登録の有無が分からないようにする
+        $customer = $this->login->findByPhone($data['phone']);
+        if ($customer && $customer->email && ! $customer->birthday) {
+            Mail::to($customer->email)->send(new CustomerLoginCode($customer->name, $this->login->issueCode($customer)));
+            $request->session()->put(self::BIRTHDAY_KEY, $customer->id);
+        } else {
+            $request->session()->put(self::BIRTHDAY_KEY, 0);
+        }
+
+        return redirect()->route('my.birthday');
+    }
+
+    public function birthdayRegister(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'code' => ['required', 'digits:6'],
+            'birthday' => ['required', 'date_format:Y-m-d', 'before_or_equal:today', 'after:1900-01-01'],
+        ], [], ['code' => '確認コード', 'birthday' => '生年月日']);
+
+        $customer = Customer::find((int) $request->session()->get(self::BIRTHDAY_KEY));
+        if (! $customer || $customer->birthday || ! $this->login->checkCode($customer, $data['code'])) {
+            return redirect()->route('my.birthday')->withInput($request->only('birthday'))->withErrors([
+                'code' => '確認コードが正しくないか、有効期間が過ぎています。',
+            ]);
+        }
+
+        $customer->update(['birthday' => $data['birthday']]);
+        $request->session()->forget(self::BIRTHDAY_KEY);
+        $this->login->markVerified($request, $customer);
+
+        return redirect()->route('my.index')->with('status', '生年月日を登録しました。次回から、電話番号と生年月日でログインできます。');
+    }
+
+    private function ownUpcoming(Request $request, Reservation $reservation): bool
+    {
+        $customer = $this->login->customer($request);
+
+        return $customer
+            && $reservation->customer_id === $customer->id
+            && $reservation->status === 'confirmed'
+            && $reservation->scheduled_at->isFuture();
+    }
+
+    // ログインのあと、どこへ戻るか（決まった行き先だけにして、外部サイトへ飛ばされないようにする）
+    private function next(Request $request): string
+    {
+        return $request->input('next') === 'book' ? 'book' : 'history';
+    }
+}

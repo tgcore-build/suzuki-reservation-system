@@ -38,6 +38,22 @@ Route::get('/book', [\App\Http\Controllers\BookingController::class, 'index'])->
 Route::post('/book', [\App\Http\Controllers\BookingController::class, 'store'])->middleware('throttle:10,1')->name('booking.store');
 Route::get('/book/complete', [\App\Http\Controllers\BookingController::class, 'complete'])->name('booking.complete');
 
+// お客様向け：簡易ログイン（電話番号＋生年月日）と利用履歴（さらにメールの確認コード）
+Route::prefix('my')->name('my.')->controller(\App\Http\Controllers\MyPageController::class)->group(function () {
+    Route::get('/', 'index')->name('index');
+    Route::get('login', 'loginForm')->name('login');
+    Route::post('login', 'login')->middleware('throttle:10,1');
+    Route::post('logout', 'logout')->name('logout');
+    Route::get('verify', 'verifyForm')->name('verify');
+    Route::post('verify', 'verify')->middleware('throttle:10,1');
+    Route::post('verify/send', 'sendCode')->middleware('throttle:3,1')->name('verify.send');
+    Route::get('birthday', 'birthdayForm')->name('birthday');
+    Route::post('birthday/send', 'birthdaySendCode')->middleware('throttle:3,1')->name('birthday.send');
+    Route::post('birthday', 'birthdayRegister')->middleware('throttle:10,1');
+    Route::get('counseling/{reservation}', 'counselingForm')->name('counseling');
+    Route::put('counseling/{reservation}', 'counseling');
+});
+
 // 顧客のCSV取り込み（※ /customers/import は顧客詳細と衝突するので別のURLにしています）
 Route::middleware('auth')->prefix('customer-import')->name('customer-import.')->group(function () {
     Route::get('/', [\App\Http\Controllers\CustomerImportController::class, 'create'])->name('create');

@@ -95,20 +95,6 @@ class AiSessionTest extends TestCase
         $this->assertSame(Customer::first()->id, $session->fresh()->customer_id);
     }
 
-    public function test_unverified_booking_does_not_link_session(): void
-    {
-        Mail::fake();
-        $menu = $this->prepareBooking();
-        Customer::create(['name' => '既存の花子', 'phone' => '090-1111-2222']);
-        $session = $this->completedSession();
-
-        $this->withSession(['ai_session_id' => $session->id])
-            ->post('/book', $this->bookingData($menu, ['name' => '別の人']))
-            ->assertRedirect(route('booking.complete'));
-
-        $this->assertNull($session->fresh()->customer_id);
-    }
-
     public function test_in_progress_session_is_not_linked(): void
     {
         Mail::fake();

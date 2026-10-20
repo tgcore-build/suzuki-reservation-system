@@ -6,6 +6,7 @@ use App\Models\Customer;
 use App\Models\Record;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
@@ -13,9 +14,23 @@ class RecordController extends Controller
 {
     public function create(Customer $customer): View
     {
+        // 今日までの予約で、事前カウンセリングが入力されていれば、最初から入れておく
+        $counseled = $customer->reservations()->with('menu')
+            ->whereNotNull('counseled_at')
+            ->where('status', '!=', 'cancelled')
+            ->where('scheduled_at', '<=', today()->endOfDay())
+            ->orderByDesc('scheduled_at')
+            ->first();
+
         return view('records.create', [
             'customer' => $customer,
-            'record' => new Record(['performed_on' => today()]),
+            'record' => new Record([
+                'performed_on' => today(),
+                'menu' => $counseled?->menu?->name,
+                'concerns' => $counseled?->concerns,
+                'concern_note' => $counseled?->concern_note,
+            ]),
+            'counseled' => $counseled,
         ]);
     }
 
@@ -65,9 +80,12 @@ class RecordController extends Controller
 
     private function validated(Request $request): array
     {
-        return $request->validate([
+        $data = $request->validate([
             'performed_on' => ['required', 'date'],
             'menu' => ['required', 'string', 'max:100'],
+            'concerns' => ['nullable', 'array'],
+            'concerns.*' => ['string', Rule::in(array_keys(config('salon.concerns')))],
+            'concern_note' => ['nullable', 'string', 'max:1000'],
             'materials' => ['nullable', 'string'],
             'duration_minutes' => ['nullable', 'integer', 'min:1', 'max:600'],
             'memo' => ['nullable', 'string'],
@@ -76,12 +94,20 @@ class RecordController extends Controller
         ], [], [
             'performed_on' => '施術日',
             'menu' => 'メニュー',
+            'concerns' => 'お悩み',
+            'concerns.*' => 'お悩み',
+            'concern_note' => 'お悩み・ご要望',
             'materials' => '使用薬剤',
             'duration_minutes' => '所要時間',
             'memo' => 'メモ',
             'photo_before' => '施術前の写真',
             'photo_after' => '施術後の写真',
         ]);
+
+        // チェックを全部外したときは、お悩みを空にする（チェックボックスは、何も選ばないと送られないため）
+        $data['concerns'] = array_values($data['concerns'] ?? []);
+
+        return $data;
     }
 
     private function storePhotos(Request $request, array $data): array

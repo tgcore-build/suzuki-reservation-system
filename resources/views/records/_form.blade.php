@@ -24,6 +24,25 @@
         <input type="text" name="menu" value="{{ old('menu', $record->menu) }}" class="w-full border-gray-300 rounded-md shadow-sm text-sm">
     </div>
 
+    {{-- カウンセリングシート（お客様の利用履歴ページにも表示されます） --}}
+    <fieldset class="border rounded-md p-4">
+        <legend class="px-1 text-sm text-gray-700">カウンセリングシート（お客様にも表示されます）</legend>
+        @if (! empty($counseled))
+            <p class="mb-2 text-xs text-gray-500">{{ $counseled->scheduled_at->format('n/j') }}のご予約で、お客様が入力した事前カウンセリングを入れてあります。</p>
+        @endif
+        @php $checked = old('concerns', $record->concerns ?? []); @endphp
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-3">
+            @foreach (config('salon.concerns') as $key => $label)
+                <label class="flex items-center gap-2 text-sm">
+                    <input type="checkbox" name="concerns[]" value="{{ $key }}" @checked(in_array($key, $checked, true)) class="rounded border-gray-300">
+                    {{ $label }}
+                </label>
+            @endforeach
+        </div>
+        <label class="block text-sm text-gray-700 mb-1">お悩み・ご要望（自由記入）</label>
+        <textarea name="concern_note" rows="2" class="w-full border-gray-300 rounded-md shadow-sm text-sm">{{ old('concern_note', $record->concern_note) }}</textarea>
+    </fieldset>
+
     <div>
         <label class="block text-sm text-gray-700 mb-1">使用薬剤・配合</label>
         <textarea name="materials" rows="3" class="w-full border-gray-300 rounded-md shadow-sm text-sm">{{ old('materials', $record->materials) }}</textarea>
@@ -35,7 +54,7 @@
     </div>
 
     <div>
-        <label class="block text-sm text-gray-700 mb-1">メモ（髪の状態・次回への申し送り）</label>
+        <label class="block text-sm text-gray-700 mb-1">メモ（髪の状態・次回への申し送り。スタッフ向けで、お客様には表示されません）</label>
         <textarea name="memo" rows="4" class="w-full border-gray-300 rounded-md shadow-sm text-sm">{{ old('memo', $record->memo) }}</textarea>
     </div>
 

@@ -16,9 +16,25 @@ class Reservation extends Model
     protected $fillable = [
         'customer_id', 'menu_id', 'scheduled_at', 'source', 'notes', 'status',
         'booked_name', 'booked_email', 'needs_review',
+        'concerns', 'concern_note', 'counseled_at',
     ];
 
-    protected $casts = ['scheduled_at' => 'datetime', 'needs_review' => 'boolean'];
+    protected $casts = [
+        'scheduled_at' => 'datetime',
+        'needs_review' => 'boolean',
+        'concerns' => 'array',
+        'counseled_at' => 'datetime',
+    ];
+
+    // 事前カウンセリングでチェックしたお悩みの項目名
+    public function concernLabels(): array
+    {
+        return collect($this->concerns ?? [])
+            ->map(fn (string $key) => config("salon.concerns.{$key}"))
+            ->filter()
+            ->values()
+            ->all();
+    }
 
     public function customer(): BelongsTo
     {

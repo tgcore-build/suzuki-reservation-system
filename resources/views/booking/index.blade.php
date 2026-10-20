@@ -16,6 +16,21 @@
         </div>
     @endif
 
+    {{-- かんたんログイン・利用履歴 --}}
+    <div class="mb-4 flex flex-wrap items-center justify-end gap-4 text-sm">
+        @if ($loggedIn)
+            <span>{{ $loggedIn->name }} 様（ログイン中）</span>
+            <a href="{{ route('my.index') }}" class="underline">ご利用履歴</a>
+            <form method="POST" action="{{ route('my.logout') }}">
+                @csrf
+                <button type="submit" class="underline text-gray-600">ログアウト</button>
+            </form>
+        @else
+            <a href="{{ route('my.login', array_filter(['next' => 'book', 'menu_id' => $menu?->id])) }}" class="underline">かんたんログイン（入力を省く）</a>
+            <a href="{{ route('my.login') }}" class="underline">ご利用履歴</a>
+        @endif
+    </div>
+
     {{-- ① メニューを選ぶ --}}
     <form method="GET" action="{{ route('booking.index') }}" class="bg-white shadow-sm rounded-lg p-5 space-y-4">
         <input type="hidden" name="weeks" value="{{ $weeks }}">
@@ -110,18 +125,39 @@
                     {{-- ③ お客様の情報 --}}
                     <div class="space-y-4 border-t pt-4">
                         <div class="font-semibold">③ お客様の情報</div>
-                        <div>
-                            <label class="block text-sm text-gray-700 mb-1">お名前</label>
-                            <input type="text" name="name" value="{{ old('name') }}" required class="w-full border-gray-300 rounded-md shadow-sm text-sm">
-                        </div>
-                        <div>
-                            <label class="block text-sm text-gray-700 mb-1">電話番号</label>
-                            <input type="tel" name="phone" value="{{ old('phone') }}" required placeholder="09012345678" class="w-full border-gray-300 rounded-md shadow-sm text-sm">
-                        </div>
-                        <div>
-                            <label class="block text-sm text-gray-700 mb-1">メールアドレス（確認メールをお送りします）</label>
-                            <input type="email" name="email" value="{{ old('email') }}" required class="w-full border-gray-300 rounded-md shadow-sm text-sm">
-                        </div>
+                        @if ($loggedIn)
+                            <p class="text-sm">{{ $loggedIn->name }} 様としてご予約します。</p>
+                            @if ($maskedEmail)
+                                <p class="text-sm text-gray-600">確認メールは、ご登録のアドレス（{{ $maskedEmail }}）にお送りします。</p>
+                            @else
+                                <div>
+                                    <label class="block text-sm text-gray-700 mb-1">メールアドレス（確認メールをお送りします）</label>
+                                    <input type="email" name="email" value="{{ old('email') }}" required class="w-full border-gray-300 rounded-md shadow-sm text-sm">
+                                </div>
+                            @endif
+                        @else
+                            <div class="p-3 bg-gray-50 rounded text-sm">
+                                ご登録済みの方は、<a href="{{ route('my.login', ['next' => 'book', 'menu_id' => $menu->id]) }}" class="underline font-semibold">かんたんログイン</a>（電話番号＋生年月日）をしてからご予約ください。
+                            </div>
+                            <div class="text-sm font-semibold">はじめての方</div>
+                            <div>
+                                <label class="block text-sm text-gray-700 mb-1">お名前</label>
+                                <input type="text" name="name" value="{{ old('name') }}" required class="w-full border-gray-300 rounded-md shadow-sm text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-sm text-gray-700 mb-1">電話番号</label>
+                                <input type="tel" name="phone" value="{{ old('phone') }}" required placeholder="09012345678" class="w-full border-gray-300 rounded-md shadow-sm text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-sm text-gray-700 mb-1">メールアドレス（確認メールをお送りします）</label>
+                                <input type="email" name="email" value="{{ old('email') }}" required class="w-full border-gray-300 rounded-md shadow-sm text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-sm text-gray-700 mb-1">生年月日（任意）</label>
+                                <input type="date" name="birthday" value="{{ old('birthday') }}" class="w-full border-gray-300 rounded-md shadow-sm text-sm">
+                                <p class="mt-1 text-xs text-gray-500">生年月日の月日は、お客様のカルテ番号に使います。次回からの「かんたんログイン」にも使います。ご来店のときにお伺いすることもできます。</p>
+                            </div>
+                        @endif
 
                         <button type="submit" class="w-full px-4 py-3 bg-gray-800 rounded-md font-semibold text-sm text-white hover:bg-gray-700">この内容で予約する</button>
                     </div>

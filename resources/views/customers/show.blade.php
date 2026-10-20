@@ -57,6 +57,12 @@
                                 </form>
                             </div>
                         </div>
+                        @if ($record->concernLabels() || $record->concern_note)
+                            <div class="mt-2 text-gray-700">
+                                お悩み：{{ implode('、', $record->concernLabels()) }}
+                                @if ($record->concern_note)<div class="whitespace-pre-line">{{ $record->concern_note }}</div>@endif
+                            </div>
+                        @endif
                         @if ($record->materials)<div class="mt-2 text-gray-700 whitespace-pre-line">薬剤：{{ $record->materials }}</div>@endif
                         @if ($record->memo)<div class="mt-1 text-gray-700 whitespace-pre-line">{{ $record->memo }}</div>@endif
                         @if ($record->photo_before || $record->photo_after)
@@ -101,7 +107,11 @@
                         @forelse ($customer->reservations()->with('menu')->orderByDesc('scheduled_at')->get() as $r)
                             <tr class="border-t">
                                 <td class="py-2">{{ $r->scheduled_at->format('Y/m/d H:i') }}</td>
-                                <td class="py-2">{{ $r->menu?->name ?? '—' }}</td>
+                                <td class="py-2">{{ $r->menu?->name ?? '—' }}
+                                    @if ($r->counseled_at)
+                                        <div class="text-xs text-gray-600">事前カウンセリング：{{ implode('、', $r->concernLabels()) }}@if ($r->concern_note)<span class="whitespace-pre-line">　{{ $r->concern_note }}</span>@endif</div>
+                                    @endif
+                                </td>
                                 <td class="py-2">{{ \App\Models\Reservation::STATUSES[$r->status] ?? $r->status }}</td>
                             </tr>
                         @empty
