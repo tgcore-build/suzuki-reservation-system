@@ -30,4 +30,16 @@ class AccessTest extends TestCase
     {
         $this->get('/book')->assertOk();
     }
+
+    public function test_mobile_menu_has_all_admin_pages(): void
+    {
+        $this->actingAs(\App\Models\User::factory()->create());
+
+        $html = $this->get(route('dashboard'))->assertOk()->getContent();
+        $mobile = substr($html, strpos($html, '<!-- Responsive Navigation Menu -->'));
+
+        foreach (['customers.index', 'reservations.index', 'schedule.index', 'menus.index', 'business-hours.edit', 'ai-guidelines.edit', 'ai-sessions.index'] as $name) {
+            $this->assertStringContainsString('href="' . route($name) . '"', $mobile, "スマホ用メニューに {$name} がない");
+        }
+    }
 }

@@ -1,3 +1,16 @@
+@php
+    // 管理画面のメニュー（パソコン用とスマホ用の両方で使う）
+    $adminLinks = [
+        ['route' => 'dashboard', 'active' => 'dashboard', 'label' => __('Dashboard')],
+        ['route' => 'customers.index', 'active' => 'customers.*', 'label' => '顧客管理'],
+        ['route' => 'reservations.index', 'active' => 'reservations.*', 'label' => '予約管理'],
+        ['route' => 'schedule.index', 'active' => 'schedule.*', 'label' => '予約表'],
+        ['route' => 'menus.index', 'active' => 'menus.*', 'label' => 'メニュー管理'],
+        ['route' => 'business-hours.edit', 'active' => 'business-hours.*', 'label' => '営業時間'],
+        ['route' => 'ai-guidelines.edit', 'active' => 'ai-guidelines.*', 'label' => 'AI設定'],
+        ['route' => 'ai-sessions.index', 'active' => 'ai-sessions.*', 'label' => 'AI提案結果'],
+    ];
+@endphp
 <nav x-data="{ open: false }" class="bg-white border-b border-gray-100">
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -11,36 +24,17 @@
                 </div>
 
                 <!-- Navigation Links -->
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                        {{ __('Dashboard') }}
-                    </x-nav-link>
-                    <x-nav-link :href="route('customers.index')" :active="request()->routeIs('customers.*')">
-                        顧客管理
-                    </x-nav-link>
-                    <x-nav-link :href="route('reservations.index')" :active="request()->routeIs('reservations.*')">
-                        予約管理
-                    </x-nav-link>
-                <x-nav-link :href="route('schedule.index')" :active="request()->routeIs('schedule.*')">
-                    予約表
-                </x-nav-link>
-                    <x-nav-link :href="route('menus.index')" :active="request()->routeIs('menus.*')">
-                        メニュー管理
-                    </x-nav-link>
-                    <x-nav-link :href="route('business-hours.edit')" :active="request()->routeIs('business-hours.*')">
-                        営業時間
-                    </x-nav-link>
-                    <x-nav-link :href="route('ai-guidelines.edit')" :active="request()->routeIs('ai-guidelines.*')">
-                        AI設定
-                    </x-nav-link>
-                    <x-nav-link :href="route('ai-sessions.index')" :active="request()->routeIs('ai-sessions.*')">
-                        AI提案結果
-                    </x-nav-link>
+                <div class="hidden space-x-8 lg:-my-px lg:ms-10 lg:flex">
+                    @foreach ($adminLinks as $link)
+                        <x-nav-link :href="route($link['route'])" :active="request()->routeIs($link['active'])">
+                            {{ $link['label'] }}
+                        </x-nav-link>
+                    @endforeach
                 </div>
             </div>
 
             <!-- Settings Dropdown -->
-            <div class="hidden sm:flex sm:items-center sm:ms-6">
+            <div class="hidden lg:flex lg:items-center lg:ms-6">
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
                         <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
@@ -74,7 +68,7 @@
             </div>
 
             <!-- Hamburger -->
-            <div class="-me-2 flex items-center sm:hidden">
+            <div class="-me-2 flex items-center lg:hidden">
                 <button @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500 transition duration-150 ease-in-out">
                     <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                         <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
@@ -86,11 +80,13 @@
     </div>
 
     <!-- Responsive Navigation Menu -->
-    <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
+    <div :class="{'block': open, 'hidden': ! open}" class="hidden lg:hidden">
         <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                {{ __('Dashboard') }}
-            </x-responsive-nav-link>
+            @foreach ($adminLinks as $link)
+                <x-responsive-nav-link :href="route($link['route'])" :active="request()->routeIs($link['active'])">
+                    {{ $link['label'] }}
+                </x-responsive-nav-link>
+            @endforeach
         </div>
 
         <!-- Responsive Settings Options -->

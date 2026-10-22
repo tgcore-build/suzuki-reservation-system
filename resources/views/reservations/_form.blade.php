@@ -1,6 +1,6 @@
 @php
     $r = $reservation ?? null;
-    $at = old('scheduled_at', $r?->scheduled_at?->format('Y-m-d H:i'));
+    $at = old('scheduled_at', $r?->scheduled_at?->format('Y-m-d H:i') ?? ($initialAt ?? null));
     $atDate = $at ? substr($at, 0, 10) : '';
     $atTime = $at ? substr($at, 11, 5) : '';
 @endphp

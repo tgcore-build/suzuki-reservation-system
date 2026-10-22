@@ -39,9 +39,15 @@ class ReservationController extends Controller
         return view('reservations.index', compact('reservations'));
     }
 
-    public function create(): View
+    public function create(Request $request): View
     {
-        return view('reservations.create', $this->formData());
+        // 予約表の空き枠から来たときは、その日時を最初から入れておく
+        $at = (string) $request->query('scheduled_at');
+
+        return view('reservations.create', $this->formData() + [
+            'initialAt' => preg_match('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/', $at) ? $at : null,
+            'fromSchedule' => $request->query('from') === 'schedule',
+        ]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -53,6 +59,13 @@ class ReservationController extends Controller
 
             Reservation::create($data);
         });
+
+        // 予約表から登録したときは、その週の予約表に戻る
+        if ($request->input('from') === 'schedule') {
+            return redirect()
+                ->route('schedule.index', ['start' => Carbon::parse($request->input('scheduled_at'))->format('Y-m-d')])
+                ->with('status', '予約を登録しました。');
+        }
 
         return redirect()->route('reservations.index')->with('status', '予約を登録しました。');
     }

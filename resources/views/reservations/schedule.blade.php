@@ -18,6 +18,9 @@
 
     <div class="py-6">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-4">
+            @if (session('status'))
+                <div class="p-3 bg-green-100 text-green-800 rounded">{{ session('status') }}</div>
+            @endif
 
             <div class="flex flex-wrap items-center gap-2 text-sm">
                 <a href="{{ $linkBase($prevStart, $weeks) }}" class="px-3 py-1 border border-gray-300 rounded-md bg-white hover:bg-gray-50">← 前へ</a>
@@ -66,6 +69,23 @@
                                     $bg = $closed ? '#f3f4f6' : ($day->isToday() ? '#fefce8' : '#ffffff');
                                 @endphp
                                 <div class="border-l" style="position: relative; height: {{ $gridHeight }}px; background-color: {{ $bg }}; background-image: repeating-linear-gradient(to bottom, #e5e7eb 0, #e5e7eb 1px, transparent 1px, transparent {{ $rowHeight }}px);">
+                                    {{-- 空き枠（30分ごと）：押すと、その日時で予約の登録画面を開く。営業時間内で、今より後の枠だけ --}}
+                                    @unless ($closed)
+                                        @php
+                                            $slotFrom = $bh ? $day->copy()->setTimeFromTimeString($bh->open_time) : $day->copy()->setTime($startHour, 0);
+                                            $slotTo = $bh ? $day->copy()->setTimeFromTimeString($bh->close_time) : $day->copy()->setTime($endHour, 0);
+                                        @endphp
+                                        @for ($t = $slotFrom->copy(); $t->lt($slotTo); $t->addMinutes(30))
+                                            @continue($t->lte(now()))
+                                            <a href="{{ route('reservations.create', ['scheduled_at' => $t->format('Y-m-d H:i'), 'from' => 'schedule']) }}"
+                                               title="{{ $t->format('n/j H:i') }} に予約を追加"
+                                               aria-label="{{ $t->format('n/j H:i') }} に予約を追加"
+                                               class="group flex items-center justify-center text-gray-400 hover:bg-indigo-50 hover:text-indigo-600"
+                                               style="position: absolute; left: 0; right: 0; top: {{ ($t->hour * 60 + $t->minute - $startHour * 60) * $pxPerMin }}px; height: {{ 30 * $pxPerMin }}px; z-index: 0;">
+                                                <span class="hidden group-hover:inline">＋ {{ $t->format('H:i') }}</span>
+                                            </a>
+                                        @endfor
+                                    @endunless
                                     @foreach ($dayReservations as $r)
                                         @php
                                             $minutes = $r->menu?->duration_minutes ?? 60;
@@ -78,7 +98,7 @@
                                         <a href="{{ route('reservations.edit', $r) }}"
                                            title="{{ $r->scheduled_at->format('H:i') }} {{ $r->customer?->name }} / {{ $r->menu?->name }}"
                                            class="rounded border px-1 leading-tight text-gray-800 hover:opacity-80"
-                                           style="position: absolute; left: 2px; right: 2px; top: {{ $top }}px; height: {{ $height }}px; overflow: hidden; {{ $colors }}">
+                                           style="position: absolute; left: 2px; right: 2px; top: {{ $top }}px; height: {{ $height }}px; overflow: hidden; z-index: 10; {{ $colors }}">
                                             <span class="font-semibold">{{ $r->scheduled_at->format('H:i') }}</span>
                                             {{ $r->customer?->name }}
                                             <span class="block text-gray-600">{{ $r->menu?->name }}@if ($r->source === 'online')（Web）@endif</span>
@@ -91,7 +111,7 @@
                 </div>
             @endforeach
 
-            <p class="text-xs text-gray-500">予約をクリックすると、編集画面が開きます。キャンセル済みの予約は表示されません。</p>
+            <p class="text-xs text-gray-500">空いている時間をクリックすると、その日時で予約の登録画面が開きます（営業時間内・今より後の時間だけ）。予約をクリックすると、編集画面が開きます。キャンセル済みの予約は表示されません。</p>
         </div>
     </div>
 </x-app-layout>
