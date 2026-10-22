@@ -5,9 +5,9 @@
 
     <div class="py-8">
         <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white shadow-sm sm:rounded-lg p-6 space-y-4 text-sm">
+            <div class="bg-white shadow-xs sm:rounded-lg p-6 space-y-4 text-sm">
                 @if ($errors->any())
-                    <div class="p-3 bg-red-100 text-red-800 rounded">{{ $errors->first() }}</div>
+                    <div class="p-3 bg-red-100 text-red-800 rounded-sm">{{ $errors->first() }}</div>
                 @endif
 
                 <p>CSVファイルを選ぶと、登録前に内容を確認できます（まだ登録はされません）。</p>

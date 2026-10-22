@@ -119,5 +119,4 @@ composer outdated --direct
 npm audit          # 画面の部品（ビルド時だけ使う）
 ```
 
-- 2026-10-15 時点：`composer audit` は問題なし。Laravel を 13.36 に更新済み。
-- `npm audit` で Tailwind CSS 3 の依存に指摘があるが、ビルドのときだけ使うもので、公開するサーバーでは動かない。Tailwind 4 への更新は画面の作り直しが必要なため、今回は見送り。
+- 2026-10-22 時点：`composer audit`・`npm audit` とも問題なし。Tailwind CSS を 4 に更新済み（v3 の依存にあった指摘は解消）。

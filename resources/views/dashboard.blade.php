@@ -6,21 +6,21 @@
     <div class="py-8">
         <div class="max-w-5xl mx-auto sm:px-6 lg:px-8 space-y-6">
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div class="bg-white shadow-sm sm:rounded-lg p-5">
+                <div class="bg-white shadow-xs sm:rounded-lg p-5">
                     <div class="text-xs text-gray-500">明日の予約</div>
                     <div class="mt-1 text-2xl font-semibold">{{ $tomorrowCount }}<span class="text-sm font-normal text-gray-500"> 件</span></div>
                 </div>
-                <div class="bg-white shadow-sm sm:rounded-lg p-5">
+                <div class="bg-white shadow-xs sm:rounded-lg p-5">
                     <div class="text-xs text-gray-500">今後7日間の予約（明日から）</div>
                     <div class="mt-1 text-2xl font-semibold">{{ $weekCount }}<span class="text-sm font-normal text-gray-500"> 件</span></div>
                 </div>
-                <div class="bg-white shadow-sm sm:rounded-lg p-5">
+                <div class="bg-white shadow-xs sm:rounded-lg p-5">
                     <div class="text-xs text-gray-500">顧客の総数</div>
                     <div class="mt-1 text-2xl font-semibold">{{ $customerCount }}<span class="text-sm font-normal text-gray-500"> 人</span></div>
                 </div>
             </div>
 
-            <div class="bg-white shadow-sm sm:rounded-lg p-6">
+            <div class="bg-white shadow-xs sm:rounded-lg p-6">
                 <div class="flex items-center justify-between mb-3">
                     <h3 class="font-semibold text-gray-800">本日の予約（{{ today()->format('Y/m/d') }}）</h3>
                     <a href="{{ route('reservations.create') }}" class="text-sm text-indigo-600 underline">予約を登録</a>
@@ -41,7 +41,7 @@
                 </table>
             </div>
 
-            <div class="bg-white shadow-sm sm:rounded-lg p-6">
+            <div class="bg-white shadow-xs sm:rounded-lg p-6">
                 <h3 class="font-semibold text-gray-800 mb-1">リマインド送信状況</h3>
                 <p class="text-xs text-gray-500 mb-4">毎日18:00に、翌日の予約（確定のもの）へリマインドメールを自動送信します。</p>
 

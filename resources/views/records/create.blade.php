@@ -4,7 +4,7 @@
     </x-slot>
     <div class="py-8">
         <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white shadow-sm sm:rounded-lg p-6">
+            <div class="bg-white shadow-xs sm:rounded-lg p-6">
                 @include('records._form', ['action' => route('records.store', $customer), 'method' => 'POST'])
             </div>
         </div>

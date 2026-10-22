@@ -41,7 +41,7 @@
 
     <div>
         <x-input-label for="gender" value="性別" />
-        <select id="gender" name="gender" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+        <select id="gender" name="gender" class="mt-1 block w-full rounded-md border-gray-300 shadow-xs focus:border-indigo-500 focus:ring-indigo-500">
             <option value="">未選択</option>
             @foreach (['女性', '男性', 'その他'] as $g)
                 <option value="{{ $g }}" @selected(old('gender', $c?->gender) === $g)>{{ $g }}</option>
@@ -52,7 +52,7 @@
 
     <div>
         <x-input-label for="memo" value="備考（アレルギー・好みなど）" />
-        <textarea id="memo" name="memo" rows="4" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">{{ old('memo', $c?->memo) }}</textarea>
+        <textarea id="memo" name="memo" rows="4" class="mt-1 block w-full rounded-md border-gray-300 shadow-xs focus:border-indigo-500 focus:ring-indigo-500">{{ old('memo', $c?->memo) }}</textarea>
         <x-input-error class="mt-2" :messages="$errors->get('memo')" />
     </div>
 </div>

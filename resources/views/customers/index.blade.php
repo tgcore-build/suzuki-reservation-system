@@ -12,12 +12,12 @@
     <div class="py-8">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             @if (session('status'))
-                <div class="mb-4 p-3 bg-green-100 text-green-800 rounded">{{ session('status') }}</div>
+                <div class="mb-4 p-3 bg-green-100 text-green-800 rounded-sm">{{ session('status') }}</div>
             @endif
 
-            <div class="bg-white shadow-sm sm:rounded-lg p-6">
+            <div class="bg-white shadow-xs sm:rounded-lg p-6">
                 <form method="GET" action="{{ route('customers.index') }}" class="flex gap-2 mb-6">
-                    <input type="text" name="q" value="{{ request('q') }}" placeholder="氏名・電話番号・カルテ番号で検索" class="flex-1 border-gray-300 rounded-md shadow-sm text-sm">
+                    <input type="text" name="q" value="{{ request('q') }}" placeholder="氏名・電話番号・カルテ番号で検索" class="flex-1 border-gray-300 rounded-md shadow-xs text-sm">
                     <button type="submit" class="px-4 py-2 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50">検索</button>
                 </form>
 

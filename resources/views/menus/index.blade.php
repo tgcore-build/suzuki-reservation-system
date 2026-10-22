@@ -9,10 +9,10 @@
     <div class="py-8">
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
             @if (session('status'))
-                <div class="mb-4 p-3 bg-green-100 text-green-800 rounded">{{ session('status') }}</div>
+                <div class="mb-4 p-3 bg-green-100 text-green-800 rounded-sm">{{ session('status') }}</div>
             @endif
 
-            <div class="bg-white shadow-sm sm:rounded-lg p-6 overflow-x-auto">
+            <div class="bg-white shadow-xs sm:rounded-lg p-6 overflow-x-auto">
                 <table class="w-full text-sm text-left">
                     <thead class="text-gray-500 border-b">
                         <tr>

@@ -5,7 +5,7 @@
 
     <div class="py-8">
         <div class="max-w-xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white shadow-sm sm:rounded-lg p-6">
+            <div class="bg-white shadow-xs sm:rounded-lg p-6">
                 <form method="POST" action="{{ route('menus.update', $menu) }}">
                     @method('PUT')
                     @include('menus._form')

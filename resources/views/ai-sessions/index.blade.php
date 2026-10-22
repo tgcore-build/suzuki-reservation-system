@@ -5,11 +5,11 @@
 
     <div class="py-8">
         <div class="max-w-5xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white shadow-sm sm:rounded-lg p-6">
+            <div class="bg-white shadow-xs sm:rounded-lg p-6">
                 <form method="GET" action="{{ route('ai-sessions.index') }}" class="flex flex-wrap items-end gap-3 mb-4">
                     <div>
                         <label for="status" class="block text-xs text-gray-500">状態</label>
-                        <select id="status" name="status" class="border-gray-300 rounded-md shadow-sm text-sm">
+                        <select id="status" name="status" class="border-gray-300 rounded-md shadow-xs text-sm">
                             <option value="">すべて</option>
                             @foreach (\App\Models\AiSession::STATUSES as $value => $label)
                                 <option value="{{ $value }}" @selected(request('status') === $value)>{{ $label }}</option>
@@ -18,7 +18,7 @@
                     </div>
                     <div>
                         <label for="booked" class="block text-xs text-gray-500">予約</label>
-                        <select id="booked" name="booked" class="border-gray-300 rounded-md shadow-sm text-sm">
+                        <select id="booked" name="booked" class="border-gray-300 rounded-md shadow-xs text-sm">
                             <option value="">すべて</option>
                             <option value="yes" @selected(request('booked') === 'yes')>済</option>
                             <option value="no" @selected(request('booked') === 'no')>未</option>

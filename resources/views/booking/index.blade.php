@@ -7,7 +7,7 @@
     @endphp
 
     @if ($errors->any())
-        <div class="mb-4 p-3 bg-red-100 text-red-800 rounded text-sm">
+        <div class="mb-4 p-3 bg-red-100 text-red-800 rounded-sm text-sm">
             <ul class="list-disc list-inside">
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
@@ -32,11 +32,11 @@
     </div>
 
     {{-- ① メニューを選ぶ --}}
-    <form method="GET" action="{{ route('booking.index') }}" class="bg-white shadow-sm rounded-lg p-5 space-y-4">
+    <form method="GET" action="{{ route('booking.index') }}" class="bg-white shadow-xs rounded-lg p-5 space-y-4">
         <input type="hidden" name="weeks" value="{{ $weeks }}">
         <div>
             <label class="block text-sm text-gray-700 mb-1">① メニューを選んでください</label>
-            <select name="menu_id" required class="w-full border-gray-300 rounded-md shadow-sm text-sm">
+            <select name="menu_id" required class="w-full border-gray-300 rounded-md shadow-xs text-sm">
                 <option value="">選択してください</option>
                 @foreach ($menus as $m)
                     <option value="{{ $m->id }}" @selected($menu && $menu->id === $m->id)>
@@ -50,7 +50,7 @@
     </form>
 
     @if ($menu)
-        <div class="mt-6 bg-white shadow-sm rounded-lg p-4">
+        <div class="mt-6 bg-white shadow-xs rounded-lg p-4">
             <h2 class="font-semibold mb-3">② ご希望の日時を選んでください　<span class="text-sm font-normal text-gray-500">{{ $menu->name }}</span></h2>
 
             {{-- 前へ・次へ / 1週間・2週間 --}}
@@ -108,7 +108,7 @@
                                                     @if ($isOpen)
                                                         <label>
                                                             <input type="radio" name="slot" value="{{ $key }}|{{ $time }}" class="peer sr-only" required>
-                                                            <span class="block py-1.5 rounded border border-gray-300 cursor-pointer text-gray-700 peer-checked:bg-gray-800 peer-checked:text-white peer-checked:border-gray-800">○</span>
+                                                            <span class="block py-1.5 rounded-sm border border-gray-300 cursor-pointer text-gray-700 peer-checked:bg-gray-800 peer-checked:text-white peer-checked:border-gray-800">○</span>
                                                         </label>
                                                     @else
                                                         <span class="block py-1.5 text-gray-300">×</span>
@@ -132,29 +132,29 @@
                             @else
                                 <div>
                                     <label class="block text-sm text-gray-700 mb-1">メールアドレス（確認メールをお送りします）</label>
-                                    <input type="email" name="email" value="{{ old('email') }}" required class="w-full border-gray-300 rounded-md shadow-sm text-sm">
+                                    <input type="email" name="email" value="{{ old('email') }}" required class="w-full border-gray-300 rounded-md shadow-xs text-sm">
                                 </div>
                             @endif
                         @else
-                            <div class="p-3 bg-gray-50 rounded text-sm">
+                            <div class="p-3 bg-gray-50 rounded-sm text-sm">
                                 ご登録済みの方は、<a href="{{ route('my.login', ['next' => 'book', 'menu_id' => $menu->id]) }}" class="underline font-semibold">かんたんログイン</a>（電話番号＋生年月日）をしてからご予約ください。
                             </div>
                             <div class="text-sm font-semibold">はじめての方</div>
                             <div>
                                 <label class="block text-sm text-gray-700 mb-1">お名前</label>
-                                <input type="text" name="name" value="{{ old('name') }}" required class="w-full border-gray-300 rounded-md shadow-sm text-sm">
+                                <input type="text" name="name" value="{{ old('name') }}" required class="w-full border-gray-300 rounded-md shadow-xs text-sm">
                             </div>
                             <div>
                                 <label class="block text-sm text-gray-700 mb-1">電話番号</label>
-                                <input type="tel" name="phone" value="{{ old('phone') }}" required placeholder="09012345678" class="w-full border-gray-300 rounded-md shadow-sm text-sm">
+                                <input type="tel" name="phone" value="{{ old('phone') }}" required placeholder="09012345678" class="w-full border-gray-300 rounded-md shadow-xs text-sm">
                             </div>
                             <div>
                                 <label class="block text-sm text-gray-700 mb-1">メールアドレス（確認メールをお送りします）</label>
-                                <input type="email" name="email" value="{{ old('email') }}" required class="w-full border-gray-300 rounded-md shadow-sm text-sm">
+                                <input type="email" name="email" value="{{ old('email') }}" required class="w-full border-gray-300 rounded-md shadow-xs text-sm">
                             </div>
                             <div>
                                 <label class="block text-sm text-gray-700 mb-1">生年月日（任意）</label>
-                                <input id="birthday" type="text" name="birthday" value="{{ old('birthday') }}" data-birthday autocomplete="bday" placeholder="1990/01/01" class="w-full border-gray-300 rounded-md shadow-sm text-sm">
+                                <input id="birthday" type="text" name="birthday" value="{{ old('birthday') }}" data-birthday autocomplete="bday" placeholder="1990/01/01" class="w-full border-gray-300 rounded-md shadow-xs text-sm">
                                 <p class="mt-1 text-xs text-gray-500">生年月日の月日は、お客様のカルテ番号に使います。次回からの「かんたんログイン」にも使います。ご来店のときにお伺いすることもできます。</p>
                             </div>
                         @endif

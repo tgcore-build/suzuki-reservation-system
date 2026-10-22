@@ -3,11 +3,11 @@
 @section('title', '生年月日の登録')
 
 @section('content')
-    <div class="bg-white shadow-sm rounded-lg p-5 max-w-md mx-auto">
+    <div class="bg-white shadow-xs rounded-lg p-5 max-w-md mx-auto">
         <h2 class="font-semibold mb-2">生年月日の登録</h2>
 
         @if ($errors->any())
-            <div class="mb-4 p-3 bg-red-100 text-red-800 rounded text-sm">
+            <div class="mb-4 p-3 bg-red-100 text-red-800 rounded-sm text-sm">
                 @foreach ($errors->all() as $error)<div>{{ $error }}</div>@endforeach
             </div>
         @endif
@@ -18,7 +18,7 @@
                 @csrf
                 <div>
                     <label for="phone" class="block text-sm text-gray-700 mb-1">電話番号</label>
-                    <input id="phone" type="tel" name="phone" value="{{ old('phone') }}" required autocomplete="tel" placeholder="09012345678" class="w-full border-gray-300 rounded-md shadow-sm text-sm">
+                    <input id="phone" type="tel" name="phone" value="{{ old('phone') }}" required autocomplete="tel" placeholder="09012345678" class="w-full border-gray-300 rounded-md shadow-xs text-sm">
                 </div>
                 <button type="submit" class="w-full px-4 py-3 bg-gray-800 rounded-md font-semibold text-sm text-white hover:bg-gray-700">確認コードを送る</button>
             </form>
@@ -31,11 +31,11 @@
                 @csrf
                 <div>
                     <label for="code" class="block text-sm text-gray-700 mb-1">確認コード（6桁）</label>
-                    <input id="code" name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" required class="w-full border-gray-300 rounded-md shadow-sm text-lg tracking-widest">
+                    <input id="code" name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" required class="w-full border-gray-300 rounded-md shadow-xs text-lg tracking-widest">
                 </div>
                 <div>
                     <label for="birthday" class="block text-sm text-gray-700 mb-1">生年月日</label>
-                    <input id="birthday" type="text" name="birthday" value="{{ old('birthday') }}" required data-birthday autocomplete="bday" placeholder="1990/01/01" class="w-full border-gray-300 rounded-md shadow-sm text-sm">
+                    <input id="birthday" type="text" name="birthday" value="{{ old('birthday') }}" required data-birthday autocomplete="bday" placeholder="1990/01/01" class="w-full border-gray-300 rounded-md shadow-xs text-sm">
                     @error('birthday')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                     <p class="mt-1 text-xs text-gray-500">生年月日の月日は、お客様のカルテ番号に使います。</p>
                 </div>

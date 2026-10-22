@@ -5,7 +5,7 @@
     @endif
 
     @if ($errors->any())
-        <div class="p-3 bg-red-100 text-red-800 rounded text-sm">
+        <div class="p-3 bg-red-100 text-red-800 rounded-sm text-sm">
             <ul class="list-disc list-inside">
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
@@ -16,12 +16,12 @@
 
     <div>
         <label class="block text-sm text-gray-700 mb-1">施術日</label>
-        <input type="date" name="performed_on" value="{{ old('performed_on', $record->performed_on?->format('Y-m-d')) }}" class="border-gray-300 rounded-md shadow-sm text-sm">
+        <input type="date" name="performed_on" value="{{ old('performed_on', $record->performed_on?->format('Y-m-d')) }}" class="border-gray-300 rounded-md shadow-xs text-sm">
     </div>
 
     <div>
         <label class="block text-sm text-gray-700 mb-1">メニュー</label>
-        <input type="text" name="menu" value="{{ old('menu', $record->menu) }}" class="w-full border-gray-300 rounded-md shadow-sm text-sm">
+        <input type="text" name="menu" value="{{ old('menu', $record->menu) }}" class="w-full border-gray-300 rounded-md shadow-xs text-sm">
     </div>
 
     {{-- カウンセリングシート（お客様の利用履歴ページにも表示されます） --}}
@@ -34,42 +34,42 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-3">
             @foreach (config('salon.concerns') as $key => $label)
                 <label class="flex items-center gap-2 text-sm">
-                    <input type="checkbox" name="concerns[]" value="{{ $key }}" @checked(in_array($key, $checked, true)) class="rounded border-gray-300">
+                    <input type="checkbox" name="concerns[]" value="{{ $key }}" @checked(in_array($key, $checked, true)) class="rounded-sm border-gray-300">
                     {{ $label }}
                 </label>
             @endforeach
         </div>
         <label class="block text-sm text-gray-700 mb-1">お悩み・ご要望（自由記入）</label>
-        <textarea name="concern_note" rows="2" class="w-full border-gray-300 rounded-md shadow-sm text-sm">{{ old('concern_note', $record->concern_note) }}</textarea>
+        <textarea name="concern_note" rows="2" class="w-full border-gray-300 rounded-md shadow-xs text-sm">{{ old('concern_note', $record->concern_note) }}</textarea>
     </fieldset>
 
     <div>
         <label class="block text-sm text-gray-700 mb-1">使用薬剤・配合</label>
-        <textarea name="materials" rows="3" class="w-full border-gray-300 rounded-md shadow-sm text-sm">{{ old('materials', $record->materials) }}</textarea>
+        <textarea name="materials" rows="3" class="w-full border-gray-300 rounded-md shadow-xs text-sm">{{ old('materials', $record->materials) }}</textarea>
     </div>
 
     <div>
         <label class="block text-sm text-gray-700 mb-1">所要時間（分）</label>
-        <input type="number" name="duration_minutes" value="{{ old('duration_minutes', $record->duration_minutes) }}" class="w-32 border-gray-300 rounded-md shadow-sm text-sm">
+        <input type="number" name="duration_minutes" value="{{ old('duration_minutes', $record->duration_minutes) }}" class="w-32 border-gray-300 rounded-md shadow-xs text-sm">
     </div>
 
     <div>
         <label class="block text-sm text-gray-700 mb-1">メモ（髪の状態・次回への申し送り。スタッフ向けで、お客様には表示されません）</label>
-        <textarea name="memo" rows="4" class="w-full border-gray-300 rounded-md shadow-sm text-sm">{{ old('memo', $record->memo) }}</textarea>
+        <textarea name="memo" rows="4" class="w-full border-gray-300 rounded-md shadow-xs text-sm">{{ old('memo', $record->memo) }}</textarea>
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
             <label class="block text-sm text-gray-700 mb-1">施術前の写真</label>
             @if ($record->photo_before)
-                <img src="{{ $record->photoUrl('photo_before') }}" class="w-40 rounded mb-2">
+                <img src="{{ $record->photoUrl('photo_before') }}" class="w-40 rounded-sm mb-2">
             @endif
             <input type="file" name="photo_before" accept="image/*" class="text-sm">
         </div>
         <div>
             <label class="block text-sm text-gray-700 mb-1">施術後の写真</label>
             @if ($record->photo_after)
-                <img src="{{ $record->photoUrl('photo_after') }}" class="w-40 rounded mb-2">
+                <img src="{{ $record->photoUrl('photo_after') }}" class="w-40 rounded-sm mb-2">
             @endif
             <input type="file" name="photo_after" accept="image/*" class="text-sm">
         </div>

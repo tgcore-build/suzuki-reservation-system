@@ -3,7 +3,7 @@
 @section('title', 'ご利用履歴')
 
 @section('content')
-    <div class="bg-white shadow-sm rounded-lg p-5 max-w-md mx-auto">
+    <div class="bg-white shadow-xs rounded-lg p-5 max-w-md mx-auto">
         <h2 class="font-semibold mb-2">確認コードの入力</h2>
 
         @if (! $maskedEmail)
@@ -15,7 +15,7 @@
             </p>
 
             @if ($errors->any())
-                <div class="mb-4 p-3 bg-red-100 text-red-800 rounded text-sm">
+                <div class="mb-4 p-3 bg-red-100 text-red-800 rounded-sm text-sm">
                     @foreach ($errors->all() as $error)<div>{{ $error }}</div>@endforeach
                 </div>
             @endif
@@ -25,7 +25,7 @@
                     @csrf
                     <div>
                         <label for="code" class="block text-sm text-gray-700 mb-1">確認コード（6桁）</label>
-                        <input id="code" name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" required class="w-full border-gray-300 rounded-md shadow-sm text-lg tracking-widest">
+                        <input id="code" name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" required class="w-full border-gray-300 rounded-md shadow-xs text-lg tracking-widest">
                     </div>
                     <button type="submit" class="w-full px-4 py-3 bg-gray-800 rounded-md font-semibold text-sm text-white hover:bg-gray-700">確認する</button>
                 </form>

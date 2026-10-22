@@ -9,18 +9,18 @@
     <div class="py-8">
         <div class="max-w-5xl mx-auto sm:px-6 lg:px-8">
             @if (session('status'))
-                <div class="mb-4 p-3 bg-green-100 text-green-800 rounded">{{ session('status') }}</div>
+                <div class="mb-4 p-3 bg-green-100 text-green-800 rounded-sm">{{ session('status') }}</div>
             @endif
 
-            <div class="bg-white shadow-sm sm:rounded-lg p-6">
+            <div class="bg-white shadow-xs sm:rounded-lg p-6">
                 <form method="GET" action="{{ route('reservations.index') }}" class="flex flex-wrap items-end gap-3 mb-4">
                     <div>
                         <label for="date" class="block text-xs text-gray-500">日付で絞り込み</label>
-                        <input id="date" name="date" type="date" value="{{ request('date') }}" class="border-gray-300 rounded-md shadow-sm text-sm">
+                        <input id="date" name="date" type="date" value="{{ request('date') }}" class="border-gray-300 rounded-md shadow-xs text-sm">
                     </div>
                     <div>
                         <label for="status" class="block text-xs text-gray-500">状態</label>
-                        <select id="status" name="status" class="border-gray-300 rounded-md shadow-sm text-sm">
+                        <select id="status" name="status" class="border-gray-300 rounded-md shadow-xs text-sm">
                             <option value="">すべて</option>
                             @foreach (\App\Models\Reservation::STATUSES as $value => $label)
                                 <option value="{{ $value }}" @selected(request('status') === $value)>{{ $label }}</option>
@@ -56,12 +56,12 @@
                                     <td class="py-2 whitespace-nowrap">{{ $r->scheduled_at->format('Y/m/d') }}（{{ $weekdays[$r->scheduled_at->dayOfWeek] }}） {{ $r->scheduled_at->format('H:i') }}</td>
                                     <td class="py-2"><a href="{{ route('customers.show', $r->customer) }}" class="text-indigo-600 underline">{{ $r->customer->name }}</a>
                                         @if ($r->needs_review)
-                                            <span class="ml-1 px-1.5 py-0.5 text-xs rounded bg-amber-100 text-amber-800" title="電話番号は一致しましたが、入力された名前またはメールが登録と違います">要確認</span>
+                                            <span class="ml-1 px-1.5 py-0.5 text-xs rounded-sm bg-amber-100 text-amber-800" title="電話番号は一致しましたが、入力された名前またはメールが登録と違います">要確認</span>
                                             <div class="text-xs text-gray-500">入力：{{ $r->booked_name }} / {{ $r->booked_email }}</div>
                                         @endif
                                         @if ($r->counseled_at)
                                             <div class="mt-1 text-xs text-gray-600">
-                                                <span class="px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700">事前カウンセリング</span>
+                                                <span class="px-1.5 py-0.5 rounded-sm bg-indigo-50 text-indigo-700">事前カウンセリング</span>
                                                 {{ implode('、', $r->concernLabels()) }}@if ($r->concern_note)　{{ \Illuminate\Support\Str::limit($r->concern_note, 40) }}@endif
                                             </div>
                                         @endif

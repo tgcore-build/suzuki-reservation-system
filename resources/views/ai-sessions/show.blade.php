@@ -8,7 +8,7 @@
 
     <div class="py-8">
         <div class="max-w-3xl mx-auto sm:px-6 lg:px-8 space-y-6">
-            <div class="bg-white shadow-sm sm:rounded-lg p-6">
+            <div class="bg-white shadow-xs sm:rounded-lg p-6">
                 <dl class="grid grid-cols-[8rem_1fr] gap-y-2 text-sm">
                     <dt class="text-gray-500">日時</dt>
                     <dd>{{ $aiSession->created_at->format('Y/m/d H:i') }}</dd>
@@ -27,7 +27,7 @@
                 </dl>
             </div>
 
-            <div class="bg-white shadow-sm sm:rounded-lg p-6">
+            <div class="bg-white shadow-xs sm:rounded-lg p-6">
                 <h3 class="font-semibold text-gray-800 mb-4">会話内容</h3>
                 <div class="space-y-3">
                     @forelse ($aiSession->messages as $m)

@@ -3,7 +3,7 @@
 @section('content')
     @php $completed = $aiSession?->isCompleted(); @endphp
 
-    <div class="bg-white shadow-sm rounded-lg p-5">
+    <div class="bg-white shadow-xs rounded-lg p-5">
         <div class="flex items-center justify-between mb-1">
             <h2 class="font-semibold">メニュー選びのご相談</h2>
             @if ($aiSession)
@@ -14,7 +14,7 @@
             @endif
         </div>
         <p class="text-sm text-gray-600 mb-2">髪のお悩みやご要望を、お書きください。AIがいくつか質問しながら、合いそうなメニューをご提案します。</p>
-        <p class="text-xs text-gray-500 mb-4 p-2 bg-gray-50 rounded">ご相談の内容は、メニューのご提案のため外部のAIサービス（Google Gemini）に送信され、当店でも記録として保存します。お名前・電話番号などの個人情報は書かないでください。</p>
+        <p class="text-xs text-gray-500 mb-4 p-2 bg-gray-50 rounded-sm">ご相談の内容は、メニューのご提案のため外部のAIサービス（Google Gemini）に送信され、当店でも記録として保存します。お名前・電話番号などの個人情報は書かないでください。</p>
 
         {{-- 会話のログ --}}
         <div class="space-y-3 mb-4">
@@ -37,7 +37,7 @@
         </div>
 
         @if ($errors->any())
-            <div class="mb-4 p-3 bg-red-100 text-red-800 rounded text-sm">
+            <div class="mb-4 p-3 bg-red-100 text-red-800 rounded-sm text-sm">
                 <ul class="list-disc list-inside">
                     @foreach ($errors->all() as $error)
                         <li>{{ $error }}</li>
@@ -63,7 +63,7 @@
             <form method="POST" action="{{ route('ai.store') }}" class="space-y-3" onsubmit="this.querySelector('button[type=submit]').disabled = true">
                 @csrf
                 <textarea name="message" rows="3" maxlength="500" required placeholder="ここに入力してください"
-                    class="w-full border-gray-300 rounded-md shadow-sm text-sm">{{ old('message') }}</textarea>
+                    class="w-full border-gray-300 rounded-md shadow-xs text-sm">{{ old('message') }}</textarea>
                 <p class="text-xs text-gray-500">※ 500文字までです。お名前・電話番号など、個人が特定できる情報は入力しないでください。</p>
                 <button type="submit" class="px-4 py-2 bg-gray-800 rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700">送信する</button>
             </form>

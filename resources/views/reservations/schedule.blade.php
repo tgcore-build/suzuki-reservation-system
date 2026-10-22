@@ -19,7 +19,7 @@
     <div class="py-6">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-4">
             @if (session('status'))
-                <div class="p-3 bg-green-100 text-green-800 rounded">{{ session('status') }}</div>
+                <div class="p-3 bg-green-100 text-green-800 rounded-sm">{{ session('status') }}</div>
             @endif
 
             <div class="flex flex-wrap items-center gap-2 text-sm">
@@ -35,7 +35,7 @@
             </div>
 
             @foreach ($weekGrids as $days)
-                <div class="bg-white shadow-sm sm:rounded-lg p-3 overflow-x-auto">
+                <div class="bg-white shadow-xs sm:rounded-lg p-3 overflow-x-auto">
                     <div style="min-width: 760px;">
                         {{-- 見出し（日付） --}}
                         <div style="display: grid; grid-template-columns: 3rem repeat(7, minmax(0, 1fr));" class="text-xs">
@@ -97,7 +97,7 @@
                                         @endphp
                                         <a href="{{ route('reservations.edit', $r) }}"
                                            title="{{ $r->scheduled_at->format('H:i') }} {{ $r->customer?->name }} / {{ $r->menu?->name }}"
-                                           class="rounded border px-1 leading-tight text-gray-800 hover:opacity-80"
+                                           class="rounded-sm border px-1 leading-tight text-gray-800 hover:opacity-80"
                                            style="position: absolute; left: 2px; right: 2px; top: {{ $top }}px; height: {{ $height }}px; overflow: hidden; z-index: 10; {{ $colors }}">
                                             <span class="font-semibold">{{ $r->scheduled_at->format('H:i') }}</span>
                                             {{ $r->customer?->name }}

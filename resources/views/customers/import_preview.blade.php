@@ -11,7 +11,7 @@
 
     <div class="py-8">
         <div class="max-w-5xl mx-auto sm:px-6 lg:px-8 space-y-4">
-            <div class="bg-white shadow-sm sm:rounded-lg p-6 text-sm">
+            <div class="bg-white shadow-xs sm:rounded-lg p-6 text-sm">
                 <p class="mb-4">
                     登録する：<strong>{{ $newCount }}件</strong>　／
                     重複でスキップ：{{ $dupCount }}件　／
@@ -29,7 +29,7 @@
                 </div>
             </div>
 
-            <div class="bg-white shadow-sm sm:rounded-lg p-6">
+            <div class="bg-white shadow-xs sm:rounded-lg p-6">
                 <table class="w-full text-sm text-left">
                     <thead class="text-gray-500">
                         <tr>

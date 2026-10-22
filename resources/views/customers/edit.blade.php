@@ -5,7 +5,7 @@
 
     <div class="py-12">
         <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white shadow sm:rounded-lg p-6">
+            <div class="bg-white shadow-sm sm:rounded-lg p-6">
                 <form method="POST" action="{{ route('customers.update', $customer) }}">
                     @csrf
                     @method('PUT')

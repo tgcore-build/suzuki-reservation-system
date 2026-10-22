@@ -3,7 +3,7 @@
 @section('title', $next === 'book' ? 'かんたんログイン' : 'ご利用履歴')
 
 @section('content')
-    <div class="bg-white shadow-sm rounded-lg p-5 max-w-md mx-auto">
+    <div class="bg-white shadow-xs rounded-lg p-5 max-w-md mx-auto">
         <h2 class="font-semibold mb-2">{{ $next === 'book' ? 'かんたんログイン' : 'ご利用履歴を見る' }}</h2>
         <p class="text-sm text-gray-600 mb-4">
             @if ($next === 'book')
@@ -19,19 +19,19 @@
             @if ($menuId)<input type="hidden" name="menu_id" value="{{ $menuId }}">@endif
 
             @if ($errors->any())
-                <div class="p-3 bg-red-100 text-red-800 rounded text-sm">
+                <div class="p-3 bg-red-100 text-red-800 rounded-sm text-sm">
                     @foreach ($errors->all() as $error)<div>{{ $error }}</div>@endforeach
                 </div>
             @endif
 
             <div>
                 <label for="phone" class="block text-sm text-gray-700 mb-1">電話番号</label>
-                <input id="phone" type="tel" name="phone" value="{{ old('phone') }}" required autocomplete="tel" placeholder="09012345678" class="w-full border-gray-300 rounded-md shadow-sm text-sm">
+                <input id="phone" type="tel" name="phone" value="{{ old('phone') }}" required autocomplete="tel" placeholder="09012345678" class="w-full border-gray-300 rounded-md shadow-xs text-sm">
                 @error('phone')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
             </div>
             <div>
                 <label for="birthday" class="block text-sm text-gray-700 mb-1">生年月日</label>
-                <input id="birthday" type="text" name="birthday" value="{{ old('birthday') }}" required data-birthday autocomplete="bday" placeholder="1990/01/01" class="w-full border-gray-300 rounded-md shadow-sm text-sm">
+                <input id="birthday" type="text" name="birthday" value="{{ old('birthday') }}" required data-birthday autocomplete="bday" placeholder="1990/01/01" class="w-full border-gray-300 rounded-md shadow-xs text-sm">
                 @error('birthday')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
             </div>
 

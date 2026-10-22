@@ -21,7 +21,7 @@
 
 <div class="mt-4">
     <x-input-label for="description" value="説明" />
-    <textarea id="description" name="description" rows="3" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">{{ old('description', $m?->description) }}</textarea>
+    <textarea id="description" name="description" rows="3" class="mt-1 block w-full border-gray-300 rounded-md shadow-xs">{{ old('description', $m?->description) }}</textarea>
     <x-input-error :messages="$errors->get('description')" class="mt-2" />
 </div>
 
@@ -33,7 +33,7 @@
 
 <div class="mt-4">
     <label class="inline-flex items-center">
-        <input type="checkbox" name="is_active" value="1" class="rounded border-gray-300" @checked(old() ? old('is_active') : ($m?->is_active ?? true))>
+        <input type="checkbox" name="is_active" value="1" class="rounded-sm border-gray-300" @checked(old() ? old('is_active') : ($m?->is_active ?? true))>
         <span class="ms-2 text-sm text-gray-600">お客様に公開する（オフにすると予約画面に出ません）</span>
     </label>
 </div>

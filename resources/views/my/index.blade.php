@@ -16,10 +16,10 @@
         </div>
 
         @if (session('status'))
-            <div class="p-3 bg-green-100 text-green-800 rounded text-sm">{{ session('status') }}</div>
+            <div class="p-3 bg-green-100 text-green-800 rounded-sm text-sm">{{ session('status') }}</div>
         @endif
 
-        <div class="bg-white shadow-sm rounded-lg p-5">
+        <div class="bg-white shadow-xs rounded-lg p-5">
             <h2 class="font-semibold mb-3">これからのご予約</h2>
             @forelse ($upcoming as $r)
                 <div class="border-t py-2 text-sm flex items-center justify-between gap-2">
@@ -31,7 +31,7 @@
             @endforelse
         </div>
 
-        <div class="bg-white shadow-sm rounded-lg p-5">
+        <div class="bg-white shadow-xs rounded-lg p-5">
             <h2 class="font-semibold mb-3">ご来店の記録</h2>
             @forelse ($records as $record)
                 <div class="border-t py-4 text-sm">
@@ -42,7 +42,7 @@
                             @if ($record->concernLabels())
                                 <div class="mt-1 flex flex-wrap gap-1">
                                     @foreach ($record->concernLabels() as $label)
-                                        <span class="px-2 py-0.5 rounded bg-gray-100 text-xs">{{ $label }}</span>
+                                        <span class="px-2 py-0.5 rounded-sm bg-gray-100 text-xs">{{ $label }}</span>
                                     @endforeach
                                 </div>
                             @endif
@@ -51,8 +51,8 @@
                     @endif
                     @if ($record->photo_before || $record->photo_after)
                         <div class="mt-3 flex gap-3">
-                            @if ($record->photo_before)<div><div class="text-xs text-gray-500">施術前</div><img src="{{ $record->photoUrl('photo_before') }}" alt="施術前の写真" class="w-32 rounded"></div>@endif
-                            @if ($record->photo_after)<div><div class="text-xs text-gray-500">施術後</div><img src="{{ $record->photoUrl('photo_after') }}" alt="施術後の写真" class="w-32 rounded"></div>@endif
+                            @if ($record->photo_before)<div><div class="text-xs text-gray-500">施術前</div><img src="{{ $record->photoUrl('photo_before') }}" alt="施術前の写真" class="w-32 rounded-sm"></div>@endif
+                            @if ($record->photo_after)<div><div class="text-xs text-gray-500">施術後</div><img src="{{ $record->photoUrl('photo_after') }}" alt="施術後の写真" class="w-32 rounded-sm"></div>@endif
                         </div>
                     @endif
                 </div>
@@ -61,7 +61,7 @@
             @endforelse
         </div>
 
-        <div class="bg-white shadow-sm rounded-lg p-5">
+        <div class="bg-white shadow-xs rounded-lg p-5">
             <h2 class="font-semibold mb-3">過去のご予約</h2>
             @forelse ($pastReservations as $r)
                 <div class="border-t py-2 text-sm">{{ $r->scheduled_at->format('Y年n月j日') }}　{{ $r->menu?->name ?? '—' }}</div>
@@ -71,7 +71,7 @@
         </div>
 
         @if ($aiSessions->isNotEmpty())
-            <div class="bg-white shadow-sm rounded-lg p-5">
+            <div class="bg-white shadow-xs rounded-lg p-5">
                 <h2 class="font-semibold mb-3">AI相談</h2>
                 @foreach ($aiSessions as $s)
                     <div class="border-t py-3 text-sm">
