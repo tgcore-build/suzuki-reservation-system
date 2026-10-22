@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Customer;
+use App\Support\PhoneNumber;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -170,12 +171,7 @@ class CustomerImportController extends Controller
     // 数字だけにそろえる。Excelで先頭の0が消えた携帯番号（9012345678）は0を補う
     private function normalizePhone(string $value): ?string
     {
-        $digits = preg_replace('/\D/', '', $value);
-        if (strlen($digits) === 10 && preg_match('/^[789]/', $digits)) {
-            $digits = '0' . $digits;
-        }
-
-        return in_array(strlen($digits), [10, 11], true) ? $digits : null;
+        return PhoneNumber::normalize($value, fixMissingZero: true);
     }
 
     private function normalizeBirthday(string $value): ?string

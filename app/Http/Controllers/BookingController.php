@@ -10,6 +10,7 @@ use App\Models\Menu;
 use App\Models\Reservation;
 use App\Services\CustomerLogin;
 use App\Support\BirthdayInput;
+use App\Support\PhoneNumber;
 use Carbon\Carbon;
 use Illuminate\Contracts\Cache\LockTimeoutException;
 use Illuminate\Database\UniqueConstraintViolationException;
@@ -96,12 +97,7 @@ class BookingController extends Controller
             'email' => [$loggedIn->email ? 'nullable' : 'required', 'email', 'max:255'],
         ] : [
             'name' => ['required', 'string', 'max:100'],
-            'phone' => ['required', 'string', 'max:20', function (string $attribute, mixed $value, \Closure $fail) {
-                // ハイフンを取り除いて、数字が10〜11桁か確認する（「----------」などを通さない）
-                if (! preg_match('/^[0-9\-]+$/', $value) || ! preg_match('/^\d{10,11}$/', str_replace('-', '', $value))) {
-                    $fail('電話番号は、数字10〜11桁で入力してください（ハイフンはあってもなくても構いません）。');
-                }
-            }],
+            'phone' => ['required', 'string', 'max:20', PhoneNumber::rule()], // 「----------」などを通さない
             'email' => ['required', 'email', 'max:255'],
             'birthday' => ['nullable', 'date_format:Y-m-d', 'before_or_equal:today', 'after:1900-01-01'],
         ];
@@ -190,7 +186,7 @@ class BookingController extends Controller
     // はじめてのお客様の予約。登録済みの電話番号なら、ログインを案内する（他人の名前で予約したり、登録を書き換えたりできないように）
     private function createNewCustomerReservation(array $data, Menu $menu, Carbon $date): Reservation
     {
-        $digits = preg_replace('/\D/', '', $data['phone']);
+        $digits = PhoneNumber::normalize($data['phone']);
         if (Customer::whereRaw("REPLACE(phone, '-', '') = ?", [$digits])->exists()) {
             throw $this->alreadyRegistered();
         }

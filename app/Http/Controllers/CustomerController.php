@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Customer;
+use App\Support\PhoneNumber;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 
 class CustomerController extends Controller
 {
@@ -17,6 +17,7 @@ class CustomerController extends Controller
                 $query->where(function ($q) use ($keyword) {
                     $q->where('name', 'like', "%{$keyword}%")
                         ->orWhere('phone', 'like', "%{$keyword}%")
+                        ->when(preg_replace('/\D/', '', $keyword), fn ($q, $digits) => $q->orWhereRaw("REPLACE(phone, '-', '') like ?", ["%{$digits}%"]))
                         ->orWhere('karte_number', 'like', "%{$keyword}%");
                 });
             })
@@ -68,15 +69,27 @@ class CustomerController extends Controller
 
     private function validated(Request $request, ?Customer $customer = null): array
     {
-        return $request->validate([
+        $data = $request->validate([
             'name' => ['required', 'string', 'max:50'],
-            'phone' => ['required', 'string', 'max:20', Rule::unique('customers', 'phone')->ignore($customer?->id)],
+            'phone' => ['required', 'string', 'max:20', PhoneNumber::rule(), function (string $attribute, mixed $value, \Closure $fail) use ($customer) {
+                // ハイフンの有無にかかわらず、同じ番号の重複を見つける（090-1111-2222 と 09011112222 は同じ）
+                $exists = Customer::whereRaw("REPLACE(phone, '-', '') = ?", [PhoneNumber::normalize($value)])
+                    ->when($customer, fn ($q) => $q->whereKeyNot($customer->id))
+                    ->exists();
+                if ($exists) {
+                    $fail('この電話番号は、すでに登録されています。');
+                }
+            }],
             'email' => ['nullable', 'email', 'max:100'],
             'email2' => ['nullable', 'email', 'max:100'],
             'address' => ['nullable', 'string', 'max:255'],
             'birthday' => ['nullable', 'date', 'before_or_equal:today'],
             'gender' => ['nullable', 'string', 'max:10'],
             'memo' => ['nullable', 'string'],
-        ]);
+        ], [], ['phone' => '電話番号']);
+
+        $data['phone'] = PhoneNumber::normalize($data['phone']); // 数字だけにそろえて保存する
+
+        return $data;
     }
 }
