@@ -19,7 +19,7 @@
                 </ul>
                 <a href="{{ route('customer-import.template') }}" class="text-indigo-600 underline">サンプルCSVをダウンロード</a>
 
-                <form method="POST" action="{{ route('customer-import.preview') }}" enctype="multipart/form-data" class="space-y-4">
+                <form method="POST" action="{{ route('customer-import.preview') }}" enctype="multipart/form-data" class="mt-6 space-y-4">
                     @csrf
                     <input type="file" name="file" accept=".csv,text/csv" required>
                     <div>
