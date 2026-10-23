@@ -66,7 +66,7 @@
                                             </div>
                                         @endif
                                     </td>
-                                    <td class="py-2">{{ $r->menu->name }}（{{ $r->menu->duration_minutes }}分）</td>
+                                    <td class="py-2">{{ $r->menu->name }}（{{ $r->minutes() }}分）</td>
                                     <td class="py-2">{{ \App\Models\Reservation::STATUSES[$r->status] }}</td>
                                     <td class="py-2">{{ $r->source === 'online' ? 'オンライン' : '管理者' }}</td>
                                     <td class="py-2 text-right whitespace-nowrap">

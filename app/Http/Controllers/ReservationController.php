@@ -147,11 +147,12 @@ class ReservationController extends Controller
 
         $newStatus = $request->input('status', $current?->status ?? 'confirmed');
 
-        if ($newStatus !== 'cancelled' && $this->hasConflict(
-            Carbon::parse($data['scheduled_at']),
-            Menu::findOrFail($data['menu_id']),
-            $current?->id
-        )) {
+        // 長さ：メニューを変えないで編集するときは予約に保存した所要時間、新しい予約・メニューを変えたときは今のメニューの所要時間
+        $minutes = $current && (int) $current->menu_id === (int) $data['menu_id']
+            ? $current->minutes()
+            : Menu::findOrFail($data['menu_id'])->duration_minutes;
+
+        if ($newStatus !== 'cancelled' && $this->hasConflict(Carbon::parse($data['scheduled_at']), $minutes, $current?->id)) {
             throw ValidationException::withMessages([
                 'scheduled_at' => 'この時間帯には、すでに別の予約があります。',
             ]);
@@ -163,19 +164,15 @@ class ReservationController extends Controller
     }
 
     // 同じ日の予約のうち、時間帯が重なるものがあるか（キャンセル済みは除く）
-    private function hasConflict(Carbon $start, Menu $menu, ?int $ignoreId): bool
+    private function hasConflict(Carbon $start, int $minutes, ?int $ignoreId): bool
     {
-        $end = $start->copy()->addMinutes($menu->duration_minutes);
+        $end = $start->copy()->addMinutes($minutes);
 
         return Reservation::with('menu')
             ->where('status', '!=', 'cancelled')
             ->when($ignoreId, fn ($q) => $q->where('id', '!=', $ignoreId))
             ->whereBetween('scheduled_at', [$start->copy()->startOfDay(), $start->copy()->endOfDay()])
             ->get()
-            ->contains(function (Reservation $r) use ($start, $end) {
-                $rEnd = $r->scheduled_at->copy()->addMinutes($r->menu->duration_minutes);
-
-                return $start < $rEnd && $end > $r->scheduled_at;
-            });
+            ->contains(fn (Reservation $r) => $start < $r->endsAt() && $end > $r->scheduled_at); // 既存の予約は、予約に保存した所要時間で判定
     }
 }

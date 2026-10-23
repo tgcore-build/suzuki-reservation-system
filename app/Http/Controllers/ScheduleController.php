@@ -37,7 +37,7 @@ class ScheduleController extends Controller
             }
         }
         foreach ($reservations as $r) {
-            $rEnd = $r->scheduled_at->copy()->addMinutes($r->menu?->duration_minutes ?? 60);
+            $rEnd = $r->endsAt();
             $startHour = min($startHour, $r->scheduled_at->hour);
             $endHour = max($endHour, $rEnd->isSameDay($r->scheduled_at) ? $this->ceilHour($rEnd->format('H:i')) : 24);
         }

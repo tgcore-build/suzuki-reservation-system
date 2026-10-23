@@ -88,7 +88,7 @@
                                     @endunless
                                     @foreach ($dayReservations as $r)
                                         @php
-                                            $minutes = $r->menu?->duration_minutes ?? 60;
+                                            $minutes = $r->minutes();
                                             $top = ($r->scheduled_at->hour * 60 + $r->scheduled_at->minute - $startHour * 60) * $pxPerMin;
                                             $height = max($minutes * $pxPerMin - 2, 18);
                                             $colors = $r->status === 'completed'

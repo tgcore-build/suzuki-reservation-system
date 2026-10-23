@@ -31,7 +31,7 @@
                             <tr class="border-b">
                                 <td class="py-2 whitespace-nowrap">{{ $r->scheduled_at->format('H:i') }}</td>
                                 <td class="py-2"><a href="{{ route('customers.show', $r->customer) }}" class="text-indigo-600 underline">{{ $r->customer->name }}</a></td>
-                                <td class="py-2">{{ $r->menu->name }}（{{ $r->menu->duration_minutes }}分）</td>
+                                <td class="py-2">{{ $r->menu->name }}（{{ $r->minutes() }}分）</td>
                                 <td class="py-2 text-right"><a href="{{ route('reservations.edit', $r) }}" class="text-indigo-600 underline">編集</a></td>
                             </tr>
                         @empty

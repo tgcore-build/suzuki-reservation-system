@@ -103,6 +103,8 @@ class SendReservationReminders extends Command
             '',
             '日時：' . $reservation->scheduled_at->format('Y年n月j日 H:i'),
             'メニュー：' . ($reservation->menu?->name ?? '—'),
+            '所要時間：約' . $reservation->minutes() . '分',
+            ...($reservation->price !== null ? ['料金：' . number_format($reservation->price) . '円'] : []),
             '',
             'ご都合が悪くなった場合は、お早めにご連絡ください。',
             'ご来店をお待ちしております。',

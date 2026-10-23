@@ -312,9 +312,7 @@ class BookingController extends Controller
             }
             $end = $t->copy()->addMinutes($menu->duration_minutes);
             $busy = $existing->contains(function (Reservation $r) use ($t, $end) {
-                $rEnd = $r->scheduled_at->copy()->addMinutes($r->menu?->duration_minutes ?? 60);
-
-                return $t->lt($rEnd) && $end->gt($r->scheduled_at);
+                return $t->lt($r->endsAt()) && $end->gt($r->scheduled_at); // 既存の予約は、予約に保存した所要時間で判定
             });
             if (! $busy) {
                 $slots[] = $t->format('H:i');
