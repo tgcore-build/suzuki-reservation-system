@@ -39,13 +39,13 @@ class DashboardTest extends TestCase
         $this->reserve($unsent, '10:00:00');
         $sentReservation = $this->reserve($sent, '12:00:00');
         $this->reserve($noMail, '14:00:00');
-        Reservation::where('id', $sentReservation->id)->update(['reminder_sent_at' => now()]);
+        Reservation::where('id', $sentReservation->id)->update(['reminder_sent_at' => now(), 'reminder_channel' => 'line']);
 
         $this->actingAs($user)->get('/dashboard')
             ->assertOk()
             ->assertSee('未送信（18:00に自動送信）')
-            ->assertSee('送信済み（')
-            ->assertSee('メール未登録（送れません）')
+            ->assertSee('送信済み・LINE（')
+            ->assertSee('LINE 未連携・メール未登録（送れません）')
             ->assertSee('送信済みさん 様');
     }
 

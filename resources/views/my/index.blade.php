@@ -18,6 +18,26 @@
         @if (session('status'))
             <div class="p-3 bg-green-100 text-green-800 rounded-sm text-sm">{{ session('status') }}</div>
         @endif
+        @if (session('line_error'))
+            <div class="p-3 bg-red-100 text-red-800 rounded-sm text-sm">{{ session('line_error') }}</div>
+        @endif
+
+        @if ($lineEnabled)
+            <div class="bg-white shadow-xs rounded-lg p-5">
+                <h2 class="font-semibold mb-2">LINE 連携</h2>
+                @if ($customer->line_user_id)
+                    <p class="text-sm text-gray-700">連携済み（{{ $customer->line_linked_at?->format('Y年n月j日') }}）。ご予約のリマインドを LINE でお送りします。</p>
+                    <form method="POST" action="{{ route('my.line.unlink') }}" class="mt-3" onsubmit="return confirm('LINE との連携を解除します。よろしいですか？');">
+                        @csrf
+                        <button type="submit" class="text-sm text-gray-600 underline">連携を解除する</button>
+                    </form>
+                @else
+                    <p class="text-sm text-gray-700 mb-3">LINE と連携すると、ご予約の前日のリマインドを LINE でお送りします（連携しない場合は、メールでお送りします）。</p>
+                    <a href="{{ route('my.line') }}" class="inline-block px-4 py-2 rounded-md font-semibold text-sm text-white" style="background-color: #06C755;">LINE と連携する</a>
+                    <p class="mt-2 text-xs text-gray-500">LINE の画面で「許可する」を押してください。お店の公式アカウントを友だち追加していない場合は、同じ画面で追加できます。</p>
+                @endif
+            </div>
+        @endif
 
         <div class="bg-white shadow-xs rounded-lg p-5">
             <h2 class="font-semibold mb-3">これからのご予約</h2>

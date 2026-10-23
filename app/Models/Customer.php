@@ -14,11 +14,12 @@ class Customer extends Model
 
     protected $fillable = [
         'name', 'phone', 'email', 'email2', 'address', 'birthday',
-        'karte_number', 'gender', 'memo', 'line_id', 'external_id',
+        'karte_number', 'gender', 'memo', 'line_id', 'external_id', 'line_user_id', 'line_linked_at',
     ];
 
     protected $casts = [
         'birthday' => 'date',
+        'line_linked_at' => 'datetime',
     ];
 
     protected static function booted(): void

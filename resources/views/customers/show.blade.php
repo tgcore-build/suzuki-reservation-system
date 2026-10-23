@@ -18,6 +18,7 @@
                     @if ($customer->email2)
                         <div class="flex py-3"><dt class="w-40 text-gray-500">メールアドレス（2つ目）</dt><dd>{{ $customer->email2 }}</dd></div>
                     @endif
+                    <div class="flex py-3"><dt class="w-40 text-gray-500">LINE 連携</dt><dd>{{ $customer->line_user_id ? '連携済み（' . $customer->line_linked_at?->format('Y/m/d') . '）・リマインドは LINE' : '未連携・リマインドはメール' }}</dd></div>
                     <div class="flex py-3"><dt class="w-40 text-gray-500">住所</dt><dd>{{ $customer->address ?? '—' }}</dd></div>
                     <div class="flex py-3"><dt class="w-40 text-gray-500">生年月日</dt><dd>{{ $customer->birthday?->format('Y/m/d') ?? '—' }}</dd></div>
                     <div class="flex py-3"><dt class="w-40 text-gray-500">性別</dt><dd>{{ $customer->gender ?? '—' }}</dd></div>

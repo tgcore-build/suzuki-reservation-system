@@ -54,9 +54,9 @@
                                 <td class="py-2">{{ $r->customer->name }}</td>
                                 <td class="py-2 text-right whitespace-nowrap">
                                     @if ($r->reminder_sent_at)
-                                        <span class="text-green-700">送信済み（{{ \Illuminate\Support\Carbon::parse($r->reminder_sent_at)->format('n/j H:i') }}）</span>
-                                    @elseif (! $r->customer->email)
-                                        <span class="text-red-600">メール未登録（送れません）</span>
+                                        <span class="text-green-700">送信済み・{{ $r->reminder_channel === 'line' ? 'LINE' : 'メール' }}（{{ \Illuminate\Support\Carbon::parse($r->reminder_sent_at)->format('n/j H:i') }}）</span>
+                                    @elseif (! $r->customer->line_user_id && ! $r->booked_email && ! $r->customer->email)
+                                        <span class="text-red-600">LINE 未連携・メール未登録（送れません）</span>
                                     @elseif ($r->status !== 'confirmed')
                                         <span class="text-gray-500">対象外（確定前）</span>
                                     @else
@@ -78,6 +78,7 @@
                                 <td class="py-2 whitespace-nowrap">{{ \Illuminate\Support\Carbon::parse($r->reminder_sent_at)->format('n/j H:i') }}</td>
                                 <td class="py-2">{{ $r->customer->name }} 様</td>
                                 <td class="py-2 text-gray-500">{{ $r->scheduled_at->format('n/j H:i') }} の予約</td>
+                                <td class="py-2 text-gray-500 text-right">{{ $r->reminder_channel === 'line' ? 'LINE' : 'メール' }}</td>
                             </tr>
                         @empty
                             <tr><td class="py-3 text-gray-500">まだ送信履歴はありません。</td></tr>

@@ -17,6 +17,7 @@ class Reservation extends Model
         'customer_id', 'menu_id', 'scheduled_at', 'source', 'notes', 'status',
         'booked_name', 'booked_email', 'needs_review',
         'concerns', 'concern_note', 'counseled_at',
+        'reminder_sent_at', 'reminder_channel',
     ];
 
     protected $casts = [

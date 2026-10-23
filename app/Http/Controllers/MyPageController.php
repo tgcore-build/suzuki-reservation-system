@@ -6,11 +6,14 @@ use App\Mail\CustomerLoginCode;
 use App\Models\Customer;
 use App\Models\Reservation;
 use App\Services\CustomerLogin;
+use App\Services\Line\LineClient;
+use App\Services\Line\LineException;
 use App\Support\BirthdayInput;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\MessageBag;
+use Illuminate\Support\Str;
 use Illuminate\Support\ViewErrorBag;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -24,6 +27,7 @@ use Illuminate\View\View;
 class MyPageController extends Controller
 {
     private const BIRTHDAY_KEY = 'customer_login.birthday_customer_id';
+    private const LINE_KEY = 'customer_login.line';
 
     public function __construct(private CustomerLogin $login)
     {
@@ -172,6 +176,7 @@ class MyPageController extends Controller
 
         return view('my.index', [
             'customer' => $customer,
+            'lineEnabled' => app(LineClient::class)->loginEnabled(),
             'upcoming' => $customer->reservations()->with('menu')
                 ->where('status', 'confirmed')->where('scheduled_at', '>=', now())
                 ->orderBy('scheduled_at')->get(),
@@ -182,6 +187,74 @@ class MyPageController extends Controller
             'aiSessions' => $customer->aiSessions()->with(['resultMenu', 'messages'])
                 ->where('status', 'completed')->orderByDesc('created_at')->get(),
         ]);
+    }
+
+    // LINE 連携：LINE のログイン画面へ（利用履歴を見られる人＝確認コードで本人確認できた人だけ）
+    public function lineRedirect(Request $request, LineClient $line): RedirectResponse
+    {
+        if (! $line->loginEnabled()) {
+            return redirect()->route('my.index');
+        }
+        if (! $this->login->customer($request) || ! $this->login->isVerified($request)) {
+            return redirect()->route('my.verify');
+        }
+
+        // なりすましを防ぐための、毎回変わる値（戻ってきたときに同じか確かめる）
+        $state = Str::random(40);
+        $nonce = Str::random(40);
+        $request->session()->put(self::LINE_KEY, ['state' => $state, 'nonce' => $nonce]);
+
+        return redirect()->away($line->authorizeUrl(route('my.line.callback'), $state, $nonce));
+    }
+
+    // LINE から戻ってきたとき
+    public function lineCallback(Request $request, LineClient $line): RedirectResponse
+    {
+        $saved = $request->session()->pull(self::LINE_KEY);
+        $customer = $this->login->customer($request);
+        if (! $customer || ! $this->login->isVerified($request)) {
+            return redirect()->route('my.verify');
+        }
+
+        if ($request->filled('error')) {
+            return redirect()->route('my.index')->with('status', 'LINE との連携をやめました。');
+        }
+        if (! $saved || ! is_string($request->query('state')) || ! hash_equals($saved['state'], $request->query('state')) || ! $request->filled('code')) {
+            return redirect()->route('my.index')->with('line_error', 'LINE との連携に失敗しました。もう一度お試しください。');
+        }
+
+        try {
+            $user = $line->fetchUser((string) $request->query('code'), route('my.line.callback'), $saved['nonce']);
+        } catch (LineException $e) {
+            report($e);
+
+            return redirect()->route('my.index')->with('line_error', 'LINE との連携に失敗しました。もう一度お試しください。');
+        }
+
+        // 1つの LINE アカウントは、1人のお客様にだけ連携できる
+        if (Customer::where('line_user_id', $user['user_id'])->whereKeyNot($customer->id)->exists()) {
+            return redirect()->route('my.index')->with('line_error', 'この LINE アカウントは、別のお客様の登録に連携されています。お店にお問い合わせください。');
+        }
+
+        $customer->update(['line_user_id' => $user['user_id'], 'line_linked_at' => now()]);
+        Log::info('LINE 連携', ['customer_id' => $customer->id]);
+
+        return redirect()->route('my.index')->with('status', $user['is_friend']
+            ? 'LINE と連携しました。次回から、ご予約のリマインドを LINE でお送りします。'
+            : 'LINE と連携しました。リマインドを LINE で受け取るには、公式アカウントを友だち追加してください（追加するまでは、メールでお送りします）。');
+    }
+
+    public function lineUnlink(Request $request): RedirectResponse
+    {
+        $customer = $this->login->customer($request);
+        if (! $customer || ! $this->login->isVerified($request)) {
+            return redirect()->route('my.verify');
+        }
+
+        $customer->update(['line_user_id' => null, 'line_linked_at' => null]);
+        Log::info('LINE 連携の解除', ['customer_id' => $customer->id]);
+
+        return redirect()->route('my.index')->with('status', 'LINE との連携を解除しました。リマインドは、メールでお送りします。');
     }
 
     // 事前カウンセリング（ご来店前に、お悩みやご要望を入力する）。かんたんログインした本人の、これからの予約だけ

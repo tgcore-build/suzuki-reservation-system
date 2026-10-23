@@ -50,6 +50,9 @@ Route::prefix('my')->name('my.')->controller(\App\Http\Controllers\MyPageControl
     Route::get('birthday', 'birthdayForm')->name('birthday');
     Route::post('birthday/send', 'birthdaySendCode')->middleware('throttle:3,1')->name('birthday.send');
     Route::post('birthday', 'birthdayRegister')->middleware('throttle:10,1');
+    Route::get('line', 'lineRedirect')->name('line');
+    Route::get('line/callback', 'lineCallback')->name('line.callback');
+    Route::post('line/unlink', 'lineUnlink')->name('line.unlink');
     Route::get('counseling/{reservation}', 'counselingForm')->name('counseling');
     Route::put('counseling/{reservation}', 'counseling');
     Route::get('counseling/{reservation}/done', 'counselingDone')->name('counseling.done');
