@@ -30,12 +30,23 @@
                         <a href="{{ route('customers.edit', $customer) }}" class="inline-flex items-center px-4 py-2 bg-gray-800 rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700">編集</a>
                         <a href="{{ route('customers.index') }}" class="text-sm text-gray-600 underline">一覧へ戻る</a>
                     </div>
-                    <form method="POST" action="{{ route('customers.destroy', $customer) }}" onsubmit="return confirm('この顧客を削除します。よろしいですか？');">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="inline-flex items-center px-4 py-2 bg-red-600 rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-500">削除</button>
-                    </form>
+                    @php $blockers = $customer->deletionBlockers(); @endphp
+                    @if ($blockers)
+                        <div class="text-right">
+                            <button type="button" disabled class="inline-flex items-center px-4 py-2 bg-gray-300 rounded-md font-semibold text-xs text-white uppercase tracking-widest cursor-not-allowed">削除</button>
+                            <p class="mt-1 text-xs text-gray-500">{{ \App\Http\Controllers\CustomerController::blockerMessage($blockers) }}</p>
+                        </div>
+                    @else
+                        <form method="POST" action="{{ route('customers.destroy', $customer) }}" onsubmit="return confirm('この顧客を削除します。元に戻せません。よろしいですか？');">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="inline-flex items-center px-4 py-2 bg-red-600 rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-500">削除</button>
+                        </form>
+                    @endif
                 </div>
+                @if (session('delete_error'))
+                    <div class="mt-4 p-3 bg-red-100 text-red-800 rounded-sm text-sm">{{ session('delete_error') }}</div>
+                @endif
             </div>
 
             <div class="bg-white shadow-xs sm:rounded-lg p-6">

@@ -61,10 +61,22 @@ class CustomerController extends Controller
 
     public function destroy(Customer $customer)
     {
+        if ($blockers = $customer->deletionBlockers()) {
+            return redirect()->route('customers.show', $customer)
+                ->with('delete_error', self::blockerMessage($blockers));
+        }
+
         $customer->delete();
 
         return redirect()->route('customers.index')
             ->with('status', '顧客を削除しました。');
+    }
+
+    public static function blockerMessage(array $blockers): string
+    {
+        $items = collect($blockers)->map(fn ($n, $label) => "{$label}{$n}件")->implode('・');
+
+        return "この顧客には{$items}があるため、削除できません（履歴が消えてしまうため）。";
     }
 
     private function validated(Request $request, ?Customer $customer = null): array

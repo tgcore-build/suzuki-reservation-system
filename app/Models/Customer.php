@@ -29,6 +29,15 @@ class Customer extends Model
         });
     }
 
+    // 削除できない理由（予約・施術記録が残っていると、履歴が消えてしまうため削除しない）。なければ空
+    public function deletionBlockers(): array
+    {
+        return array_filter([
+            '予約' => $this->reservations()->count(),
+            '対応記録' => $this->records()->count(),
+        ]);
+    }
+
     public function reservations(): HasMany
     {
         return $this->hasMany(Reservation::class);
