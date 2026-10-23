@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\BookingEmailCode;
 use App\Mail\ReservationConfirmed;
 use App\Models\AiSession;
 use App\Models\BusinessHour;
@@ -9,6 +10,7 @@ use App\Models\Customer;
 use App\Models\Menu;
 use App\Models\Reservation;
 use App\Services\CustomerLogin;
+use App\Services\VerificationCode;
 use App\Support\BirthdayInput;
 use App\Support\PhoneNumber;
 use Carbon\Carbon;
@@ -19,11 +21,15 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class BookingController extends Controller
 {
+    private const PENDING_KEY = 'booking.pending'; // はじめての方の、メール確認前の入力内容
+
     private const STEP = 30;          // 予約できる時間の刻み（分）
     private const LEAD_MINUTES = 60;  // 何分前まで予約できるか
     private const MAX_DAYS = 60;      // 何日先まで予約できるか
@@ -131,7 +137,96 @@ class BookingController extends Controller
             throw $unavailable;
         }
 
-        // 同じ日の予約は1件ずつ処理して、同時送信による二重予約を防ぐ
+        if ($loggedIn) {
+            return $this->finalize($request, $login, $data, $menu, $date, $loggedIn);
+        }
+
+        // はじめての方：先にここで確かめられることを確かめてから、メールアドレスに確認コードを送る
+        // （本人のアドレスだと確かめるまで、顧客は作らない。他人がアドレスを先に登録できないように）
+        if (! in_array($data['time'], $this->availableSlots($date, $menu), true)) {
+            throw $unavailable;
+        }
+        if ($this->phoneRegistered($data['phone'])) {
+            throw $this->alreadyRegistered();
+        }
+
+        $request->session()->put(self::PENDING_KEY, $data + ['token' => Str::random(40), 'expires' => now()->addMinutes(30)->timestamp]);
+        $this->sendEmailCode($request);
+
+        return redirect()->route('booking.verify');
+    }
+
+    // はじめての方：メールアドレスの確認コードの入力
+    public function verifyForm(Request $request): View|RedirectResponse
+    {
+        $pending = $this->pending($request);
+        if (! $pending) {
+            return redirect()->route('booking.index');
+        }
+
+        return view('booking.verify', [
+            'pending' => $pending,
+            'menu' => Menu::find($pending['menu_id']),
+            'minutes' => VerificationCode::CODE_MINUTES,
+        ]);
+    }
+
+    public function resendCode(Request $request): RedirectResponse
+    {
+        if (! $this->pending($request)) {
+            return redirect()->route('booking.index');
+        }
+
+        $sent = $this->sendEmailCode($request);
+
+        return redirect()->route('booking.verify')->with($sent ? 'status' : 'code_error', $sent
+            ? '確認コードを送り直しました。'
+            : 'コードの送信回数が多すぎます。しばらくしてから、もう一度お試しください。');
+    }
+
+    public function verify(Request $request, CustomerLogin $login, VerificationCode $codes): RedirectResponse
+    {
+        $pending = $this->pending($request);
+        if (! $pending) {
+            return redirect()->route('booking.index');
+        }
+
+        $request->validate(['code' => ['required', 'digits:6']], [], ['code' => '確認コード']);
+        if (! $codes->check($this->codeKey($pending), (string) $request->input('code'))) {
+            return redirect()->route('booking.verify')->withErrors([
+                'code' => '確認コードが正しくないか、有効期間が過ぎています。まちがえが続いた場合は、コードを送り直してください。',
+            ]);
+        }
+
+        // ここで初めて、顧客と予約を作る（そのあいだに枠が埋まっていないか、もう一度確かめる）
+        $request->session()->forget(self::PENDING_KEY);
+        $menu = Menu::where('is_active', true)->find($pending['menu_id']);
+        $date = $this->parseDate($pending['date']);
+        $back = fn (string $field, string $message) => redirect()
+            ->route('booking.index', array_filter(['menu_id' => $pending['menu_id']]))
+            ->withInput(collect($pending)->only(['name', 'phone', 'email', 'birthday'])->all())
+            ->withErrors([$field => $message]);
+
+        if (! $menu || ! $date) {
+            return $back('time', '選択された時間は予約できなくなりました。別の時間をお選びください。');
+        }
+
+        try {
+            return $this->finalize($request, $login, $pending, $menu, $date, null);
+        } catch (ValidationException $e) {
+            $field = array_key_first($e->errors());
+
+            return $back($field, $e->errors()[$field][0]);
+        }
+    }
+
+    // 予約を確定する。同じ日の予約は1件ずつ処理して、同時送信による二重予約を防ぐ
+    private function finalize(Request $request, CustomerLogin $login, array $data, Menu $menu, Carbon $date, ?Customer $loggedIn): RedirectResponse
+    {
+        $unavailable = ValidationException::withMessages([
+            'time' => '選択された時間は予約できません。別の時間をお選びください。',
+        ]);
+
         try {
             $reservation = Cache::lock('reservation:' . $date->format('Y-m-d'), 10)->block(5, function () use ($data, $menu, $date, $unavailable, $loggedIn) {
                 return DB::transaction(function () use ($data, $menu, $date, $unavailable, $loggedIn) {
@@ -174,6 +269,45 @@ class BookingController extends Controller
         ]);
     }
 
+    // 預けている、はじめての方の入力内容（30分で無効）
+    private function pending(Request $request): ?array
+    {
+        $pending = $request->session()->get(self::PENDING_KEY);
+        if (! is_array($pending) || ($pending['expires'] ?? 0) < now()->timestamp) {
+            $request->session()->forget(self::PENDING_KEY);
+
+            return null;
+        }
+
+        return $pending;
+    }
+
+    // 確認コードをメールで送る。同じアドレスへは10分に3回まで。送れたら true
+    private function sendEmailCode(Request $request): bool
+    {
+        $pending = $this->pending($request);
+        $limitKey = 'booking-email-code:' . mb_strtolower($pending['email']);
+        if (RateLimiter::tooManyAttempts($limitKey, 3)) {
+            return false;
+        }
+        RateLimiter::hit($limitKey, 600);
+
+        $code = app(VerificationCode::class)->issue($this->codeKey($pending));
+        Mail::to($pending['email'])->send(new BookingEmailCode($pending['name'], $code));
+
+        return true;
+    }
+
+    private function codeKey(array $pending): string
+    {
+        return 'booking-email:' . $pending['token'];
+    }
+
+    private function phoneRegistered(string $phone): bool
+    {
+        return Customer::whereRaw("REPLACE(phone, '-', '') = ?", [PhoneNumber::normalize($phone)])->exists();
+    }
+
     public function complete(): View|RedirectResponse
     {
         if (! session('booked')) {
@@ -187,7 +321,7 @@ class BookingController extends Controller
     private function createNewCustomerReservation(array $data, Menu $menu, Carbon $date): Reservation
     {
         $digits = PhoneNumber::normalize($data['phone']);
-        if (Customer::whereRaw("REPLACE(phone, '-', '') = ?", [$digits])->exists()) {
+        if ($this->phoneRegistered($digits)) {
             throw $this->alreadyRegistered();
         }
 

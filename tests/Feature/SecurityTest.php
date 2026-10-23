@@ -108,4 +108,13 @@ class SecurityTest extends TestCase
 
         \Illuminate\Support\Facades\Http::assertSentCount(1);
     }
+
+    public function test_route_limits_are_counted_separately_per_url(): void
+    {
+        // 予約の送信を何回かしても、別の URL（AI相談）の回数には数えない
+        for ($i = 0; $i < 5; $i++) {
+            $this->post('/book', []);
+        }
+        $this->post('/ai', [])->assertStatus(302); // 429（回数オーバー）にならない
+    }
 }

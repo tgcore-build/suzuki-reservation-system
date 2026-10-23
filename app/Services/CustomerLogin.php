@@ -4,8 +4,6 @@ namespace App\Services;
 
 use App\Models\Customer;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Hash;
 
 // お客様の簡易ログイン（管理者のログインとは別）
 //  1段階目：電話番号＋生年月日 … 予約のときに、名前などの入力を省ける
@@ -15,9 +13,12 @@ class CustomerLogin
     private const CUSTOMER_KEY = 'customer_login.id';
     private const VERIFIED_KEY = 'customer_login.verified_at';
 
-    public const CODE_MINUTES = 10;     // コードの有効期間（分）
-    public const MAX_ATTEMPTS = 5;      // コードを何回まちがえたら無効にするか
+    public const CODE_MINUTES = VerificationCode::CODE_MINUTES; // コードの有効期間（分）
     public const VERIFIED_MINUTES = 30; // 2段階目の確認が有効な時間（分）。過ぎたら、もう一度コードを入力する
+
+    public function __construct(private VerificationCode $codes)
+    {
+    }
 
     public function findByPhone(string $phone): ?Customer
     {
@@ -60,13 +61,10 @@ class CustomerLogin
         return $at && now()->timestamp - $at < self::VERIFIED_MINUTES * 60;
     }
 
-    // 新しいコードを作る（前のコードは使えなくなる）。コードそのものは保存せず、ハッシュだけ保存する
+    // 新しいコードを作る（前のコードは使えなくなる）
     public function issueCode(Customer $customer): string
     {
-        $code = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
-        Cache::put($this->codeKey($customer), ['hash' => Hash::make($code), 'attempts' => 0], now()->addMinutes(self::CODE_MINUTES));
-
-        return $code;
+        return $this->codes->issue($this->codeKey($customer));
     }
 
     // コードが正しければ、2段階目まで確認できた状態にする
@@ -88,29 +86,10 @@ class CustomerLogin
         $request->session()->put(self::VERIFIED_KEY, now()->timestamp);
     }
 
-    // コードが正しいか確認する。正しければコードを無効にする。まちがいが続いたらコードを無効にする
+    // コードが正しいか確認する（正しければ、そのコードは使えなくなる）
     public function checkCode(Customer $customer, string $code): bool
     {
-        $key = $this->codeKey($customer);
-        $saved = Cache::get($key);
-        if (! $saved) {
-            return false;
-        }
-
-        if (Hash::check($code, $saved['hash'])) {
-            Cache::forget($key); // 1回使ったコードは使えなくする
-
-            return true;
-        }
-
-        $saved['attempts']++;
-        if ($saved['attempts'] >= self::MAX_ATTEMPTS) {
-            Cache::forget($key);
-        } else {
-            Cache::put($key, $saved, now()->addMinutes(self::CODE_MINUTES));
-        }
-
-        return false;
+        return $this->codes->check($this->codeKey($customer), $code);
     }
 
     // メールアドレスの一部を隠す（例：h****@example.com）

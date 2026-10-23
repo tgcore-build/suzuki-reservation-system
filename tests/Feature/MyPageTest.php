@@ -12,11 +12,12 @@ use App\Models\Reservation;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
+use Tests\Concerns\BooksAsNewCustomer;
 use Tests\TestCase;
 
 class MyPageTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase, BooksAsNewCustomer;
 
     private Customer $customer;
 
@@ -198,7 +199,7 @@ class MyPageTest extends TestCase
         $day = today()->addDays(3);
         BusinessHour::create(['weekday' => $day->dayOfWeek, 'is_open' => true, 'open_time' => '10:00', 'close_time' => '19:00']);
 
-        $this->post('/book', [
+        $this->bookAsNewCustomer([
             'menu_id' => $menu->id, 'date' => $day->format('Y-m-d'), 'time' => '10:00',
             'name' => '新しい人', 'phone' => '080-2222-3333', 'email' => 'new@example.com', 'birthday' => '1995-05-05',
         ])->assertRedirect(route('booking.complete'));
@@ -362,7 +363,7 @@ class MyPageTest extends TestCase
         $day = today()->addDays(3);
         BusinessHour::create(['weekday' => $day->dayOfWeek, 'is_open' => true, 'open_time' => '10:00', 'close_time' => '19:00']);
 
-        $this->post('/book', [
+        $this->bookAsNewCustomer([
             'menu_id' => $menu->id, 'date' => $day->format('Y-m-d'), 'time' => '10:00',
             'name' => '新しい人', 'phone' => '080-2222-3333', 'email' => 'new@example.com', 'birthday' => '1995/5/5',
         ])->assertRedirect(route('booking.complete'));

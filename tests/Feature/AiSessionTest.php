@@ -9,11 +9,12 @@ use App\Models\Menu;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
+use Tests\Concerns\BooksAsNewCustomer;
 use Tests\TestCase;
 
 class AiSessionTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase, BooksAsNewCustomer;
 
     private function completedSession(array $attributes = []): AiSession
     {
@@ -89,7 +90,7 @@ class AiSessionTest extends TestCase
         $session = $this->completedSession();
 
         $this->withSession(['ai_session_id' => $session->id])
-            ->post('/book', $this->bookingData($menu))
+            ->bookAsNewCustomer($this->bookingData($menu))
             ->assertRedirect(route('booking.complete'));
 
         $this->assertSame(Customer::first()->id, $session->fresh()->customer_id);
@@ -102,7 +103,7 @@ class AiSessionTest extends TestCase
         $session = AiSession::create(['status' => 'in_progress']);
 
         $this->withSession(['ai_session_id' => $session->id])
-            ->post('/book', $this->bookingData($menu))
+            ->bookAsNewCustomer($this->bookingData($menu))
             ->assertRedirect(route('booking.complete'));
 
         $this->assertNull($session->fresh()->customer_id);

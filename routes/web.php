@@ -36,22 +36,27 @@ Route::middleware('auth')->group(function () {
 });
 
 // お客様向けオンライン予約（ログイン不要）
+// throttle の3つ目（book など）は、回数を URL ごとに別々に数えるための名前（付けないと、全部の URL で回数を共有してしまう）
 Route::get('/book', [\App\Http\Controllers\BookingController::class, 'index'])->name('booking.index');
-Route::post('/book', [\App\Http\Controllers\BookingController::class, 'store'])->middleware('throttle:10,1')->name('booking.store');
+Route::post('/book', [\App\Http\Controllers\BookingController::class, 'store'])->middleware('throttle:10,1,book')->name('booking.store');
 Route::get('/book/complete', [\App\Http\Controllers\BookingController::class, 'complete'])->name('booking.complete');
+// はじめての方：メールアドレスの確認コード
+Route::get('/book/verify', [\App\Http\Controllers\BookingController::class, 'verifyForm'])->name('booking.verify');
+Route::post('/book/verify', [\App\Http\Controllers\BookingController::class, 'verify'])->middleware('throttle:10,1,book-verify');
+Route::post('/book/verify/resend', [\App\Http\Controllers\BookingController::class, 'resendCode'])->middleware('throttle:3,1,book-resend')->name('booking.verify.resend');
 
 // お客様向け：簡易ログイン（電話番号＋生年月日）と利用履歴（さらにメールの確認コード）
 Route::prefix('my')->name('my.')->controller(\App\Http\Controllers\MyPageController::class)->group(function () {
     Route::get('/', 'index')->name('index');
     Route::get('login', 'loginForm')->name('login');
-    Route::post('login', 'login')->middleware('throttle:10,1');
+    Route::post('login', 'login')->middleware('throttle:10,1,my-login');
     Route::post('logout', 'logout')->name('logout');
     Route::get('verify', 'verifyForm')->name('verify');
-    Route::post('verify', 'verify')->middleware('throttle:10,1');
-    Route::post('verify/send', 'sendCode')->middleware('throttle:3,1')->name('verify.send');
+    Route::post('verify', 'verify')->middleware('throttle:10,1,my-verify');
+    Route::post('verify/send', 'sendCode')->middleware('throttle:3,1,my-verify-send')->name('verify.send');
     Route::get('birthday', 'birthdayForm')->name('birthday');
-    Route::post('birthday/send', 'birthdaySendCode')->middleware('throttle:3,1')->name('birthday.send');
-    Route::post('birthday', 'birthdayRegister')->middleware('throttle:10,1');
+    Route::post('birthday/send', 'birthdaySendCode')->middleware('throttle:3,1,my-birthday-send')->name('birthday.send');
+    Route::post('birthday', 'birthdayRegister')->middleware('throttle:10,1,my-birthday');
     Route::get('records/{record}/photo/{field}', 'recordPhoto')->whereIn('field', \App\Models\Record::PHOTO_FIELDS)->name('records.photo');
     Route::get('line', 'lineRedirect')->name('line');
     Route::get('line/callback', 'lineCallback')->name('line.callback');
@@ -74,7 +79,7 @@ Route::get('/schedule', [\App\Http\Controllers\ScheduleController::class, 'index
 
 // AI提案（お客様向け・ログイン不要）
 Route::get('/ai', [\App\Http\Controllers\AiAdviceController::class, 'index'])->name('ai.index');
-Route::post('/ai', [\App\Http\Controllers\AiAdviceController::class, 'store'])->middleware('throttle:5,1')->name('ai.store');
+Route::post('/ai', [\App\Http\Controllers\AiAdviceController::class, 'store'])->middleware('throttle:5,1,ai')->name('ai.store');
 Route::post('/ai/reset', [\App\Http\Controllers\AiAdviceController::class, 'reset'])->name('ai.reset');
 
 // AI相談の設定（管理者）

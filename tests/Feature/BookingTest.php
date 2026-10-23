@@ -9,11 +9,12 @@ use App\Models\Menu;
 use App\Models\Reservation;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
+use Tests\Concerns\BooksAsNewCustomer;
 use Tests\TestCase;
 
 class BookingTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase, BooksAsNewCustomer;
 
     private Menu $menu;
     private string $date;
@@ -109,7 +110,7 @@ class BookingTest extends TestCase
     {
         Mail::fake();
 
-        $this->post('/book', [
+        $this->bookAsNewCustomer([
             'menu_id' => $this->menu->id,
             'slot' => $this->date . '|13:30',
             'name' => 'テスト花子',
@@ -129,7 +130,7 @@ class BookingTest extends TestCase
     {
         Mail::fake();
 
-        $this->post('/book', $this->bookingData())
+        $this->bookAsNewCustomer($this->bookingData())
             ->assertRedirect(route('booking.complete'));
 
         $this->assertDatabaseHas('customers', ['name' => 'テスト花子', 'phone' => '09011112222']);
@@ -141,7 +142,8 @@ class BookingTest extends TestCase
     {
         Mail::fake();
 
-        $this->post('/book', $this->bookingData())->assertRedirect(route('booking.complete'));
+        $this->bookAsNewCustomer($this->bookingData())->assertRedirect(route('booking.complete'));
+        $this->post('/my/logout');
         $this->post('/book', $this->bookingData(['name' => '別の人', 'phone' => '08099998888']))
             ->assertSessionHasErrors('time');
 
@@ -188,7 +190,8 @@ class BookingTest extends TestCase
     {
         Mail::fake();
 
-        $this->followingRedirects()->post('/book', $this->bookingData())
+        $this->post('/book', $this->bookingData());
+        $this->followingRedirects()->post('/book/verify', ['code' => $this->lastBookingCode()])
             ->assertOk()
             ->assertSee('事前カウンセリングに進む');
 
@@ -201,7 +204,7 @@ class BookingTest extends TestCase
     {
         Mail::fake();
 
-        $this->post('/book', $this->bookingData(['birthday' => '1990-02-02']))->assertRedirect(route('booking.complete'));
+        $this->bookAsNewCustomer($this->bookingData(['birthday' => '1990-02-02']))->assertRedirect(route('booking.complete'));
 
         $this->assertSame('0202', Customer::first()->karte_number);
     }
