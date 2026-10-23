@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Mail\CustomerLoginCode;
 use App\Models\Customer;
+use App\Models\Record;
 use App\Models\Reservation;
 use App\Services\CustomerLogin;
 use App\Services\Line\LineClient;
@@ -255,6 +256,15 @@ class MyPageController extends Controller
         Log::info('LINE 連携の解除', ['customer_id' => $customer->id]);
 
         return redirect()->route('my.index')->with('status', 'LINE との連携を解除しました。リマインドは、メールでお送りします。');
+    }
+
+    // 来店記録の写真（確認コードまで済ませた本人だけ）
+    public function recordPhoto(Request $request, Record $record, string $field): Response|\Symfony\Component\HttpFoundation\StreamedResponse
+    {
+        $customer = $this->login->customer($request);
+        abort_unless($customer && $this->login->isVerified($request) && $record->customer_id === $customer->id, 403);
+
+        return RecordController::photoResponse($record, $field);
     }
 
     // 事前カウンセリング（ご来店前に、お悩みやご要望を入力する）。かんたんログインした本人の、これからの予約だけ

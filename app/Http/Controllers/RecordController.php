@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class RecordController extends Controller
 {
@@ -76,6 +77,23 @@ class RecordController extends Controller
         $record->delete();
 
         return redirect()->route('customers.show', $customerId)->with('status', '対応記録を削除しました。');
+    }
+
+    // 写真を表示する（ログインした管理者だけ）
+    public function photo(Record $record, string $field): StreamedResponse
+    {
+        return self::photoResponse($record, $field);
+    }
+
+    public static function photoResponse(Record $record, string $field): StreamedResponse
+    {
+        abort_unless(in_array($field, Record::PHOTO_FIELDS, true) && $record->{$field}, 404);
+
+        $disk = Storage::disk(config('salon.photo_disk'));
+        abort_unless($disk->exists($record->{$field}), 404);
+
+        // ブラウザや途中のサーバーに残さない
+        return $disk->response($record->{$field}, null, ['Cache-Control' => 'private, no-store']);
     }
 
     private function validated(Request $request): array

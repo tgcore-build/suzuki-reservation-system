@@ -15,7 +15,7 @@ class RecordTest extends TestCase
 
     public function test_record_with_photo_can_be_created_shown_and_deleted(): void
     {
-        Storage::fake('public');
+        Storage::fake('local');
         $this->actingAs(User::factory()->create());
         $customer = Customer::create(['name' => 'A', 'phone' => '09011110000']);
 
@@ -26,14 +26,14 @@ class RecordTest extends TestCase
         ])->assertRedirect(route('customers.show', $customer));
 
         $record = $customer->records()->first();
-        Storage::disk('public')->assertExists($record->photo_before);
+        Storage::disk('local')->assertExists($record->photo_before);
 
         $this->get(route('customers.show', $customer))->assertOk()->assertSee('カラー');
 
         $path = $record->photo_before;
         $this->delete(route('records.destroy', $record))->assertRedirect();
 
-        Storage::disk('public')->assertMissing($path);
+        Storage::disk('local')->assertMissing($path);
         $this->assertDatabaseMissing('records', ['id' => $record->id]);
     }
 

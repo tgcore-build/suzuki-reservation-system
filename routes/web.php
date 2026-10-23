@@ -31,6 +31,8 @@ Route::middleware('auth')->group(function () {
     Route::get('records/{record}/edit', [\App\Http\Controllers\RecordController::class, 'edit'])->name('records.edit');
     Route::put('records/{record}', [\App\Http\Controllers\RecordController::class, 'update'])->name('records.update');
     Route::delete('records/{record}', [\App\Http\Controllers\RecordController::class, 'destroy'])->name('records.destroy');
+    Route::get('records/{record}/photo/{field}', [\App\Http\Controllers\RecordController::class, 'photo'])
+        ->whereIn('field', \App\Models\Record::PHOTO_FIELDS)->name('records.photo');
 });
 
 // お客様向けオンライン予約（ログイン不要）
@@ -50,6 +52,7 @@ Route::prefix('my')->name('my.')->controller(\App\Http\Controllers\MyPageControl
     Route::get('birthday', 'birthdayForm')->name('birthday');
     Route::post('birthday/send', 'birthdaySendCode')->middleware('throttle:3,1')->name('birthday.send');
     Route::post('birthday', 'birthdayRegister')->middleware('throttle:10,1');
+    Route::get('records/{record}/photo/{field}', 'recordPhoto')->whereIn('field', \App\Models\Record::PHOTO_FIELDS)->name('records.photo');
     Route::get('line', 'lineRedirect')->name('line');
     Route::get('line/callback', 'lineCallback')->name('line.callback');
     Route::post('line/unlink', 'lineUnlink')->name('line.unlink');

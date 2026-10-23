@@ -30,6 +30,7 @@ class SecurityTest extends TestCase
 
     public function test_photo_upload_rejects_non_image_files(): void
     {
+        Storage::fake('local');
         Storage::fake('public');
         $this->actingAs(User::factory()->create());
         $customer = Customer::create(['name' => 'A', 'phone' => '09011110000']);
@@ -41,6 +42,7 @@ class SecurityTest extends TestCase
         ])->assertSessionHasErrors('photo_before');
 
         $this->assertSame(0, $customer->records()->count());
+        $this->assertSame([], Storage::disk('local')->allFiles());
         $this->assertSame([], Storage::disk('public')->allFiles());
     }
 

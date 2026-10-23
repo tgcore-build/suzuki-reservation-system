@@ -39,18 +39,22 @@ class Record extends Model
             ->all();
     }
 
-    public function photoUrl(string $field): ?string
+    public const PHOTO_FIELDS = ['photo_before', 'photo_after'];
+
+    // 写真を表示するURL。写真は非公開の場所に置き、URLを知っているだけでは見られないようにする
+    //  本番（s3）：30分だけ有効な一時URL
+    //  それ以外：ログインした管理者（admin）／確認コードまで済ませた本人のお客様（customer）だけが通れるURL
+    public function photoUrl(string $field, string $for = 'admin'): ?string
     {
-        $path = $this->{$field};
-        if (! $path) {
+        if (! in_array($field, self::PHOTO_FIELDS, true) || ! $this->{$field}) {
             return null;
         }
 
         $diskName = config('salon.photo_disk');
-        $disk = Storage::disk($diskName);
+        if (config("filesystems.disks.{$diskName}.driver") === 's3') {
+            return Storage::disk($diskName)->temporaryUrl($this->{$field}, now()->addMinutes(30));
+        }
 
-        return config("filesystems.disks.{$diskName}.driver") === 's3'
-            ? $disk->temporaryUrl($path, now()->addMinutes(30))
-            : $disk->url($path);
+        return route($for === 'customer' ? 'my.records.photo' : 'records.photo', ['record' => $this, 'field' => $field]);
     }
 }
