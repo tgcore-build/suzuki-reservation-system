@@ -33,5 +33,5 @@ return [
     'contact' => env('SHOP_CONTACT'),
 
     // プライバシーポリシーの制定日・改定日
-    'privacy_updated_at' => '2026-10-23',
+    'privacy_updated_at' => '2026-10-23', // 内容を変えたら、この日付も変える
 ];

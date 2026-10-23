@@ -61,4 +61,13 @@ class PrivacyPolicyTest extends TestCase
 
         $this->get('/privacy')->assertSee('〇〇（以下「当店」）');
     }
+
+    public function test_analysis_purpose_and_retention_are_stated(): void
+    {
+        $this->get('/privacy')->assertOk()
+            ->assertSee('メニューやサービスの改善のための分析')
+            ->assertSee('個人が分からない形で集計')
+            ->assertSee('ご利用が終わったあとも保存することがあります')
+            ->assertSee('削除のご依頼があれば、削除します。');
+    }
 }
