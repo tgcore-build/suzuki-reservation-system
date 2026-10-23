@@ -11,7 +11,7 @@ class MenuController extends Controller
 {
     public function index(): View
     {
-        $menus = Menu::orderBy('sort_order')->orderBy('id')->get();
+        $menus = Menu::withCount('reservations')->orderBy('sort_order')->orderBy('id')->get();
 
         return view('menus.index', compact('menus'));
     }
@@ -40,8 +40,16 @@ class MenuController extends Controller
         return redirect()->route('menus.index')->with('status', 'メニューを更新しました。');
     }
 
+    // 予約があるメニューは、削除すると予約の履歴が壊れるので、削除せずに非公開にする
     public function destroy(Menu $menu): RedirectResponse
     {
+        if ($menu->reservations()->exists()) {
+            $menu->update(['is_active' => false]);
+
+            return redirect()->route('menus.index')
+                ->with('status', "「{$menu->name}」は予約があるため削除せず、非公開にしました（予約の履歴は残ります。お客様の予約画面には出ません）。");
+        }
+
         $menu->delete();
 
         return redirect()->route('menus.index')->with('status', 'メニューを削除しました。');

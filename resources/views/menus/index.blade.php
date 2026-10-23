@@ -34,11 +34,22 @@
                                 <td class="py-2">{{ $menu->is_active ? '公開' : '非公開' }}</td>
                                 <td class="py-2 text-right whitespace-nowrap">
                                     <a href="{{ route('menus.edit', $menu) }}" class="text-indigo-600 underline">編集</a>
-                                    <form method="POST" action="{{ route('menus.destroy', $menu) }}" class="inline" onsubmit="return confirm('「{{ $menu->name }}」を削除します。よろしいですか？');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="ms-3 text-red-600 underline">削除</button>
-                                    </form>
+                                    @if ($menu->reservations_count > 0)
+                                        {{-- 予約があるメニューは削除できないので、非公開にする --}}
+                                        @if ($menu->is_active)
+                                            <form method="POST" action="{{ route('menus.destroy', $menu) }}" class="inline" onsubmit="return confirm('「{{ $menu->name }}」には予約が{{ $menu->reservations_count }}件あるため、削除せずに非公開にします。よろしいですか？');">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="ms-3 text-gray-600 underline">非公開にする</button>
+                                            </form>
+                                        @endif
+                                    @else
+                                        <form method="POST" action="{{ route('menus.destroy', $menu) }}" class="inline" onsubmit="return confirm('「{{ $menu->name }}」を削除します。よろしいですか？');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="ms-3 text-red-600 underline">削除</button>
+                                        </form>
+                                    @endif
                                 </td>
                             </tr>
                         @empty
