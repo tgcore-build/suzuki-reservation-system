@@ -10,6 +10,9 @@
     <div class="max-w-3xl mx-auto px-4 py-8">
         <h1 class="text-center text-xl font-semibold mb-6">{{ config('app.name') }}　@yield('title', 'ご予約')</h1>
         @yield('content')
+        <footer class="mt-10 text-center text-xs text-gray-500">
+            <a href="{{ route('privacy') }}" class="underline">プライバシーポリシー</a>
+        </footer>
     </div>
 </body>
 </html>

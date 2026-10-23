@@ -35,6 +35,9 @@ Route::middleware('auth')->group(function () {
         ->whereIn('field', \App\Models\Record::PHOTO_FIELDS)->name('records.photo');
 });
 
+// プライバシーポリシー
+Route::view('/privacy', 'privacy')->name('privacy');
+
 // お客様向けオンライン予約（ログイン不要）
 // throttle の3つ目（book など）は、回数を URL ごとに別々に数えるための名前（付けないと、全部の URL で回数を共有してしまう）
 Route::get('/book', [\App\Http\Controllers\BookingController::class, 'index'])->name('booking.index');

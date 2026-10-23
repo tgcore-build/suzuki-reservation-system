@@ -33,6 +33,7 @@
                 <textarea id="concern_note" name="concern_note" rows="3" maxlength="1000" class="w-full border-gray-300 rounded-md shadow-xs text-sm">{{ old('concern_note', $reservation->concern_note) }}</textarea>
             </div>
             <button type="submit" class="w-full px-4 py-3 bg-gray-800 rounded-md font-semibold text-sm text-white hover:bg-gray-700">送信する</button>
+            <p class="mt-2 text-xs text-gray-500 text-center">ご入力いただいた情報は、<a href="{{ route('privacy') }}" class="underline" target="_blank">プライバシーポリシー</a>に沿って取り扱います。</p>
         </form>
 
         <a href="{{ route('booking.index') }}" class="mt-4 inline-block text-sm text-gray-600 underline">トップへ戻る</a>

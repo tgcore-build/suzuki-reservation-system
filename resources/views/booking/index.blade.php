@@ -160,6 +160,7 @@
                         @endif
 
                         <button type="submit" class="w-full px-4 py-3 bg-gray-800 rounded-md font-semibold text-sm text-white hover:bg-gray-700">この内容で予約する</button>
+                        <p class="mt-2 text-xs text-gray-500 text-center">ご入力いただいた情報は、<a href="{{ route('privacy') }}" class="underline" target="_blank">プライバシーポリシー</a>に沿って取り扱います。</p>
                     </div>
                 @endif
             </form>

@@ -25,4 +25,10 @@ return [
         'email' => env('ADMIN_EMAIL'),
         'password' => env('ADMIN_PASSWORD'),
     ],
+
+    // お問い合わせ先（プライバシーポリシーに表示する。電話番号やメールアドレスなど。.env の SHOP_CONTACT）
+    'contact' => env('SHOP_CONTACT'),
+
+    // プライバシーポリシーの制定日・改定日
+    'privacy_updated_at' => '2026-10-23',
 ];
