@@ -206,6 +206,6 @@ class BookingTest extends TestCase
 
         $this->bookAsNewCustomer($this->bookingData(['birthday' => '1990-02-02']))->assertRedirect(route('booking.complete'));
 
-        $this->assertSame('0202', Customer::first()->karte_number);
+        $this->assertSame('0202-1', Customer::first()->karte_number);
     }
 }

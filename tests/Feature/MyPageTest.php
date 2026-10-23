@@ -244,7 +244,7 @@ class MyPageTest extends TestCase
         $this->assertNull($this->customer->fresh()->birthday);
 
         $this->post('/my/birthday', ['code' => $code, 'birthday' => '1990-04-01'])->assertRedirect(route('my.index'));
-        $this->assertSame('0401', $this->customer->fresh()->karte_number);
+        $this->assertSame('0401-2', $this->customer->fresh()->karte_number); // 消す前の 0401-1 は使い回さない
         $this->get('/my')->assertOk()->assertSee('生年月日を登録しました');
     }
 
@@ -368,7 +368,7 @@ class MyPageTest extends TestCase
             'name' => '新しい人', 'phone' => '080-2222-3333', 'email' => 'new@example.com', 'birthday' => '1995/5/5',
         ])->assertRedirect(route('booking.complete'));
 
-        $this->assertSame('0505', Customer::where('name', '新しい人')->first()->karte_number);
+        $this->assertSame('0505-1', Customer::where('name', '新しい人')->first()->karte_number);
 
         $this->post('/my/logout');
         $this->post('/book', [

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Customer extends Model
@@ -24,8 +25,31 @@ class Customer extends Model
 
     protected static function booted(): void
     {
+        // カルテ番号：生年月日の月日4桁のあとに、同じ月日の中での連番を付ける（例：0202-1、0202-2）
+        // 一度付けた番号は変えない（ほかの顧客を削除しても詰めない。年だけ直したときもそのまま）
         static::saving(function (Customer $customer) {
-            $customer->karte_number = $customer->birthday?->format('md');
+            $md = $customer->birthday?->format('md');
+            if (! $md || ! str_starts_with((string) $customer->karte_number, "{$md}-")) {
+                $customer->karte_number = null; // 月日が変わった・生年月日を消した → 付け直す
+            }
+        });
+
+        // 番号は保存したあとに付ける。月日ごとの「最後に付けた番号」を、ロックしてから1つ進める
+        // （ほぼ同時に同じ月日の人が登録されても、番号がぶつからない。削除した人の番号も使い回さない）
+        static::saved(function (Customer $customer) {
+            if ($customer->karte_number || ! $customer->birthday) {
+                return;
+            }
+            $md = $customer->birthday->format('md');
+
+            DB::transaction(function () use ($customer, $md) {
+                DB::table('karte_sequences')->insertOrIgnore(['month_day' => $md, 'last_number' => 0]);
+                $next = DB::table('karte_sequences')->where('month_day', $md)->lockForUpdate()->value('last_number') + 1;
+                DB::table('karte_sequences')->where('month_day', $md)->update(['last_number' => $next]);
+
+                $customer->karte_number = sprintf('%s-%d', $md, $next);
+                $customer->saveQuietly();
+            });
         });
     }
 

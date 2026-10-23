@@ -34,7 +34,7 @@ class CustomerImportTest extends TestCase
             ->assertRedirect(route('customers.index'));
 
         $this->assertSame(3, Customer::count());
-        $this->assertDatabaseHas('customers', ['name' => '新規 一郎', 'karte_number' => '0520']);
+        $this->assertDatabaseHas('customers', ['name' => '新規 一郎', 'karte_number' => '0520-1']);
         $this->assertDatabaseHas('customers', ['name' => '新規 三郎', 'phone' => '09011110003']);
     }
 
