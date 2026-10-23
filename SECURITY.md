@@ -63,6 +63,10 @@
 | `GEMINI_API_KEY` | Render の画面でだけ設定する（render.yaml には値を書かない） |
 | `LINE_LOGIN_CHANNEL_SECRET`・`LINE_MESSAGING_ACCESS_TOKEN` | 同じく Render の画面でだけ設定する。漏れたら LINE Developers で再発行する |
 | `TRUSTED_PROXIES` | 通常は設定しない（プライベートIPだけを信頼）。デプロイ後に下の「接続元IPの確認」をする |
+| `ADMIN_EMAIL`・`ADMIN_PASSWORD` | 最初の管理者。ログインしてパスワードを変えたら、`ADMIN_PASSWORD` は消してよい |
+| `DB_SSL_CA_CERT` | Aiven の CA 証明書の中身。DB への接続を SSL で確かめる |
+
+すべての設定は `render.yaml` にまとめてあり、秘密の値は `sync: false`（リポジトリには書かず、Render の画面で入れる）。手順は README の「本番の手順」を参照。
 
 ### 接続元IPの確認（デプロイ後に1回）
 

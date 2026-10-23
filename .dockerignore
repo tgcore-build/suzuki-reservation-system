@@ -1,0 +1,21 @@
+# Docker イメージに入れないもの（秘密の値・開発用のファイル・ビルドで作り直すもの）
+.env
+.env.*
+!.env.example
+.git
+.github
+node_modules
+vendor
+public/build
+public/hot
+public/storage
+storage/app/private/*
+storage/app/public/*
+storage/framework/cache/data/*
+storage/framework/sessions/*
+storage/framework/views/*
+storage/logs/*
+tests
+docs
+*.sqlite
+.DS_Store

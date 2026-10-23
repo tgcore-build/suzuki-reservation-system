@@ -19,4 +19,10 @@ return [
         'scalp_oil' => '頭皮のべたつき・におい',
         'styling' => 'まとまらない・スタイリングしにくい',
     ],
+
+    // 最初の管理者（AdminUserSeeder が使う。本番の環境変数で設定する）
+    'admin' => [
+        'email' => env('ADMIN_EMAIL'),
+        'password' => env('ADMIN_PASSWORD'),
+    ],
 ];

@@ -1,0 +1,124 @@
+# Render のブループリント（Render の画面で「New → Blueprint」からこのリポジトリを選ぶと、この内容で作られる）
+# sync: false の値は秘密の値。ここには書かず、作るときに Render の画面で入れる
+# DB は Aiven の無料 MySQL を使う（README の「本番の手順」を参照）
+services:
+  - type: web
+    name: reservation-system
+    runtime: docker
+    plan: free
+    region: singapore
+    dockerfilePath: ./Dockerfile.render
+    healthCheckPath: /up
+    envVars:
+      # アプリ
+      - key: APP_NAME
+        sync: false          # お店の名前（画面とメールに出る）
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"       # エラーの中身を画面に出さない
+      - key: APP_KEY
+        sync: false          # php artisan key:generate --show で作った値
+      - key: APP_URL
+        sync: false          # https://〜.onrender.com
+      - key: APP_LOCALE
+        value: ja
+      - key: APP_FALLBACK_LOCALE
+        value: ja
+      - key: APP_TIMEZONE
+        value: Asia/Tokyo
+      - key: LOG_CHANNEL
+        value: stderr        # Render の Logs に出す
+      - key: LOG_LEVEL
+        value: warning
+
+      # DB（Aiven の MySQL）
+      - key: DB_CONNECTION
+        value: mysql
+      - key: DB_HOST
+        sync: false
+      - key: DB_PORT
+        sync: false
+      - key: DB_DATABASE
+        sync: false
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: DB_SSL_CA_CERT
+        sync: false          # Aiven の CA 証明書（ca.pem）の中身をそのまま貼る
+
+      # セッション・キャッシュ（DB に保存する）
+      - key: SESSION_DRIVER
+        value: database
+      - key: SESSION_SECURE_COOKIE
+        value: "true"
+      - key: CACHE_STORE
+        value: database
+      - key: QUEUE_CONNECTION
+        value: sync
+
+      # メール（SMTP）
+      - key: MAIL_MAILER
+        value: smtp
+      - key: MAIL_HOST
+        sync: false
+      - key: MAIL_PORT
+        sync: false
+      - key: MAIL_USERNAME
+        sync: false
+      - key: MAIL_PASSWORD
+        sync: false
+      - key: MAIL_FROM_ADDRESS
+        sync: false          # 差出人のアドレス
+      - key: MAIL_FROM_NAME
+        sync: false          # 差出人の名前（お店の名前）
+
+      # 施術写真（S3 などの非公開のバケット。無料プランはファイルが消えるため、必ず外に置く）
+      - key: PHOTO_DISK
+        value: s3
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+      - key: AWS_DEFAULT_REGION
+        sync: false
+      - key: AWS_BUCKET
+        sync: false
+
+      # AI提案（Gemini）
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_MODEL
+        value: gemini-3.1-flash-lite
+
+      # LINE 連携（使わないなら空のまま）
+      - key: LINE_LOGIN_CHANNEL_ID
+        sync: false
+      - key: LINE_LOGIN_CHANNEL_SECRET
+        sync: false
+      - key: LINE_MESSAGING_ACCESS_TOKEN
+        sync: false
+
+      # お問い合わせ先（プライバシーポリシーに表示する）
+      - key: SHOP_CONTACT
+        sync: false
+
+      # 最初の管理者（起動のたびに確認し、いなければ作る。すでにいればパスワードは変えない）
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false          # 12文字以上
+
+      # コンテナが起きているあいだ、リマインドのスケジューラーを動かす
+      - key: RUN_SCHEDULER
+        value: "true"
+
+  # リマインドを確実に送るための Cron Job（有料。使うときは # を外し、上と同じ環境変数を設定する）
+  # 毎日 9:00（UTC）＝日本時間 18:00 に、翌日の予約へリマインドを送る
+  # - type: cron
+  #   name: reservation-reminders
+  #   runtime: docker
+  #   dockerfilePath: ./Dockerfile.render
+  #   schedule: "0 9 * * *"
+  #   dockerCommand: php artisan reminders:send

@@ -95,6 +95,62 @@ docker compose exec app php artisan reminders:send
 
 「明日の確定済みの予約で、メールアドレスがあり、まだ送っていないもの」に送信し、送信日時を記録します（二重送信しません）。毎日18:00に自動実行する設定が `routes/console.php` にあります。本番では、スケジューラ（`php artisan schedule:run` を毎分、または `schedule:work`）を動かす必要があります。
 
+## 本番の手順（Render ＋ Aiven）
+
+公開用のファイル：`render.yaml`（Render の設定）、`Dockerfile.render`（本番用のイメージ）、`docker/start.sh`（起動のたびに動く処理）、`.dockerignore`。
+
+### 1. 準備するもの
+
+| もの | 使いみち |
+|---|---|
+| Render のアカウント | アプリを動かす（無料プラン） |
+| Aiven のアカウント | DB（無料の MySQL） |
+| SMTP のメールサービス | 確認メール・リマインド・確認コードの送信 |
+| S3 など、非公開のファイル置き場 | 施術写真（無料プランのサーバーは、再起動でファイルが消えるため） |
+| （任意）Gemini の APIキー、LINE のチャネル | AI提案、LINE でのリマインド |
+
+### 2. DB（Aiven）
+
+1. Aiven で MySQL のサービス（無料プラン）を作る。
+2. 接続情報（Host・Port・User・Password・Database）と、CA 証明書（`ca.pem`）を控える。
+
+### 3. アプリ（Render）
+
+1. 手元で `APP_KEY` を作る：`docker compose exec app php artisan key:generate --show`
+2. Render の画面で「New → Blueprint」を選び、このリポジトリを選ぶ（`render.yaml` の内容で作られる）。
+3. `sync: false` の値を入れる。主なものは次のとおり。
+   - `APP_NAME`・`MAIL_FROM_NAME`：お店の名前（画面とメールの差出人に出る）
+   - `APP_KEY`：1で作った値。`APP_URL`：`https://〜.onrender.com`
+   - `DB_*`：2の接続情報。`DB_SSL_CA_CERT`：`ca.pem` の中身をそのまま貼る
+   - `MAIL_*`：SMTP の設定。`MAIL_FROM_ADDRESS` は、そのサービスで送信できるアドレスにする
+   - `AWS_*`：写真を置くバケット（非公開にする。表示は30分の一時URL）
+   - `ADMIN_EMAIL`・`ADMIN_PASSWORD`（12文字以上）：最初の管理者
+   - `SHOP_CONTACT`：プライバシーポリシーに出す問い合わせ先
+4. デプロイすると、起動のたびに `docker/start.sh` が、設定のキャッシュ・マイグレーション・最初の管理者の作成（`AdminUserSeeder`）を行う。
+
+### 4. 最初の管理者
+
+- `ADMIN_EMAIL`・`ADMIN_PASSWORD` があり、その管理者がまだいないときだけ作る。すでにいれば、パスワードは変えない（管理画面で変えたパスワードが、再起動で戻らないように）。
+- 最初にログインしたら、プロフィール画面でパスワードを変え、Render の `ADMIN_PASSWORD` は消してよい。
+- ローカルでも `ADMIN_EMAIL`・`ADMIN_PASSWORD` を `.env` に書いて `php artisan db:seed --class=AdminUserSeeder` で作れる。
+
+### 5. リマインドの自動送信
+
+リマインドは `routes/console.php` のスケジュール（毎日18:00に `reminders:send`）で送る。スケジュールを動かすには、`php artisan schedule:run` を毎分動かす必要がある。方法は次のどれか。
+
+| 方法 | 内容 | 注意 |
+|---|---|---|
+| A（設定済み） | `RUN_SCHEDULER=true` で、アプリのコンテナの中で `schedule:work` を動かす | 無料プランは、しばらく使われないとスリープするので、18:00 に止まっていると送られない |
+| B（確実） | Render の Cron Job（有料）。`render.yaml` の下のほうの `# - type: cron` の部分の `#` を外し、同じ環境変数を設定する。毎日 9:00（UTC）＝日本時間18:00 に `reminders:send` を動かす | Render の料金は公式サイトで確認する |
+| C | ほかのサーバーの cron に `* * * * * cd /アプリの場所 && php artisan schedule:run >> /dev/null 2>&1` を登録する | |
+
+送れなかった予約は送信済みにしないので、もう一度 `php artisan reminders:send` を動かせば送り直せる。
+
+### 6. 公開したあとの確認
+
+- 管理画面にログインできるか、予約・確認メール・リマインドが届くか。
+- SECURITY.md の「接続元IPの確認」。
+
 ## テスト
 
 ```sh
