@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\ReservationChanged;
 use App\Models\Customer;
 use App\Models\Menu;
 use App\Models\Reservation;
@@ -11,6 +12,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
@@ -77,14 +79,46 @@ class ReservationController extends Controller
 
     public function update(Request $request, Reservation $reservation): RedirectResponse
     {
-        $this->withDayLock($request, function () use ($request, $reservation) {
+        $before = $reservation->scheduled_at->copy();
+
+        $this->withDayLock($request, function () use ($request, $reservation, $before) {
             $data = $this->validated($request, $reservation);
             $data['status'] = $request->input('status', $reservation->status);
+
+            // 日時を変えたら、リマインドを未送信に戻す（新しい日時の前日に、もう一度送る）
+            if (! Carbon::parse($data['scheduled_at'])->equalTo($before)) {
+                $data['reminder_sent_at'] = null;
+                $data['reminder_channel'] = null;
+            }
 
             $reservation->update($data);
         });
 
-        return redirect()->route('reservations.index')->with('status', '予約を更新しました。');
+        $message = '予約を更新しました。';
+        if (! $reservation->scheduled_at->equalTo($before) && $reservation->status === 'confirmed') {
+            $message .= $this->notifyChange($reservation, $before);
+        }
+
+        return redirect()->route('reservations.index')->with('status', $message);
+    }
+
+    // 日時の変更を、お客様にメールで知らせる。結果を画面に出す文を返す
+    private function notifyChange(Reservation $reservation, Carbon $before): string
+    {
+        $email = $reservation->booked_email ?: $reservation->customer?->email;
+        if (! $email) {
+            return 'メールアドレスがないため、変更のお知らせは送っていません。お客様に直接ご連絡ください。';
+        }
+
+        try {
+            Mail::to($email)->send(new ReservationChanged($reservation->load(['customer', 'menu']), $before));
+        } catch (\Throwable $e) {
+            report($e);
+
+            return '変更のお知らせのメールを送れませんでした。お客様に直接ご連絡ください。';
+        }
+
+        return 'お客様に変更のお知らせをメールで送りました。';
     }
 
     // 削除ではなく「キャンセル」状態にする（履歴を残すため）

@@ -9,7 +9,6 @@
 料金：{{ number_format($reservation->price) }}円@endif
 </p>
 
-<p>ご都合が悪くなった場合は、お早めにご連絡ください。<br>
-ご来店をお待ちしております。</p>
+@include('emails._contact')
 
 <p>{{ config('app.name') }}</p>

@@ -107,6 +107,7 @@ class SendReservationReminders extends Command
             ...($reservation->price !== null ? ['料金：' . number_format($reservation->price) . '円'] : []),
             '',
             'ご都合が悪くなった場合は、お早めにご連絡ください。',
+            ...(config('salon.phone') ? ['お電話：' . config('salon.phone')] : []),
             'ご来店をお待ちしております。',
         ]);
     }

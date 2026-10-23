@@ -26,6 +26,9 @@ return [
         'password' => env('ADMIN_PASSWORD'),
     ],
 
+    // お店の電話番号（確認メール・変更のお知らせ・リマインドに入れる。.env の SHOP_PHONE）
+    'phone' => env('SHOP_PHONE'),
+
     // お問い合わせ先（プライバシーポリシーに表示する。電話番号やメールアドレスなど。.env の SHOP_CONTACT）
     'contact' => env('SHOP_CONTACT'),
 

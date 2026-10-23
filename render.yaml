@@ -100,8 +100,10 @@ services:
       - key: LINE_MESSAGING_ACCESS_TOKEN
         sync: false
 
-      # お問い合わせ先（プライバシーポリシーに表示する）
+      # お問い合わせ先（プライバシーポリシーに表示する）と、お店の電話番号（メール・リマインドに入れる）
       - key: SHOP_CONTACT
+        sync: false
+      - key: SHOP_PHONE
         sync: false
 
       # 最初の管理者（起動のたびに確認し、いなければ作る。すでにいればパスワードは変えない）
